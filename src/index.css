@@ -2,39 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* AssetsManager Design System - Finance Dashboard Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Light theme - Soft and professional */
+    --background: 220 20% 98%;
+    --foreground: 220 15% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Glass morphism cards */
+    --card: 220 20% 98%;
+    --card-foreground: 220 15% 15%;
+    --glass: 220 20% 100%;
+    --glass-border: 220 20% 90%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 20% 100%;
+    --popover-foreground: 220 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Soft green primary for finance theme */
+    --primary: 142 76% 36%;
+    --primary-foreground: 220 20% 98%;
+    --primary-light: 142 40% 85%;
+    --primary-glow: 142 76% 36%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Slate gray secondary */
+    --secondary: 220 15% 85%;
+    --secondary-foreground: 220 15% 25%;
+    --secondary-dark: 220 20% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 142 40% 85%;
+    --accent-foreground: 220 15% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Finance-specific colors */
+    --success: 142 76% 36%;
+    --success-foreground: 220 20% 98%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 220 15% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 20% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 15% 88%;
+    --input: 220 20% 96%;
+    --input-border: 220 15% 75%;
+    --ring: 142 76% 36%;
+
+    /* Neumorphism shadows */
+    --neomorph-light: 220 20% 100%;
+    --neomorph-dark: 220 15% 85%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 60% 45%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(220 20% 100% / 0.8) 0%, hsl(220 20% 98% / 0.6) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 20% 100% / 0.25) 0%, hsl(220 20% 100% / 0.1) 100%);
+    
+    /* Shadows */
+    --shadow-glass: 0 8px 32px hsl(220 15% 15% / 0.1);
+    --shadow-neomorph: 8px 8px 16px hsl(220 15% 85%), -8px -8px 16px hsl(220 20% 100%);
+    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.15);
+
+    /* Chart colors */
+    --chart-1: 142 76% 36%;
+    --chart-2: 220 15% 55%;
+    --chart-3: 45 93% 47%;
+    --chart-4: 200 80% 50%;
+    --chart-5: 280 60% 60%;
 
     --radius: 0.5rem;
 
@@ -56,41 +90,72 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark theme - Professional and modern */
+    --background: 220 25% 8%;
+    --foreground: 220 15% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Dark glass morphism */
+    --card: 220 20% 12%;
+    --card-foreground: 220 15% 92%;
+    --glass: 220 20% 15%;
+    --glass-border: 220 15% 25%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 220 15% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Green primary stays consistent */
+    --primary: 142 76% 36%;
+    --primary-foreground: 220 20% 98%;
+    --primary-light: 142 40% 25%;
+    --primary-glow: 142 76% 36%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Dark slate gray */
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 220 15% 80%;
+    --secondary-dark: 220 20% 15%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 142 40% 25%;
+    --accent-foreground: 220 15% 92%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Dark finance colors */
+    --success: 142 76% 36%;
+    --success-foreground: 220 20% 98%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 220 15% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 20% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 15% 22%;
+    --input: 220 20% 15%;
+    --input-border: 220 15% 30%;
+    --ring: 142 76% 36%;
+
+    /* Dark neumorphism */
+    --neomorph-light: 220 20% 18%;
+    --neomorph-dark: 220 25% 8%;
+    
+    /* Dark gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 60% 45%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(220 20% 15% / 0.8) 0%, hsl(220 20% 12% / 0.6) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 20% 25% / 0.25) 0%, hsl(220 20% 15% / 0.1) 100%);
+    
+    /* Dark shadows */
+    --shadow-glass: 0 8px 32px hsl(220 25% 5% / 0.3);
+    --shadow-neomorph: 8px 8px 16px hsl(220 25% 5%), -8px -8px 16px hsl(220 20% 18%);
+    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.25);
+
+    /* Dark sidebar */
+    --sidebar-background: 220 25% 8%;
+    --sidebar-foreground: 220 15% 92%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 220 20% 98%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 220 15% 92%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 142 76% 36%;
   }
 }
 
