@@ -10,8 +10,11 @@ import {
   Sun,
   Moon,
   IndianRupee,
-  Settings
+  Settings,
+  LogOut,
+  User
 } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 
 import {
   Sidebar,
@@ -59,6 +62,7 @@ const navigationItems = [
 export function AppSidebar() {
   const { state } = useSidebar()
   const { theme, toggleTheme } = useTheme()
+  const { user, signOut } = useAuth()
   const location = useLocation()
   const currentPath = location.pathname
 
@@ -147,7 +151,24 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="p-4 border-t border-border/50">
+      <SidebarFooter className="p-4 border-t border-border/50 space-y-2">
+        {/* User Info */}
+        {user && !isCollapsed && (
+          <motion.div 
+            className="flex items-center gap-3 p-2 rounded-xl bg-accent/30"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground">
+              <User className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user.email}</p>
+              <p className="text-xs text-muted-foreground">Logged in</p>
+            </div>
+          </motion.div>
+        )}
+        
         <motion.div 
           className="flex items-center gap-2"
           initial={false}
@@ -175,9 +196,11 @@ export function AppSidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl hover:bg-accent/50"
+              onClick={signOut}
+              className="rounded-xl hover:bg-destructive/10 hover:text-destructive"
+              title="Sign Out"
             >
-              <Settings className="w-4 h-4" />
+              <LogOut className="w-4 h-4" />
             </Button>
           )}
         </motion.div>
