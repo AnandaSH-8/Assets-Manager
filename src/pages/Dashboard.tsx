@@ -11,13 +11,15 @@ import {
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts'
+import EmptyDashboard from "@/components/EmptyDashboard"
+import { useState, useEffect } from "react"
 
 // Mock data - replace with real data from Supabase
 const summaryData = {
-  totalAssets: 1250000,
-  totalInvestments: 850000,
-  monthlyGrowth: 12.5,
-  totalGrowth: 186500
+  totalAssets: 0,
+  totalInvestments: 0,
+  monthlyGrowth: 0,
+  totalGrowth: 0
 }
 
 const chartData = [
@@ -43,6 +45,22 @@ const formatCurrency = (value: number) => {
 }
 
 export default function Dashboard() {
+  const [hasData, setHasData] = useState(false)
+
+  // Check if user has any data - replace with real Supabase query
+  useEffect(() => {
+    // For now, checking if any values are greater than 0
+    const hasAnyData = summaryData.totalAssets > 0 || 
+                       summaryData.totalInvestments > 0 || 
+                       summaryData.monthlyGrowth > 0 || 
+                       summaryData.totalGrowth > 0
+    setHasData(hasAnyData)
+  }, [])
+
+  if (!hasData) {
+    return <EmptyDashboard />
+  }
+
   return (
     <div className="space-y-8 p-6">
       {/* Welcome Section */}

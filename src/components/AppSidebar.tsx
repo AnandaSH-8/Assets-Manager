@@ -37,25 +37,29 @@ const navigationItems = [
     title: "Dashboard", 
     url: "/", 
     icon: Home,
-    description: "Overview of your assets"
+    description: "Overview of your assets",
+    alwaysShow: true
   },
   { 
     title: "Add Particulars", 
     url: "/add-particulars", 
     icon: Plus,
-    description: "Add new financial entries"
+    description: "Add new financial entries",
+    alwaysShow: true
   },
   { 
     title: "Statistics", 
     url: "/statistics", 
     icon: BarChart3,
-    description: "View detailed analytics"
+    description: "View detailed analytics",
+    alwaysShow: false
   },
   { 
     title: "Comparison", 
     url: "/comparison", 
     icon: TrendingUp,
-    description: "Compare periods and trends"
+    description: "Compare periods and trends",
+    alwaysShow: false
   },
 ]
 
@@ -67,6 +71,19 @@ export function AppSidebar() {
   const currentPath = location.pathname
 
   const isCollapsed = state === "collapsed"
+  
+  // Check if user has data - replace with real Supabase query
+  const [hasData, setHasData] = useState(false)
+  
+  useState(() => {
+    // Mock check - replace with actual data query
+    setHasData(false) // Set to true when user has added particulars
+  })
+
+  // Filter navigation items based on data availability
+  const visibleItems = navigationItems.filter(item => 
+    item.alwaysShow || hasData
+  )
 
   const getNavClassName = (path: string) => {
     const isActive = currentPath === path
@@ -108,7 +125,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="transition-all duration-200">
                     <NavLink 

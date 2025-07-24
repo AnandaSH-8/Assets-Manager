@@ -6,7 +6,7 @@ import { NeomorphInput } from '@/components/ui/neomorph-input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Mail, Lock, LogIn, UserPlus, User } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus, User, Eye, EyeOff } from 'lucide-react';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -15,7 +15,10 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -30,28 +33,33 @@ const Auth = () => {
     checkUser();
   }, [navigate]);
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return;
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    if (!email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+    
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 6) newErrors.password = "Password must be at least 6 characters";
 
     if (isSignUp) {
-      if (!name || !username) {
-        toast({
-          variant: "destructive",
-          title: "Missing Information",
-          description: "Please fill in all required fields."
-        });
-        return;
-      }
+      if (!name) newErrors.name = "Name is required";
+      if (!username) newErrors.username = "Username is required";
+      else if (username.length < 3) newErrors.username = "Username must be at least 3 characters";
       
-      if (password !== confirmPassword) {
-        toast({
-          variant: "destructive",
-          title: "Password Mismatch",
-          description: "Passwords do not match."
-        });
-        return;
-      }
+      if (!confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+      else if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
     }
 
     try {
@@ -122,7 +130,7 @@ const Auth = () => {
                     onChange={(e) => setName(e.target.value)}
                     className="pl-10"
                     placeholder="Enter your name"
-                    required
+                    error={errors.name}
                   />
                 </div>
               </div>
@@ -137,8 +145,8 @@ const Auth = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="pl-10"
-                    placeholder="Enter your username"
-                    required
+                    placeholder="Enter your username (min 3 characters)"
+                    error={errors.username}
                   />
                 </div>
               </div>
@@ -156,7 +164,7 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
                 placeholder="Enter your email"
-                required
+                error={errors.email}
               />
             </div>
           </div>
@@ -167,13 +175,20 @@ const Auth = () => {
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <NeomorphInput
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
-                placeholder="Enter your password"
-                required
+                className="pl-10 pr-10"
+                placeholder="Enter your password (min 6 characters)"
+                error={errors.password}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
@@ -184,13 +199,20 @@ const Auth = () => {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <NeomorphInput
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   placeholder="Confirm your password"
-                  required
+                  error={errors.confirmPassword}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
           )}
