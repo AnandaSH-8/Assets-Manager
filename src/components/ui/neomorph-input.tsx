@@ -18,7 +18,7 @@ const NeomorphInput = React.forwardRef<HTMLInputElement, NeomorphInputProps>(
         <motion.div
           className={cn(
             "relative rounded-xl transition-all duration-300",
-            "shadow-neomorph bg-background",
+            "shadow-2xl bg-background",
             isFocused && "shadow-inner ring-2 ring-primary/20",
             error && "ring-2 ring-destructive/50",
             className

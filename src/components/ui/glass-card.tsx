@@ -21,7 +21,7 @@ export function GlassCard({
   }[blur]
 
   const baseClasses = cn(
-    "bg-gradient-glass border border-white/20 rounded-2xl shadow-glass",
+    "bg-gradient-glass border border-white/20 rounded-2xl shadow-2xl",
     blurClass,
     "dark:border-white/10 dark:bg-gradient-glass",
     hover && "cursor-pointer",
