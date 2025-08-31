@@ -12,7 +12,6 @@ const categories = [
   "Fixed Deposit",
   "Mutual Fund",
   "Stocks",
-  "Real Estate",
   "Gold",
   "Crypto Currency",
   "Other"
@@ -132,9 +131,11 @@ export default function AddParticulars() {
               </div>
 
               {/* Title Field */}
-              <div>
+              <div className="space-y-2">
+                <label htmlFor="title" className="text-sm font-medium">Title</label>
                 <NeomorphInput
-                  label="Title"
+                  id="title"
+                  className="border border-gray-300"
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="e.g., HDFC Savings Account"
@@ -169,24 +170,31 @@ export default function AddParticulars() {
 
               {/* Amount Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="actualCash" className="text-sm font-medium">Actual Cash (₹)</label>
                 <NeomorphInput
-                  label="Actual Cash (₹)"
+                  id="actualCash"
                   type="number"
+                  className="border border-gray-300"
                   value={formData.actualCash}
                   onChange={(e) => handleInputChange("actualCash", e.target.value)}
                   placeholder="0"
                   error={errors.actualCash}
                 />
-
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="investedCash" className="text-sm font-medium">Invested Cash (₹)</label>
                 <NeomorphInput
-                  label="Invested Cash (₹)"
+                  id="investedCash"
                   type="number"
+                  className="border border-gray-300"
                   value={formData.investedCash}
                   onChange={(e) => handleInputChange("investedCash", e.target.value)}
                   placeholder="0"
                   error={errors.investedCash}
                 />
               </div>
+            </div>
 
               {/* Submit Button */}
               <motion.div

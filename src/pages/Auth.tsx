@@ -105,8 +105,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <GlassCard className="w-full max-w-sm sm:max-w-md lg:max-w-lg p-6 sm:p-8 space-y-4 sm:space-y-6">
+    <div className="min-h-screen w-full bg-slate-150 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <GlassCard className="w-full max-w-sm sm:max-w-md lg:max-w-lg p-6 sm:p-8 space-y-4 sm:space-y-6"
+       style={{boxShadow: '0 -10px 25px rgba(0,0,0,0.1), 0 10px 25px rgba(0,0,0,0.1), -10px 0 25px rgba(0,0,0,0.1), 10px 0 25px rgba(0,0,0,0.1)'}}>
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
             AssetsManager
@@ -162,7 +163,7 @@ const Auth = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                className="pl-10 border border-gray-300"
                 placeholder="Enter your email"
                 error={errors.email}
               />
@@ -178,7 +179,7 @@ const Auth = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 border border-gray-300"
                 placeholder="Enter your password (min 6 characters)"
                 error={errors.password}
               />
@@ -217,7 +218,7 @@ const Auth = () => {
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading} style={{marginTop: '30px'}}>
             {loading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
