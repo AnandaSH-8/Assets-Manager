@@ -6,13 +6,15 @@ interface GlassCardProps {
   hover?: boolean
   blur?: "sm" | "md" | "lg"
   className?: string
+  style?: React.CSSProperties
 }
 
 export function GlassCard({ 
   children, 
   className, 
   hover = false,
-  blur = "md"
+  blur = "md",
+  style
 }: GlassCardProps) {
   const blurClass = {
     sm: "backdrop-blur-sm",
@@ -32,9 +34,11 @@ export function GlassCard({
     return (
       <motion.div
         className={baseClasses}
+        style={style}
         whileHover={{ 
           scale: 1.02,
           boxShadow: "var(--shadow-hover)"
+
         }}
         transition={{ type: "spring" as const, stiffness: 400, damping: 30 }}
       >
@@ -44,7 +48,7 @@ export function GlassCard({
   }
 
   return (
-    <div className={baseClasses}>
+    <div className={baseClasses} style={style}>
       {children}
     </div>
   )

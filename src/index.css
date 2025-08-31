@@ -7,155 +7,178 @@
 @layer base {
   :root {
     /* Light theme - Soft and professional */
-    --background: 220 20% 98%;
-    --foreground: 220 15% 15%;
+    --background: 20 20% 98%; /* hsl(220, 20%, 98%) */
+    --foreground: 22 15% 15%; /* hsl(220, 15%, 15%) */
 
     /* Glass morphism cards */
-    --card: 220 20% 98%;
-    --card-foreground: 220 15% 15%;
-    --glass: 220 20% 100%;
-    --glass-border: 220 20% 90%;
+    --card: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --card-foreground: 220 15% 15%; /* hsl(220, 15%, 15%) */
+    --glass: 220 20% 100%; /* hsl(220, 20%, 100%) */
+    --glass-border: 220 20% 90%; /* hsl(220, 20%, 90%) */
 
-    --popover: 220 20% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover: 220 20% 100%; /* hsl(220, 20%, 100%) */
+    --popover-foreground: 220 15% 15%; /* hsl(220, 15%, 15%) */
 
     /* Soft green primary for finance theme */
-    --primary: 142 76% 36%;
-    --primary-foreground: 220 20% 98%;
-    --primary-light: 142 40% 85%;
-    --primary-glow: 142 76% 36%;
+    --primary: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --primary-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --primary-light: 142 40% 85%; /* hsl(142, 40%, 85%) */
+    --primary-glow: 142 76% 36%; /* hsl(142, 76%, 36%) */
 
     /* Slate gray secondary */
-    --secondary: 220 15% 85%;
-    --secondary-foreground: 220 15% 25%;
-    --secondary-dark: 220 20% 20%;
+    --secondary: 220 15% 85%; /* hsl(220, 15%, 85%) */
+    --secondary-foreground: 220 15% 25%; /* hsl(220, 15%, 25%) */
+    --secondary-dark: 220 20% 20%; /* hsl(220, 20%, 20%) */
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 220 15% 92%; /* hsl(220, 15%, 92%) */
+    --muted-foreground: 220 10% 45%; /* hsl(220, 10%, 45%) */
 
-    --accent: 142 40% 85%;
-    --accent-foreground: 220 15% 15%;
+    --accent: 142 40% 85%; /* hsl(142, 40%, 85%) */
+    --accent-foreground: 220 15% 15%; /* hsl(220, 15%, 15%) */
 
     /* Finance-specific colors */
-    --success: 142 76% 36%;
-    --success-foreground: 220 20% 98%;
-    --warning: 45 93% 47%;
-    --warning-foreground: 220 15% 15%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 220 20% 98%;
+    --success: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --success-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --warning: 45 93% 47%; /* hsl(45, 93%, 47%) */
+    --warning-foreground: 220 15% 15%; /* hsl(220, 15%, 15%) */
+    --destructive: 0 84% 60%; /* hsl(0, 84%, 60%) */
+    --destructive-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
 
-    --border: 220 15% 88%;
-    --input: 220 20% 96%;
-    --input-border: 220 15% 75%;
-    --ring: 142 76% 36%;
+    --border: 220 15% 88%; /* hsl(220, 15%, 88%) */
+    --input: 220 20% 96%; /* hsl(220, 20%, 96%) */
+    --input-border: 220 15% 75%; /* hsl(220, 15%, 75%) */
+    --ring: 142 76% 36%; /* hsl(142, 76%, 36%) */
 
     /* Neumorphism shadows */
-    --neomorph-light: 220 20% 100%;
-    --neomorph-dark: 220 15% 85%;
-    
+    --neomorph-light: 220 20% 100%; /* hsl(220, 20%, 100%) */
+    --neomorph-dark: 220 15% 85%; /* hsl(220, 15%, 85%) */
+
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 60% 45%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(220 20% 100% / 0.8) 0%, hsl(220 20% 98% / 0.6) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(220 20% 100% / 0.25) 0%, hsl(220 20% 100% / 0.1) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(142 76% 36%) 0%,
+      /* hsl(142, 76%, 36%) */ hsl(142 60% 45%) 100% /* hsl(142, 60%, 45%) */
+    );
+    --gradient-card: linear-gradient(
+      135deg,
+      hsl(220 20% 100% / 0.8) 0%,
+      /* hsl(220, 20%, 100%) */ hsl(220 20% 98% / 0.6) 100%
+        /* hsl(220, 20%, 98%) */
+    );
+    --gradient-glass: linear-gradient(
+      135deg,
+      hsl(220 20% 100% / 0.25) 0%,
+      /* hsl(220, 20%, 100%) */ hsl(220 20% 100% / 0.1) 100%
+        /* hsl(220, 20%, 100%) */
+    );
+
     /* Shadows */
-    --shadow-glass: 0 8px 32px hsl(220 15% 15% / 0.1);
-    --shadow-neomorph: 8px 8px 16px hsl(220 15% 85%), -8px -8px 16px hsl(220 20% 100%);
-    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.15);
+    --shadow-glass: 0 8px 32px hsl(220 15% 15% / 0.1); /* hsl(220, 15%, 15%) */
+    --shadow-neomorph: 8px 8px 16px hsl(220 15% 85%),
+      /* hsl(220, 15%, 85%) */ -8px -8px 16px hsl(220 20% 100%); /* hsl(220, 20%, 100%) */
+    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.15); /* hsl(142, 76%, 36%) */
 
     /* Chart colors */
-    --chart-1: 142 76% 36%;
-    --chart-2: 220 15% 55%;
-    --chart-3: 45 93% 47%;
-    --chart-4: 200 80% 50%;
-    --chart-5: 280 60% 60%;
+    --chart-1: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --chart-2: 220 15% 55%; /* hsl(220, 15%, 55%) */
+    --chart-3: 45 93% 47%; /* hsl(45, 93%, 47%) */
+    --chart-4: 200 80% 50%; /* hsl(200, 80%, 50%) */
+    --chart-5: 280 60% 60%; /* hsl(280, 60%, 60%) */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 98%; /* hsl(0, 0%, 98%) */
+    --sidebar-foreground: 240 5.3% 26.1%; /* hsl(240, 5.3%, 26.1%) */
+    --sidebar-primary: 240 5.9% 10%; /* hsl(240, 5.9%, 10%) */
+    --sidebar-primary-foreground: 0 0% 98%; /* hsl(0, 0%, 98%) */
+    --sidebar-accent: 240 4.8% 95.9%; /* hsl(240, 4.8%, 95.9%) */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* hsl(240, 5.9%, 10%) */
+    --sidebar-border: 220 13% 91%; /* hsl(220, 13%, 91%) */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* hsl(217.2, 91.2%, 59.8%) */
   }
 
   .dark {
     /* Dark theme - Professional and modern */
-    --background: 220 25% 8%;
-    --foreground: 220 15% 92%;
+    --background: 220 25% 8%; /* hsl(220, 25%, 8%) */
+    --foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
 
     /* Dark glass morphism */
-    --card: 220 20% 12%;
-    --card-foreground: 220 15% 92%;
-    --glass: 220 20% 15%;
-    --glass-border: 220 15% 25%;
+    --card: 220 20% 12%; /* hsl(220, 20%, 12%) */
+    --card-foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
+    --glass: 220 20% 15%; /* hsl(220, 20%, 15%) */
+    --glass-border: 220 15% 25%; /* hsl(220, 15%, 25%) */
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 220 15% 92%;
+    --popover: 220 20% 12%; /* hsl(220, 20%, 12%) */
+    --popover-foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
 
     /* Green primary stays consistent */
-    --primary: 142 76% 36%;
-    --primary-foreground: 220 20% 98%;
-    --primary-light: 142 40% 25%;
-    --primary-glow: 142 76% 36%;
+    --primary: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --primary-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --primary-light: 142 40% 25%; /* hsl(142, 40%, 25%) */
+    --primary-glow: 142 76% 36%; /* hsl(142, 76%, 36%) */
 
     /* Dark slate gray */
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 220 15% 80%;
-    --secondary-dark: 220 20% 15%;
+    --secondary: 220 15% 20%; /* hsl(220, 15%, 20%) */
+    --secondary-foreground: 220 15% 80%; /* hsl(220, 15%, 80%) */
+    --secondary-dark: 220 20% 15%; /* hsl(220, 20%, 15%) */
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 220 15% 18%; /* hsl(220, 15%, 18%) */
+    --muted-foreground: 220 10% 60%; /* hsl(220, 10%, 60%) */
 
-    --accent: 142 40% 25%;
-    --accent-foreground: 220 15% 92%;
+    --accent: 142 40% 25%; /* hsl(142, 40%, 25%) */
+    --accent-foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
 
     /* Dark finance colors */
-    --success: 142 76% 36%;
-    --success-foreground: 220 20% 98%;
-    --warning: 45 93% 47%;
-    --warning-foreground: 220 15% 15%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 220 20% 98%;
+    --success: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --success-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --warning: 45 93% 47%; /* hsl(45, 93%, 47%) */
+    --warning-foreground: 220 15% 15%; /* hsl(220, 15%, 15%) */
+    --destructive: 0 84% 60%; /* hsl(0, 84%, 60%) */
+    --destructive-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
 
-    --border: 220 15% 22%;
-    --input: 220 20% 15%;
-    --input-border: 220 15% 30%;
-    --ring: 142 76% 36%;
+    --border: 220 15% 22%; /* hsl(220, 15%, 22%) */
+    --input: 220 20% 15%; /* hsl(220, 20%, 15%) */
+    --input-border: 220 15% 30%; /* hsl(220, 15%, 30%) */
+    --ring: 142 76% 36%; /* hsl(142, 76%, 36%) */
 
     /* Dark neumorphism */
-    --neomorph-light: 220 20% 18%;
-    --neomorph-dark: 220 25% 8%;
-    
+    --neomorph-light: 220 20% 18%; /* hsl(220, 20%, 18%) */
+    --neomorph-dark: 220 25% 8%; /* hsl(220, 25%, 8%) */
+
     /* Dark gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 60% 45%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(220 20% 15% / 0.8) 0%, hsl(220 20% 12% / 0.6) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(220 20% 25% / 0.25) 0%, hsl(220 20% 15% / 0.1) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(142 76% 36%) 0%,
+      /* hsl(142, 76%, 36%) */ hsl(142 60% 45%) 100% /* hsl(142, 60%, 45%) */
+    );
+    --gradient-card: linear-gradient(
+      135deg,
+      hsl(220 20% 15% / 0.8) 0%,
+      /* hsl(220, 20%, 15%) */ hsl(220 20% 12% / 0.6) 100%
+        /* hsl(220, 20%, 12%) */
+    );
+    --gradient-glass: linear-gradient(
+      135deg,
+      hsl(220 20% 25% / 0.25) 0%,
+      /* hsl(220, 20%, 25%) */ hsl(220 20% 15% / 0.1) 100%
+        /* hsl(220, 20%, 15%) */
+    );
+
     /* Dark shadows */
-    --shadow-glass: 0 8px 32px hsl(220 25% 5% / 0.3);
-    --shadow-neomorph: 8px 8px 16px hsl(220 25% 5%), -8px -8px 16px hsl(220 20% 18%);
-    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.25);
+    --shadow-glass: 0 8px 32px hsl(220 25% 5% / 0.3); /* hsl(220, 25%, 5%) */
+    --shadow-neomorph: 8px 8px 16px hsl(220 25% 5%),
+      /* hsl(220, 25%, 5%) */ -8px -8px 16px hsl(220 20% 18%); /* hsl(220, 20%, 18%) */
+    --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.25); /* hsl(142, 76%, 36%) */
 
     /* Dark sidebar */
-    --sidebar-background: 220 25% 8%;
-    --sidebar-foreground: 220 15% 92%;
-    --sidebar-primary: 142 76% 36%;
-    --sidebar-primary-foreground: 220 20% 98%;
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 220 15% 92%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 142 76% 36%;
+    --sidebar-background: 220 25% 8%; /* hsl(220, 25%, 8%) */
+    --sidebar-foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
+    --sidebar-primary: 142 76% 36%; /* hsl(142, 76%, 36%) */
+    --sidebar-primary-foreground: 220 20% 98%; /* hsl(220, 20%, 98%) */
+    --sidebar-accent: 220 15% 18%; /* hsl(220, 15%, 18%) */
+    --sidebar-accent-foreground: 220 15% 92%; /* hsl(220, 15%, 92%) */
+    --sidebar-border: 220 15% 22%; /* hsl(220, 15%, 22%) */
+    --sidebar-ring: 142 76% 36%; /* hsl(142, 76%, 36%) */
   }
 }
 

@@ -126,18 +126,18 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {visibleItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="transition-all duration-200">
+                <SidebarMenuItem className="w-full h-10" key={item.title}>
+                  <SidebarMenuButton asChild className="transition-all duration-100 h-10">
                     <NavLink 
                       to={item.url} 
                       className={`${getNavClassName(item.url)} px-3 py-3 rounded-xl group relative overflow-hidden`}
                     >
                       <motion.div 
-                        className="flex items-center gap-3"
+                        className="flex items-center gap-3 "
                         whileHover={{ x: 2 }}
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       >
-                        <item.icon className="w-5 h-5 shrink-0" />
+                        <item.icon className="w-5 h-8 shrink-0 " />
                         {!isCollapsed && (
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
