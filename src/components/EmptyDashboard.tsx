@@ -109,7 +109,10 @@ export default function EmptyDashboard() {
         className="max-w-3xl mx-auto"
       >
         <GlassCard className="p-8">
-          <h3 className="text-xl font-semibold mb-6 text-center">Built with Modern Technology</h3>
+          <h3 className="text-xl font-semibold mb-6 text-center">
+            {/* Built with Modern Technology */}
+            Powered by Modern Web Technologies
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="p-4 rounded-lg bg-accent/20">
               <div className="font-semibold text-primary">React</div>

@@ -44,13 +44,17 @@ const AppContent = () => {
           <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
           <Route path="/*" element={
             <ProtectedRoute>
-              <div className="flex min-h-screen w-full bg-background">
+              <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
                 <AppSidebar />
                 <main className="flex-1 flex flex-col">
-                  {/* Header with trigger for mobile */}
-                  <header className="lg:hidden h-14 flex items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-                    <SidebarTrigger />
-                    <h1 className="ml-4 text-lg font-semibold">AssetsManager</h1>
+                  {/* Header with sidebar trigger - always visible */}
+                  <header className="h-14 flex items-center justify-between border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 px-4 shadow-sm">
+                    <div className="flex items-center">
+                      <SidebarTrigger className="mr-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" />
+                      <h1 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
+                        AssetsManager
+                      </h1>
+                    </div>
                   </header>
                   
                   {/* Main content */}
