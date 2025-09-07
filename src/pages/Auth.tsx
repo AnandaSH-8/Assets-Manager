@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/glass-card';
 import { NeomorphInput } from '@/components/ui/neomorph-input';
+import { PasswordStrengthMeter } from '@/components/ui/password-strength-meter';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,22 +34,74 @@ const Auth = () => {
     checkUser();
   }, [navigate]);
 
+  const validatePassword = (pwd: string) => {
+    const checks = {
+      length: pwd.length >= 12,
+      lowercase: /[a-z]/.test(pwd),
+      uppercase: /[A-Z]/.test(pwd),
+      numbers: /\d/.test(pwd),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)
+    };
+    
+    return Object.values(checks).every(check => check);
+  };
+
+  const validateUsername = (username: string) => {
+    // Username: 3-30 chars, alphanumeric + underscore, no consecutive underscores
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+    const noConsecutiveUnderscores = !/__/.test(username);
+    const noStartEndUnderscore = !username.startsWith('_') && !username.endsWith('_');
+    
+    return usernameRegex.test(username) && noConsecutiveUnderscores && noStartEndUnderscore;
+  };
+
+  const sanitizeInput = (input: string) => {
+    // Remove potentially dangerous characters
+    return input.replace(/[<>\"']/g, '');
+  };
+
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+    // Email validation with more robust regex
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
     
-    if (!password) newErrors.password = "Password is required";
-    else if (password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    // Password validation
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (isSignUp && !validatePassword(password)) {
+      newErrors.password = "Password must meet all security requirements";
+    } else if (!isSignUp && password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
 
     if (isSignUp) {
-      if (!name) newErrors.name = "Name is required";
-      if (!username) newErrors.username = "Username is required";
-      else if (username.length < 3) newErrors.username = "Username must be at least 3 characters";
+      // Name validation
+      if (!name) {
+        newErrors.name = "Name is required";
+      } else if (name.trim().length < 2) {
+        newErrors.name = "Name must be at least 2 characters";
+      } else if (name.trim().length > 50) {
+        newErrors.name = "Name must be less than 50 characters";
+      }
+
+      // Username validation
+      if (!username) {
+        newErrors.username = "Username is required";
+      } else if (!validateUsername(username)) {
+        newErrors.username = "Username must be 3-30 characters, letters, numbers, and underscores only";
+      }
       
-      if (!confirmPassword) newErrors.confirmPassword = "Please confirm your password";
-      else if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+      // Confirm password validation
+      if (!confirmPassword) {
+        newErrors.confirmPassword = "Please confirm your password";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     setErrors(newErrors);
@@ -72,8 +125,8 @@ const Auth = () => {
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              name,
-              username
+              name: sanitizeInput(name.trim()),
+              username: sanitizeInput(username.trim().toLowerCase())
             }
           }
         });
@@ -128,7 +181,7 @@ const Auth = () => {
                     id="name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(sanitizeInput(e.target.value))}
                     className="pl-10"
                     placeholder="Enter your name"
                     error={errors.name}
@@ -144,7 +197,7 @@ const Auth = () => {
                     id="username"
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => setUsername(sanitizeInput(e.target.value.toLowerCase()))}
                     className="pl-10"
                     placeholder="Enter your username (min 3 characters)"
                     error={errors.username}
@@ -180,7 +233,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10 border border-gray-300"
-                placeholder="Enter your password (min 6 characters)"
+                placeholder={isSignUp ? "Enter a strong password (min 12 characters)" : "Enter your password"}
                 error={errors.password}
               />
               <button
@@ -191,6 +244,9 @@ const Auth = () => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {isSignUp && (
+              <PasswordStrengthMeter password={password} />
+            )}
           </div>
 
           {isSignUp && (
