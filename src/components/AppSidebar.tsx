@@ -88,16 +88,16 @@ export function AppSidebar() {
   const getNavClassName = (path: string) => {
     const isActive = currentPath === path
     return isActive 
-      ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-r-2 border-blue-500" 
+      ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-r-2 border-green-500" 
       : "hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
   }
 
   return (
     <Sidebar className="border-r bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-lg">
       {/* Header */}
-      <SidebarHeader className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+      <SidebarHeader className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-green-600 to-emerald-600 text-white"
         style={{
-          background: 'linear-gradient(135deg, hsl(220, 100%, 50%) 0%, hsl(240, 100%, 60%) 100%)'
+          background: 'linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(158, 64%, 52%) 100%)'
         }}
       >
         <motion.div 
@@ -180,7 +180,7 @@ export function AppSidebar() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white">
               <User className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">

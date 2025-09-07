@@ -44,7 +44,7 @@ const AppContent = () => {
           <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
           <Route path="/*" element={
             <ProtectedRoute>
-              <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+              <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 via-green-50 to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
                 <AppSidebar />
                 <main className="flex-1 flex flex-col">
                   {/* Header with sidebar trigger - always visible */}
