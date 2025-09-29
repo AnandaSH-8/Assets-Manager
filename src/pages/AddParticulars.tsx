@@ -6,6 +6,8 @@ import { NeomorphInput } from "@/components/ui/neomorph-input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { financialAPI } from "@/services/api"
+import { useAuth } from "@/hooks/useAuth"
 
 const categories = [
   "Bank Account",
@@ -19,6 +21,7 @@ const categories = [
 
 export default function AddParticulars() {
   const { toast } = useToast()
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -26,6 +29,7 @@ export default function AddParticulars() {
     investedCash: ""
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -54,7 +58,7 @@ export default function AddParticulars() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateForm()) {
@@ -66,28 +70,50 @@ export default function AddParticulars() {
       return
     }
 
-    // Here you would normally save to Supabase
-    console.log("Saving particular:", formData)
-    
-    toast({
-      title: "Success!",
-      description: "Financial particular has been added successfully.",
-    })
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to add financial particulars.",
+        variant: "destructive"
+      })
+      return
+    }
 
-    // Reset form
-    setFormData({
-      title: "",
-      category: "",
-      actualCash: "",
-      investedCash: ""
-    })
+    setIsSubmitting(true)
+
+    try {
+      const totalAmount = Number(formData.actualCash) + Number(formData.investedCash)
+      
+      await financialAPI.create({
+        category: formData.category,
+        description: formData.title,
+        amount: totalAmount
+      })
+      
+      toast({
+        title: "Success!",
+        description: "Financial particular has been added successfully.",
+      })
+
+      // Reset form
+      setFormData({
+        title: "",
+        category: "",
+        actualCash: "",
+        investedCash: ""
+      })
+    } catch (error) {
+      console.error("Error saving financial particular:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save financial particular.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const calculateDifference = () => {
-    const actual = Number(formData.actualCash) || 0
-    const invested = Number(formData.investedCash) || 0
-    return actual - invested
-  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -203,10 +229,11 @@ export default function AddParticulars() {
               >
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Add Particular
+                  {isSubmitting ? "Saving..." : "Add Particular"}
                 </Button>
               </motion.div>
             </form>
@@ -247,16 +274,6 @@ export default function AddParticulars() {
                 <span className="font-medium text-warning">
                   {formData.investedCash ? formatCurrency(Number(formData.investedCash)) : "₹0"}
                 </span>
-              </div>
-              <div className="border-t pt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Difference:</span>
-                  <span className={`font-bold ${
-                    calculateDifference() >= 0 ? "text-success" : "text-destructive"
-                  }`}>
-                    {formatCurrency(calculateDifference())}
-                  </span>
-                </div>
               </div>
             </div>
           </GlassCard>

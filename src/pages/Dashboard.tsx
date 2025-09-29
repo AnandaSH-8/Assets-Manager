@@ -13,13 +13,14 @@ import { Button } from "@/components/ui/button"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts'
 import EmptyDashboard from "@/components/EmptyDashboard"
 import { useState, useEffect } from "react"
+import { financialAPI } from "@/services/api"
+import { useAuth } from "@/hooks/useAuth"
 
-// Mock data - replace with real data from Supabase
-const summaryData = {
-  totalAssets: 0,
-  totalInvestments: 0,
-  monthlyGrowth: 0,
-  totalGrowth: 0
+interface SummaryData {
+  totalAssets: number
+  totalInvestments: number
+  monthlyGrowth: number
+  totalGrowth: number
 }
 
 const chartData = [
@@ -45,17 +46,64 @@ const formatCurrency = (value: number) => {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth()
   const [hasData, setHasData] = useState(false)
+  const [summaryData, setSummaryData] = useState<SummaryData>({
+    totalAssets: 0,
+    totalInvestments: 0,
+    monthlyGrowth: 0,
+    totalGrowth: 0
+  })
+  const [financialData, setFinancialData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Check if user has any data - replace with real Supabase query
+  // Fetch real data from Supabase
   useEffect(() => {
-    // For now, checking if any values are greater than 0
-    const hasAnyData = summaryData.totalAssets > 0 || 
-                       summaryData.totalInvestments > 0 || 
-                       summaryData.monthlyGrowth > 0 || 
-                       summaryData.totalGrowth > 0
-    setHasData(hasAnyData)
-  }, [])
+    const fetchData = async () => {
+      if (!user) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const [statsResponse, allDataResponse] = await Promise.all([
+          financialAPI.getStats(),
+          financialAPI.getAll()
+        ])
+
+        const stats = statsResponse.data
+        const allData = allDataResponse.data
+
+        setFinancialData(allData)
+        
+        // Calculate summary data from stats
+        setSummaryData({
+          totalAssets: stats.total_amount || 0,
+          totalInvestments: stats.total_amount || 0,
+          monthlyGrowth: 5.2, // Placeholder for now
+          totalGrowth: stats.total_amount * 0.1 || 0 // 10% growth assumption
+        })
+
+        setHasData(allData.length > 0)
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+        setHasData(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
 
   if (!hasData) {
     return <EmptyDashboard />
@@ -170,7 +218,10 @@ export default function Dashboard() {
         <GlassCard className="p-6">
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="flex gap-4">
-            <Button className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300">
+            <Button 
+              onClick={() => window.location.href = '/add-particulars'}
+              className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add New Asset
             </Button>
