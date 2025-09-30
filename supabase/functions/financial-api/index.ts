@@ -7,11 +7,6 @@ interface FinancialParticularRequest {
   amount: number
 }
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-)
-
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -37,6 +32,18 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    
+    // Create authenticated Supabase client for this request
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      }
+    )
+
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
 
     if (userError || !user) {
@@ -49,35 +56,29 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Set user context for RLS
-    await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: ''
-    })
-
     switch (req.method) {
       case 'GET':
         if (action === 'all') {
-          return await getAllFinancials(user.id)
+          return await getAllFinancials(supabase, user.id)
         } else if (action === 'stats') {
-          return await getFinancialStats(user.id)
+          return await getFinancialStats(supabase, user.id)
         } else if (id && action !== 'all') {
-          return await getFinancial(id, user.id)
+          return await getFinancial(supabase, id, user.id)
         }
         break
       
       case 'POST':
-        return await createFinancial(req, user.id)
+        return await createFinancial(req, supabase, user.id)
       
       case 'PUT':
         if (id) {
-          return await updateFinancial(req, id, user.id)
+          return await updateFinancial(req, supabase, id, user.id)
         }
         break
       
       case 'DELETE':
         if (id) {
-          return await deleteFinancial(id, user.id)
+          return await deleteFinancial(supabase, id, user.id)
         }
         break
     }
@@ -102,7 +103,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function getAllFinancials(userId: string) {
+async function getAllFinancials(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('*')
@@ -128,7 +129,7 @@ async function getAllFinancials(userId: string) {
   )
 }
 
-async function getFinancial(id: string, userId: string) {
+async function getFinancial(supabase: any, id: string, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('*')
@@ -155,7 +156,7 @@ async function getFinancial(id: string, userId: string) {
   )
 }
 
-async function createFinancial(req: Request, userId: string) {
+async function createFinancial(req: Request, supabase: any, userId: string) {
   const { category, description, amount }: FinancialParticularRequest = await req.json()
 
   if (!category || !amount) {
@@ -201,7 +202,7 @@ async function createFinancial(req: Request, userId: string) {
   )
 }
 
-async function updateFinancial(req: Request, id: string, userId: string) {
+async function updateFinancial(req: Request, supabase: any, id: string, userId: string) {
   const updates: Partial<FinancialParticularRequest> = await req.json()
 
   const { data, error } = await supabase
@@ -234,7 +235,7 @@ async function updateFinancial(req: Request, id: string, userId: string) {
   )
 }
 
-async function deleteFinancial(id: string, userId: string) {
+async function deleteFinancial(supabase: any, id: string, userId: string) {
   const { error } = await supabase
     .from('financial_particulars')
     .delete()
@@ -260,7 +261,7 @@ async function deleteFinancial(id: string, userId: string) {
   )
 }
 
-async function getFinancialStats(userId: string) {
+async function getFinancialStats(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('category, amount')
