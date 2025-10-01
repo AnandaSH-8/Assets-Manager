@@ -15,6 +15,7 @@ import EmptyDashboard from "@/components/EmptyDashboard"
 import { useState, useEffect } from "react"
 import { financialAPI } from "@/services/api"
 import { useAuth } from "@/hooks/useAuth"
+import { useNavigate } from "react-router-dom"
 
 interface SummaryData {
   totalAssets: number
@@ -47,6 +48,7 @@ const formatCurrency = (value: number) => {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [hasData, setHasData] = useState(false)
   const [summaryData, setSummaryData] = useState<SummaryData>({
     totalAssets: 0,
@@ -219,13 +221,17 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="flex gap-4">
             <Button 
-              onClick={() => window.location.href = '/add-particulars'}
+              onClick={() => navigate('/add-particulars')}
               className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add New Asset
             </Button>
-            <Button variant="outline" className="flex-1 h-12 hover:bg-accent/50">
+            <Button 
+              onClick={() => navigate('/statistics')} 
+              variant="outline" 
+              className="flex-1 h-12 hover:bg-accent/50"
+            >
               <BarChart3 className="w-4 h-4 mr-2" />
               View Analytics
             </Button>

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Save, Plus, Wallet, TrendingUp } from "lucide-react"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -19,6 +19,11 @@ const categories = [
   "Other"
 ]
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+]
+
 export default function AddParticulars() {
   const { toast } = useToast()
   const { user } = useAuth()
@@ -26,10 +31,26 @@ export default function AddParticulars() {
     title: "",
     category: "",
     actualCash: "",
-    investedCash: ""
+    investedCash: "",
+    month: ""
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [savedTitles, setSavedTitles] = useState<string[]>([])
+  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false)
+
+  // Fetch saved titles on component mount
+  useEffect(() => {
+    const fetchTitles = async () => {
+      try {
+        const response = await financialAPI.getTitles()
+        setSavedTitles(response.data || [])
+      } catch (error) {
+        console.error("Failed to fetch titles:", error)
+      }
+    }
+    fetchTitles()
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -53,10 +74,17 @@ export default function AddParticulars() {
     if (!formData.investedCash || isNaN(Number(formData.investedCash))) {
       newErrors.investedCash = "Valid invested cash amount is required"
     }
+    if (!formData.month) {
+      newErrors.month = "Month is required"
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
+
+  const filteredTitles = savedTitles.filter(title => 
+    title.toLowerCase().includes(formData.title.toLowerCase())
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,7 +115,8 @@ export default function AddParticulars() {
       await financialAPI.create({
         category: formData.category,
         description: formData.title,
-        amount: totalAmount
+        amount: totalAmount,
+        month: formData.month
       })
       
       toast({
@@ -100,7 +129,8 @@ export default function AddParticulars() {
         title: "",
         category: "",
         actualCash: "",
-        investedCash: ""
+        investedCash: "",
+        month: ""
       })
     } catch (error) {
       console.error("Error saving financial particular:", error)
@@ -156,17 +186,38 @@ export default function AddParticulars() {
                 <h2 className="text-2xl font-semibold">New Financial Entry</h2>
               </div>
 
-              {/* Title Field */}
-              <div className="space-y-2">
+              {/* Title Field with Autocomplete */}
+              <div className="space-y-2 relative">
                 <label htmlFor="title" className="text-sm font-medium">Title</label>
                 <NeomorphInput
                   id="title"
                   className="border border-gray-300"
                   value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange("title", e.target.value)
+                    setShowTitleSuggestions(true)
+                  }}
+                  onFocus={() => setShowTitleSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowTitleSuggestions(false), 200)}
                   placeholder="e.g., HDFC Savings Account"
                   error={errors.title}
                 />
+                {showTitleSuggestions && filteredTitles.length > 0 && formData.title && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredTitles.map((title, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-2 hover:bg-accent cursor-pointer text-sm"
+                        onMouseDown={() => {
+                          handleInputChange("title", title)
+                          setShowTitleSuggestions(false)
+                        }}
+                      >
+                        {title}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Category Field */}
@@ -222,6 +273,29 @@ export default function AddParticulars() {
               </div>
             </div>
 
+            {/* Month Field */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Month</label>
+              <Select 
+                value={formData.month} 
+                onValueChange={(value) => handleInputChange("month", value)}
+              >
+                <SelectTrigger className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.month ? "border-destructive" : ""}`}>
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((month) => (
+                    <SelectItem key={month} value={month}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.month && (
+                <p className="text-xs text-destructive mt-1 ml-1">{errors.month}</p>
+              )}
+            </div>
+
               {/* Submit Button */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -273,6 +347,12 @@ export default function AddParticulars() {
                 <span className="text-sm text-muted-foreground">Invested Cash:</span>
                 <span className="font-medium text-warning">
                   {formData.investedCash ? formatCurrency(Number(formData.investedCash)) : "₹0"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Month:</span>
+                <span className="font-medium">
+                  {formData.month || "Not selected"}
                 </span>
               </div>
             </div>

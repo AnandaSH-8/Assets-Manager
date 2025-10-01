@@ -5,6 +5,7 @@ interface FinancialParticularRequest {
   category: string
   description?: string
   amount: number
+  month?: string
 }
 
 Deno.serve(async (req) => {
@@ -62,7 +63,9 @@ Deno.serve(async (req) => {
           return await getAllFinancials(supabase, user.id)
         } else if (action === 'stats') {
           return await getFinancialStats(supabase, user.id)
-        } else if (id && action !== 'all') {
+        } else if (action === 'titles') {
+          return await getUniqueTitles(supabase, user.id)
+        } else if (id && action !== 'all' && action !== 'titles') {
           return await getFinancial(supabase, id, user.id)
         }
         break
@@ -77,7 +80,9 @@ Deno.serve(async (req) => {
         break
       
       case 'DELETE':
-        if (id) {
+        if (action === 'clear-all') {
+          return await clearAllFinancials(supabase, user.id)
+        } else if (id) {
           return await deleteFinancial(supabase, id, user.id)
         }
         break
@@ -157,7 +162,7 @@ async function getFinancial(supabase: any, id: string, userId: string) {
 }
 
 async function createFinancial(req: Request, supabase: any, userId: string) {
-  const { category, description, amount }: FinancialParticularRequest = await req.json()
+  const { category, description, amount, month }: FinancialParticularRequest = await req.json()
 
   if (!category || !amount) {
     return new Response(
@@ -175,12 +180,14 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       user_id: userId,
       category,
       description,
-      amount
+      amount,
+      month
     })
     .select()
     .single()
 
   if (error) {
+    console.error('Create financial error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
@@ -293,6 +300,62 @@ async function getFinancialStats(supabase: any, userId: string) {
 
   return new Response(
     JSON.stringify({ data: stats }),
+    { 
+      status: 200, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  )
+}
+
+async function clearAllFinancials(supabase: any, userId: string) {
+  const { error } = await supabase
+    .from('financial_particulars')
+    .delete()
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Clear all financials error:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  }
+
+  return new Response(
+    JSON.stringify({ message: 'All financial data cleared successfully' }),
+    { 
+      status: 200, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  )
+}
+
+async function getUniqueTitles(supabase: any, userId: string) {
+  const { data, error } = await supabase
+    .from('financial_particulars')
+    .select('description')
+    .eq('user_id', userId)
+    .not('description', 'is', null)
+
+  if (error) {
+    console.error('Get unique titles error:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  }
+
+  // Extract unique non-empty titles
+  const uniqueTitles = [...new Set(data.map(item => item.description).filter(Boolean))]
+
+  return new Response(
+    JSON.stringify({ data: uniqueTitles }),
     { 
       status: 200, 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

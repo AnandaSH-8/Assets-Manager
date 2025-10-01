@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import AddParticulars from "./pages/AddParticulars";
 import Statistics from "./pages/Statistics";
 import Comparison from "./pages/Comparison";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -64,6 +65,7 @@ const AppContent = () => {
                       <Route path="/add-particulars" element={<AddParticulars />} />
                       <Route path="/statistics" element={<Statistics />} />
                       <Route path="/comparison" element={<Comparison />} />
+                      <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>

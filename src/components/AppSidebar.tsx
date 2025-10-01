@@ -61,6 +61,13 @@ const navigationItems = [
     description: "Compare periods and trends",
     alwaysShow: false
   },
+  { 
+    title: "Settings", 
+    url: "/settings", 
+    icon: Settings,
+    description: "Account and data settings",
+    alwaysShow: true
+  },
 ]
 
 export function AppSidebar() {

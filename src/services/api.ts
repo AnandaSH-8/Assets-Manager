@@ -73,53 +73,67 @@ export const authAPI = {
   },
 }
 
+// Financial API - Interacts with 'financial_particulars' table
 export const financialAPI = {
-  // Get all financial particulars
+  // Get all financial particulars from 'financial_particulars' table
   getAll: async () => {
     return apiCall('/financial-api/all')
   },
 
-  // Get financial statistics
+  // Get financial statistics from 'financial_particulars' table
   getStats: async () => {
     return apiCall('/financial-api/stats')
   },
 
-  // Get single financial particular
+  // Get single financial particular from 'financial_particulars' table
   getById: async (id: string) => {
     return apiCall(`/financial-api/${id}`)
   },
 
-  // Create new financial particular
-  create: async (data: { category: string; description?: string; amount: number }) => {
+  // Create new financial particular in 'financial_particulars' table
+  create: async (data: { category: string; description?: string; amount: number; month?: string }) => {
     return apiCall('/financial-api/', {
       method: 'POST',
       body: JSON.stringify(data),
     })
   },
 
-  // Update financial particular
-  update: async (id: string, data: { category?: string; description?: string; amount?: number }) => {
+  // Update financial particular in 'financial_particulars' table
+  update: async (id: string, data: { category?: string; description?: string; amount?: number; month?: string }) => {
     return apiCall(`/financial-api/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
   },
 
-  // Delete financial particular
+  // Delete financial particular from 'financial_particulars' table
   delete: async (id: string) => {
     return apiCall(`/financial-api/${id}`, {
       method: 'DELETE',
     })
   },
+
+  // Clear all financial data from 'financial_particulars' table (keep login credentials)
+  clearAll: async () => {
+    return apiCall('/financial-api/clear-all', {
+      method: 'DELETE',
+    })
+  },
+
+  // Get unique titles from 'financial_particulars' table for autocomplete
+  getTitles: async () => {
+    return apiCall('/financial-api/titles')
+  },
 }
 
+// User API - Interacts with 'profiles' and 'financial_particulars' tables
 export const userAPI = {
-  // Get user profile
+  // Get user profile from 'profiles' table
   getProfile: async () => {
     return apiCall('/user-api/profile')
   },
 
-  // Update user profile
+  // Update user profile in 'profiles' table
   updateProfile: async (data: { name?: string; username?: string }) => {
     return apiCall('/user-api/profile', {
       method: 'PUT',
@@ -127,7 +141,7 @@ export const userAPI = {
     })
   },
 
-  // Delete user account
+  // Delete user account from 'profiles' and 'financial_particulars' tables
   deleteAccount: async () => {
     return apiCall('/user-api/delete-account', {
       method: 'DELETE',
