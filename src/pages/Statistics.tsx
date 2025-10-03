@@ -4,39 +4,128 @@ import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useState, useEffect } from "react"
+import { financialAPI } from "@/services/api"
+import { useAuth } from "@/hooks/useAuth"
 
-// Mock data
-const categoryData = [
-  { name: 'Bank Account', value: 450000, color: 'hsl(var(--chart-1))' },
-  { name: 'Mutual Fund', value: 320000, color: 'hsl(var(--chart-2))' },
-  { name: 'Stocks', value: 280000, color: 'hsl(var(--chart-3))' },
-  { name: 'Fixed Deposit', value: 150000, color: 'hsl(var(--chart-4))' },
-  { name: 'Real Estate', value: 80000, color: 'hsl(var(--chart-5))' }
-]
-
-const monthlyData = [
-  { month: 'Jan', assets: 1100000, investments: 750000, growth: 5.2 },
-  { month: 'Feb', assets: 1150000, investments: 780000, growth: 7.8 },
-  { month: 'Mar', assets: 1200000, investments: 810000, growth: 9.1 },
-  { month: 'Apr', assets: 1250000, investments: 850000, growth: 12.5 },
-  { month: 'May', assets: 1280000, investments: 880000, growth: 15.7 },
-  { month: 'Jun', assets: 1320000, investments: 920000, growth: 18.2 }
-]
-
-const performanceData = [
-  { category: 'Mutual Fund', return: 18.5, invested: 320000, current: 379200 },
-  { category: 'Stocks', return: 22.3, invested: 280000, current: 342440 },
-  { category: 'Bank Account', return: 3.5, invested: 450000, current: 465750 },
-  { category: 'Fixed Deposit', return: 6.8, invested: 150000, current: 160200 },
+const CHART_COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))'
 ]
 
 export default function Statistics() {
+  const { user } = useAuth()
+  const [categoryData, setCategoryData] = useState<any[]>([])
+  const [monthlyData, setMonthlyData] = useState<any[]>([])
+  const [performanceData, setPerformanceData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const [statsResponse, allDataResponse] = await Promise.all([
+          financialAPI.getStats(),
+          financialAPI.getAll()
+        ])
+
+        const stats = statsResponse.data
+        const allData = allDataResponse.data
+
+        // Process category data for pie chart
+        const categoryBreakdown = stats.category_breakdown || {}
+        const newCategoryData = Object.entries(categoryBreakdown).map(([name, value], index) => ({
+          name,
+          value: Number(value),
+          color: CHART_COLORS[index % CHART_COLORS.length]
+        }))
+        setCategoryData(newCategoryData)
+
+        // Process monthly data for bar chart
+        const monthlyGrouped: Record<string, { assets: number, investments: number }> = {}
+        allData.forEach((item: any) => {
+          const month = item.month || 'Unknown'
+          if (!monthlyGrouped[month]) {
+            monthlyGrouped[month] = { assets: 0, investments: 0 }
+          }
+          monthlyGrouped[month].assets += Number(item.amount)
+          monthlyGrouped[month].investments += Number(item.amount)
+        })
+
+        const newMonthlyData = Object.entries(monthlyGrouped).map(([month, data]) => ({
+          month,
+          ...data
+        }))
+        setMonthlyData(newMonthlyData)
+
+        // Process performance data by category
+        const performanceByCategory: Record<string, { invested: number, current: number, count: number }> = {}
+        allData.forEach((item: any) => {
+          const category = item.category
+          if (!performanceByCategory[category]) {
+            performanceByCategory[category] = { invested: 0, current: 0, count: 0 }
+          }
+          const amount = Number(item.amount)
+          performanceByCategory[category].invested += amount
+          performanceByCategory[category].current += amount
+          performanceByCategory[category].count += 1
+        })
+
+        const newPerformanceData = Object.entries(performanceByCategory).map(([category, data]) => {
+          const returnPercent = data.invested > 0 
+            ? ((data.current - data.invested) / data.invested) * 100 
+            : 0
+          return {
+            category,
+            invested: data.invested,
+            current: data.current,
+            return: returnPercent
+          }
+        })
+        setPerformanceData(newPerformanceData)
+
+      } catch (error) {
+        console.error("Error fetching statistics:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user])
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
     }).format(value)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  if (categoryData.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">No Data Available</h2>
+          <p className="text-muted-foreground">Add financial particulars to see statistics</p>
+        </div>
+      </div>
+    )
   }
 
   return (

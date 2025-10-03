@@ -186,37 +186,46 @@ export default function AddParticulars() {
                 <h2 className="text-2xl font-semibold">New Financial Entry</h2>
               </div>
 
-              {/* Title Field with Autocomplete */}
-              <div className="space-y-2 relative">
+              {/* Title Field - Dropdown + Input */}
+              <div className="space-y-2">
                 <label htmlFor="title" className="text-sm font-medium">Title</label>
-                <NeomorphInput
-                  id="title"
-                  className="border border-gray-300"
-                  value={formData.title}
-                  onChange={(e) => {
-                    handleInputChange("title", e.target.value)
-                    setShowTitleSuggestions(true)
+                <Select 
+                  value={formData.title} 
+                  onValueChange={(value) => {
+                    if (value === "__custom__") {
+                      // User wants to type custom
+                      handleInputChange("title", "")
+                    } else {
+                      handleInputChange("title", value)
+                    }
                   }}
-                  onFocus={() => setShowTitleSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowTitleSuggestions(false), 200)}
-                  placeholder="e.g., HDFC Savings Account"
-                  error={errors.title}
-                />
-                {showTitleSuggestions && filteredTitles.length > 0 && formData.title && (
-                  <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {filteredTitles.map((title, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-2 hover:bg-accent cursor-pointer text-sm"
-                        onMouseDown={() => {
-                          handleInputChange("title", title)
-                          setShowTitleSuggestions(false)
-                        }}
-                      >
+                >
+                  <SelectTrigger className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.title ? "border-destructive" : ""}`}>
+                    <SelectValue placeholder="Select or type a title" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    <SelectItem value="__custom__">
+                      <span className="text-primary">+ Type Custom Title</span>
+                    </SelectItem>
+                    {savedTitles.map((title, index) => (
+                      <SelectItem key={index} value={title}>
                         {title}
-                      </div>
+                      </SelectItem>
                     ))}
-                  </div>
+                  </SelectContent>
+                </Select>
+                {(formData.title === "" || !savedTitles.includes(formData.title)) && (
+                  <NeomorphInput
+                    id="title"
+                    className="border border-gray-300"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    placeholder="e.g., HDFC Savings Account"
+                    error={errors.title}
+                  />
+                )}
+                {errors.title && (
+                  <p className="text-xs text-destructive mt-1 ml-1">{errors.title}</p>
                 )}
               </div>
 
