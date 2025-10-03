@@ -24,19 +24,16 @@ interface SummaryData {
   totalGrowth: number
 }
 
-const chartData = [
-  { month: 'Jan', assets: 1100000, investments: 750000 },
-  { month: 'Feb', assets: 1150000, investments: 780000 },
-  { month: 'Mar', assets: 1200000, investments: 810000 },
-  { month: 'Apr', assets: 1250000, investments: 850000 },
-]
+interface ChartDataItem {
+  month: string
+  assets: number
+  investments: number
+}
 
-const growthData = [
-  { month: 'Jan', growth: 5.2 },
-  { month: 'Feb', growth: 7.8 },
-  { month: 'Mar', growth: 9.1 },
-  { month: 'Apr', growth: 12.5 },
-]
+interface GrowthDataItem {
+  month: string
+  growth: number
+}
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -58,6 +55,8 @@ export default function Dashboard() {
   })
   const [financialData, setFinancialData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [chartData, setChartData] = useState<ChartDataItem[]>([])
+  const [growthData, setGrowthData] = useState<GrowthDataItem[]>([])
 
   // Fetch real data from Supabase
   useEffect(() => {
@@ -79,11 +78,46 @@ export default function Dashboard() {
 
         setFinancialData(allData)
         
+        // Group data by month for charts
+        const monthlyData: Record<string, { assets: number, count: number }> = {}
+        allData.forEach((item: any) => {
+          const month = item.month || 'Unknown'
+          if (!monthlyData[month]) {
+            monthlyData[month] = { assets: 0, count: 0 }
+          }
+          monthlyData[month].assets += Number(item.amount)
+          monthlyData[month].count += 1
+        })
+
+        // Convert to chart data format
+        const months = Object.keys(monthlyData)
+        const newChartData = months.map(month => ({
+          month,
+          assets: monthlyData[month].assets,
+          investments: monthlyData[month].assets // Same as assets for now
+        }))
+        setChartData(newChartData)
+
+        // Calculate growth data (comparison with previous month)
+        const newGrowthData = months.map((month, index) => {
+          if (index === 0) {
+            return { month, growth: 0 }
+          }
+          const currentAmount = monthlyData[month].assets
+          const previousMonth = months[index - 1]
+          const previousAmount = monthlyData[previousMonth].assets
+          const growth = previousAmount > 0 
+            ? ((currentAmount - previousAmount) / previousAmount) * 100 
+            : 0
+          return { month, growth: Number(growth.toFixed(2)) }
+        })
+        setGrowthData(newGrowthData)
+        
         // Calculate summary data from stats
         setSummaryData({
           totalAssets: stats.total_amount || 0,
           totalInvestments: stats.total_amount || 0,
-          monthlyGrowth: 5.2, // Placeholder for now
+          monthlyGrowth: newGrowthData.length > 0 ? newGrowthData[newGrowthData.length - 1].growth : 0,
           totalGrowth: stats.total_amount * 0.1 || 0 // 10% growth assumption
         })
 
