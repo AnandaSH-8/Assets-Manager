@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Save, Plus, Wallet, TrendingUp } from "lucide-react"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -37,7 +37,8 @@ export default function AddParticulars() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [savedTitles, setSavedTitles] = useState<string[]>([])
-  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false)
+  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
 
   // Fetch saved titles on component mount
   useEffect(() => {
@@ -192,29 +193,34 @@ export default function AddParticulars() {
                 <Select 
                   value={formData.title} 
                   onValueChange={(value) => {
-                    if (value === "__custom__") {
-                      // User wants to type custom
+                    console.log(value);
+                    if(value === "__custom__") {
+                      setIsCustom(true);
                       handleInputChange("title", "")
-                    } else {
+                    }
+                   else if (value.trim() && value !== "__custom__") {
+                      setIsCustom(false);
                       handleInputChange("title", value)
                     }
                   }}
                 >
                   <SelectTrigger className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.title ? "border-destructive" : ""}`}>
-                    <SelectValue placeholder="Select or type a title" />
+                    <SelectValue placeholder="Select or type a title">
+                      {savedTitles.includes(formData.title) ? formData.title : "Select or type a title"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-background">
                     <SelectItem value="__custom__">
                       <span className="text-primary">+ Type Custom Title</span>
                     </SelectItem>
                     {savedTitles.map((title, index) => (
-                      <SelectItem key={index} value={title}>
+                      <SelectItem key={index+1} value={title}>
                         {title}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {(formData.title === "" || !savedTitles.includes(formData.title)) && (
+                {(formData.title === "" || isCustom || !savedTitles.includes(formData.title)) && (
                   <NeomorphInput
                     id="title"
                     className="border border-gray-300"
