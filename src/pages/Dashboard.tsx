@@ -22,6 +22,10 @@ interface SummaryData {
   totalInvestments: number
   monthlyGrowth: number
   totalGrowth: number
+  assetsGrowthPercent: number
+  investmentsGrowthPercent: number
+  monthlyGrowthPercent: number
+  totalGrowthPercent: number
 }
 
 interface ChartDataItem {
@@ -51,7 +55,11 @@ export default function Dashboard() {
     totalAssets: 0,
     totalInvestments: 0,
     monthlyGrowth: 0,
-    totalGrowth: 0
+    totalGrowth: 0,
+    assetsGrowthPercent: 0,
+    investmentsGrowthPercent: 0,
+    monthlyGrowthPercent: 0,
+    totalGrowthPercent: 0
   })
   const [financialData, setFinancialData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -78,6 +86,9 @@ export default function Dashboard() {
 
         setFinancialData(allData)
         
+        // Sort months chronologically
+        const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        
         // Group data by month for charts
         const monthlyData: Record<string, { assets: number, count: number }> = {}
         allData.forEach((item: any) => {
@@ -89,8 +100,13 @@ export default function Dashboard() {
           monthlyData[month].count += 1
         })
 
-        // Convert to chart data format
-        const months = Object.keys(monthlyData)
+        // Convert to chart data format and sort by month order
+        const months = Object.keys(monthlyData).sort((a, b) => {
+          const indexA = monthOrder.indexOf(a)
+          const indexB = monthOrder.indexOf(b)
+          return indexA - indexB
+        })
+        
         const newChartData = months.map(month => ({
           month,
           assets: monthlyData[month].assets,
@@ -113,12 +129,38 @@ export default function Dashboard() {
         })
         setGrowthData(newGrowthData)
         
+        // Calculate actual percentage changes
+        const currentMonthAmount = months.length > 0 ? monthlyData[months[months.length - 1]].assets : 0
+        const previousMonthAmount = months.length > 1 ? monthlyData[months[months.length - 2]].assets : 0
+        const firstMonthAmount = months.length > 0 ? monthlyData[months[0]].assets : 0
+        
+        const assetsGrowthPercent = previousMonthAmount > 0 
+          ? ((currentMonthAmount - previousMonthAmount) / previousMonthAmount) * 100 
+          : 0
+        
+        const investmentsGrowthPercent = assetsGrowthPercent // Same calculation for now
+        
+        const monthlyGrowthValue = newGrowthData.length > 0 ? newGrowthData[newGrowthData.length - 1].growth : 0
+        const previousMonthGrowthValue = newGrowthData.length > 1 ? newGrowthData[newGrowthData.length - 2].growth : 0
+        const monthlyGrowthPercent = previousMonthGrowthValue !== 0 
+          ? ((monthlyGrowthValue - previousMonthGrowthValue) / Math.abs(previousMonthGrowthValue)) * 100
+          : 0
+        
+        const totalGrowthAmount = currentMonthAmount - firstMonthAmount
+        const totalGrowthPercent = firstMonthAmount > 0 
+          ? (totalGrowthAmount / firstMonthAmount) * 100 
+          : 0
+        
         // Calculate summary data from stats
         setSummaryData({
           totalAssets: stats.total_amount || 0,
           totalInvestments: stats.total_amount || 0,
-          monthlyGrowth: newGrowthData.length > 0 ? newGrowthData[newGrowthData.length - 1].growth : 0,
-          totalGrowth: stats.total_amount * 0.1 || 0 // 10% growth assumption
+          monthlyGrowth: monthlyGrowthValue,
+          totalGrowth: totalGrowthAmount,
+          assetsGrowthPercent: Number(assetsGrowthPercent.toFixed(2)),
+          investmentsGrowthPercent: Number(investmentsGrowthPercent.toFixed(2)),
+          monthlyGrowthPercent: Number(monthlyGrowthPercent.toFixed(2)),
+          totalGrowthPercent: Number(totalGrowthPercent.toFixed(2))
         })
 
         setHasData(allData.length > 0)
@@ -181,8 +223,14 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-success mr-1" />
-            <span className="text-success font-medium">+8.2%</span>
+            {summaryData.assetsGrowthPercent >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-success mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+            )}
+            <span className={summaryData.assetsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
+              {summaryData.assetsGrowthPercent >= 0 ? '+' : ''}{summaryData.assetsGrowthPercent}%
+            </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
         </GlassCard>
@@ -200,8 +248,14 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-success mr-1" />
-            <span className="text-success font-medium">+12.1%</span>
+            {summaryData.investmentsGrowthPercent >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-success mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+            )}
+            <span className={summaryData.investmentsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
+              {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}{summaryData.investmentsGrowthPercent}%
+            </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
         </GlassCard>
@@ -219,8 +273,14 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-success mr-1" />
-            <span className="text-success font-medium">+3.1%</span>
+            {summaryData.monthlyGrowthPercent >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-success mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+            )}
+            <span className={summaryData.monthlyGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
+              {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}{summaryData.monthlyGrowthPercent}%
+            </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
         </GlassCard>
@@ -238,9 +298,15 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-success mr-1" />
-            <span className="text-success font-medium">+15.7%</span>
-            <span className="text-muted-foreground ml-1">from last quarter</span>
+            {summaryData.totalGrowthPercent >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-success mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+            )}
+            <span className={summaryData.totalGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
+              {summaryData.totalGrowthPercent >= 0 ? '+' : ''}{summaryData.totalGrowthPercent}%
+            </span>
+            <span className="text-muted-foreground ml-1">total growth</span>
           </div>
         </GlassCard>
       </motion.div>
