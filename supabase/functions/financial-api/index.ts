@@ -5,6 +5,8 @@ interface FinancialParticularRequest {
   category: string
   description?: string
   amount: number
+  cash?: number
+  investment?: number
   month?: string
 }
 
@@ -162,7 +164,7 @@ async function getFinancial(supabase: any, id: string, userId: string) {
 }
 
 async function createFinancial(req: Request, supabase: any, userId: string) {
-  const { category, description, amount, month }: FinancialParticularRequest = await req.json()
+  const { category, description, amount, cash, investment, month }: FinancialParticularRequest = await req.json()
 
   if (!category || !amount) {
     return new Response(
@@ -181,6 +183,8 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       category,
       description,
       amount,
+      cash: cash || 0,
+      investment: investment || 0,
       month
     })
     .select()
@@ -285,14 +289,19 @@ async function getFinancialStats(supabase: any, userId: string) {
   }
 
   // Calculate statistics
-  const totalAmount = data.reduce((sum, item) => sum + Number(item.amount), 0)
-  const categoryStats = data.reduce((acc, item) => {
+  const totalAmount = data.reduce((sum: number, item: any) => sum + Number(item.amount), 0)
+  const totalCash = data.reduce((sum: number, item: any) => sum + Number(item.cash || 0), 0)
+  const totalInvestment = data.reduce((sum: number, item: any) => sum + Number(item.investment || 0), 0)
+  
+  const categoryStats = data.reduce((acc: any, item: any) => {
     acc[item.category] = (acc[item.category] || 0) + Number(item.amount)
     return acc
   }, {} as Record<string, number>)
 
   const stats = {
     total_amount: totalAmount,
+    total_cash: totalCash,
+    total_investment: totalInvestment,
     total_entries: data.length,
     category_breakdown: categoryStats,
     average_amount: data.length > 0 ? totalAmount / data.length : 0

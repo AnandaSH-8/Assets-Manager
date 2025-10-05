@@ -18,11 +18,11 @@ import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 
 interface SummaryData {
-  totalAssets: number
+  totalLiquidAssets: number
   totalInvestments: number
   monthlyGrowth: number
   totalGrowth: number
-  assetsGrowthPercent: number
+  liquidAssetsGrowthPercent: number
   investmentsGrowthPercent: number
   monthlyGrowthPercent: number
   totalGrowthPercent: number
@@ -52,11 +52,11 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [hasData, setHasData] = useState(false)
   const [summaryData, setSummaryData] = useState<SummaryData>({
-    totalAssets: 0,
+    totalLiquidAssets: 0,
     totalInvestments: 0,
     monthlyGrowth: 0,
     totalGrowth: 0,
-    assetsGrowthPercent: 0,
+    liquidAssetsGrowthPercent: 0,
     investmentsGrowthPercent: 0,
     monthlyGrowthPercent: 0,
     totalGrowthPercent: 0
@@ -90,13 +90,14 @@ export default function Dashboard() {
         const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         
         // Group data by month for charts
-        const monthlyData: Record<string, { assets: number, count: number }> = {}
+        const monthlyData: Record<string, { cash: number, investment: number, count: number }> = {}
         allData.forEach((item: any) => {
           const month = item.month || 'Unknown'
           if (!monthlyData[month]) {
-            monthlyData[month] = { assets: 0, count: 0 }
+            monthlyData[month] = { cash: 0, investment: 0, count: 0 }
           }
-          monthlyData[month].assets += Number(item.amount)
+          monthlyData[month].cash += Number(item.cash || 0)
+          monthlyData[month].investment += Number(item.investment || 0)
           monthlyData[month].count += 1
         })
 
@@ -109,36 +110,42 @@ export default function Dashboard() {
         
         const newChartData = months.map(month => ({
           month,
-          assets: monthlyData[month].assets,
-          investments: monthlyData[month].assets // Same as assets for now
+          assets: monthlyData[month].cash,
+          investments: monthlyData[month].investment
         }))
         setChartData(newChartData)
 
-        // Calculate growth data (comparison with previous month)
+        // Calculate growth data (comparison with previous month for total)
         const newGrowthData = months.map((month, index) => {
           if (index === 0) {
             return { month, growth: 0 }
           }
-          const currentAmount = monthlyData[month].assets
+          const currentTotal = monthlyData[month].cash + monthlyData[month].investment
           const previousMonth = months[index - 1]
-          const previousAmount = monthlyData[previousMonth].assets
-          const growth = previousAmount > 0 
-            ? ((currentAmount - previousAmount) / previousAmount) * 100 
+          const previousTotal = monthlyData[previousMonth].cash + monthlyData[previousMonth].investment
+          const growth = previousTotal > 0 
+            ? ((currentTotal - previousTotal) / previousTotal) * 100 
             : 0
           return { month, growth: Number(growth.toFixed(2)) }
         })
         setGrowthData(newGrowthData)
         
         // Calculate actual percentage changes
-        const currentMonthAmount = months.length > 0 ? monthlyData[months[months.length - 1]].assets : 0
-        const previousMonthAmount = months.length > 1 ? monthlyData[months[months.length - 2]].assets : 0
-        const firstMonthAmount = months.length > 0 ? monthlyData[months[0]].assets : 0
+        const currentMonthCash = months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0
+        const previousMonthCash = months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0
+        const firstMonthCash = months.length > 0 ? monthlyData[months[0]].cash : 0
         
-        const assetsGrowthPercent = previousMonthAmount > 0 
-          ? ((currentMonthAmount - previousMonthAmount) / previousMonthAmount) * 100 
+        const currentMonthInvestment = months.length > 0 ? monthlyData[months[months.length - 1]].investment : 0
+        const previousMonthInvestment = months.length > 1 ? monthlyData[months[months.length - 2]].investment : 0
+        const firstMonthInvestment = months.length > 0 ? monthlyData[months[0]].investment : 0
+        
+        const liquidAssetsGrowthPercent = previousMonthCash > 0 
+          ? ((currentMonthCash - previousMonthCash) / previousMonthCash) * 100 
           : 0
         
-        const investmentsGrowthPercent = assetsGrowthPercent // Same calculation for now
+        const investmentsGrowthPercent = previousMonthInvestment > 0 
+          ? ((currentMonthInvestment - previousMonthInvestment) / previousMonthInvestment) * 100 
+          : 0
         
         const monthlyGrowthValue = newGrowthData.length > 0 ? newGrowthData[newGrowthData.length - 1].growth : 0
         const previousMonthGrowthValue = newGrowthData.length > 1 ? newGrowthData[newGrowthData.length - 2].growth : 0
@@ -146,18 +153,19 @@ export default function Dashboard() {
           ? ((monthlyGrowthValue - previousMonthGrowthValue) / Math.abs(previousMonthGrowthValue)) * 100
           : 0
         
-        const totalGrowthAmount = currentMonthAmount - firstMonthAmount
-        const totalGrowthPercent = firstMonthAmount > 0 
-          ? (totalGrowthAmount / firstMonthAmount) * 100 
+        const totalGrowthAmount = (currentMonthCash + currentMonthInvestment) - (firstMonthCash + firstMonthInvestment)
+        const firstMonthTotal = firstMonthCash + firstMonthInvestment
+        const totalGrowthPercent = firstMonthTotal > 0 
+          ? (totalGrowthAmount / firstMonthTotal) * 100 
           : 0
         
         // Calculate summary data from stats
         setSummaryData({
-          totalAssets: stats.total_amount || 0,
-          totalInvestments: stats.total_amount || 0,
+          totalLiquidAssets: stats.total_cash || 0,
+          totalInvestments: stats.total_investment || 0,
           monthlyGrowth: monthlyGrowthValue,
           totalGrowth: totalGrowthAmount,
-          assetsGrowthPercent: Number(assetsGrowthPercent.toFixed(2)),
+          liquidAssetsGrowthPercent: Number(liquidAssetsGrowthPercent.toFixed(2)),
           investmentsGrowthPercent: Number(investmentsGrowthPercent.toFixed(2)),
           monthlyGrowthPercent: Number(monthlyGrowthPercent.toFixed(2)),
           totalGrowthPercent: Number(totalGrowthPercent.toFixed(2))
@@ -213,9 +221,9 @@ export default function Dashboard() {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
+              <p className="text-sm font-medium text-muted-foreground">Total Liquid Assets</p>
               <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalAssets)}
+                {formatCurrency(summaryData.totalLiquidAssets)}
               </p>
             </div>
             <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -223,13 +231,13 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            {summaryData.assetsGrowthPercent >= 0 ? (
+            {summaryData.liquidAssetsGrowthPercent >= 0 ? (
               <TrendingUp className="h-4 w-4 text-success mr-1" />
             ) : (
               <TrendingDown className="h-4 w-4 text-destructive mr-1" />
             )}
-            <span className={summaryData.assetsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
-              {summaryData.assetsGrowthPercent >= 0 ? '+' : ''}{summaryData.assetsGrowthPercent}%
+            <span className={summaryData.liquidAssetsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
+              {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}{summaryData.liquidAssetsGrowthPercent}%
             </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
@@ -376,7 +384,7 @@ export default function Dashboard() {
                     dataKey="assets" 
                     fill="hsl(var(--primary))" 
                     radius={[4, 4, 0, 0]}
-                    name="Assets"
+                    name="Liquid Assets (Cash)"
                   />
                   <Bar 
                     dataKey="investments" 

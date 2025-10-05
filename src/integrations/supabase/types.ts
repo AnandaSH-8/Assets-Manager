@@ -17,33 +17,39 @@ export type Database = {
       financial_particulars: {
         Row: {
           amount: number
+          cash: number
           category: string
           created_at: string
           date_added: string
           description: string | null
           id: string
+          investment: number
           month: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
+          cash?: number
           category: string
           created_at?: string
           date_added?: string
           description?: string | null
           id?: string
+          investment?: number
           month?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          cash?: number
           category?: string
           created_at?: string
           date_added?: string
           description?: string | null
           id?: string
+          investment?: number
           month?: string | null
           updated_at?: string
           user_id?: string

@@ -111,12 +111,16 @@ export default function AddParticulars() {
     setIsSubmitting(true)
 
     try {
-      const totalAmount = Number(formData.actualCash) + Number(formData.investedCash)
+      const cashAmount = Number(formData.actualCash)
+      const investmentAmount = Number(formData.investedCash)
+      const totalAmount = cashAmount + investmentAmount
       
       await financialAPI.create({
         category: formData.category,
         description: formData.title,
         amount: totalAmount,
+        cash: cashAmount,
+        investment: investmentAmount,
         month: formData.month
       })
       
