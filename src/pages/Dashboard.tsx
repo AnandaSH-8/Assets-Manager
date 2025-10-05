@@ -86,6 +86,33 @@ export default function Dashboard() {
 
         setFinancialData(allData)
         
+        // Find the latest month/year entry
+        const sortedData = [...allData].sort((a: any, b: any) => {
+          const yearDiff = (b.year || 0) - (a.year || 0)
+          if (yearDiff !== 0) return yearDiff
+          
+          const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+          const aIndex = monthOrder.indexOf(a.month || '')
+          const bIndex = monthOrder.indexOf(b.month || '')
+          return bIndex - aIndex
+        })
+        
+        const latestEntry = sortedData[0]
+        const latestMonth = latestEntry?.month
+        const latestYear = latestEntry?.year
+        
+        // Calculate totals for latest month only
+        const latestMonthData = allData.filter((item: any) => 
+          item.month === latestMonth && item.year === latestYear
+        )
+        
+        const latestMonthCash = latestMonthData.reduce((sum: number, item: any) => 
+          sum + Number(item.cash || 0), 0
+        )
+        const latestMonthInvestment = latestMonthData.reduce((sum: number, item: any) => 
+          sum + Number(item.investment || 0), 0
+        )
+        
         // Sort months chronologically
         const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         
@@ -159,10 +186,10 @@ export default function Dashboard() {
           ? (totalGrowthAmount / firstMonthTotal) * 100 
           : 0
         
-        // Calculate summary data from stats
+        // Calculate summary data using latest month totals
         setSummaryData({
-          totalLiquidAssets: stats.total_cash || 0,
-          totalInvestments: stats.total_investment || 0,
+          totalLiquidAssets: latestMonthCash,
+          totalInvestments: latestMonthInvestment,
           monthlyGrowth: monthlyGrowthValue,
           totalGrowth: totalGrowthAmount,
           liquidAssetsGrowthPercent: Number(liquidAssetsGrowthPercent.toFixed(2)),

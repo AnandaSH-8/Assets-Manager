@@ -91,7 +91,7 @@ export const financialAPI = {
   },
 
   // Create new financial particular in 'financial_particulars' table
-  create: async (data: { category: string; description?: string; amount: number; cash?: number; investment?: number; month?: string }) => {
+  create: async (data: { category: string; description?: string; amount: number; cash?: number; investment?: number; month?: string; year?: number }) => {
     return apiCall('/financial-api/', {
       method: 'POST',
       body: JSON.stringify(data),

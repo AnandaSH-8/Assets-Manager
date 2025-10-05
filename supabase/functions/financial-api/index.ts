@@ -8,6 +8,7 @@ interface FinancialParticularRequest {
   cash?: number
   investment?: number
   month?: string
+  year?: number
 }
 
 Deno.serve(async (req) => {
@@ -164,7 +165,7 @@ async function getFinancial(supabase: any, id: string, userId: string) {
 }
 
 async function createFinancial(req: Request, supabase: any, userId: string) {
-  const { category, description, amount, cash, investment, month }: FinancialParticularRequest = await req.json()
+  const { category, description, amount, cash, investment, month, year }: FinancialParticularRequest = await req.json()
 
   if (!category || !amount) {
     return new Response(
@@ -185,7 +186,8 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       amount,
       cash: cash || 0,
       investment: investment || 0,
-      month
+      month,
+      year: year || new Date().getFullYear()
     })
     .select()
     .single()

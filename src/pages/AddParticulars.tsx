@@ -121,7 +121,8 @@ export default function AddParticulars() {
         amount: totalAmount,
         cash: cashAmount,
         investment: investmentAmount,
-        month: formData.month
+        month: formData.month,
+        year: new Date().getFullYear()
       })
       
       toast({
