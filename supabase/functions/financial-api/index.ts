@@ -352,7 +352,7 @@ async function getUniqueTitles(supabase: any, userId: string) {
   }
 
   // Extract unique non-empty titles
-  const uniqueTitles = [...new Set(data.map(item => item.description).filter(Boolean))]
+  const uniqueTitles = [...new Set(data.map((item: any) => item.description).filter(Boolean))]
 
   return new Response(
     JSON.stringify({ data: uniqueTitles }),
