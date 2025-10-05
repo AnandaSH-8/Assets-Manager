@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+bun.lockb
+package-lock.json
+
+# Build outputs
+dist/
+build/
+out/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Generated files
+*.min.js
+*.min.css
+
+# Supabase generated
+supabase/migrations/
+supabase/.temp/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

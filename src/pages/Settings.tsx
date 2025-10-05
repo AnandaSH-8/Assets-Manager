@@ -1,10 +1,10 @@
-import { motion } from "framer-motion"
-import { Trash2, AlertTriangle, UserX } from "lucide-react"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { financialAPI, userAPI } from "@/services/api"
-import { useState } from "react"
+import { motion } from 'framer-motion';
+import { Trash2, AlertTriangle, UserX } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { financialAPI, userAPI } from '@/services/api';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,56 +15,58 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
+} from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Settings() {
-  const { toast } = useToast()
-  const navigate = useNavigate()
-  const [isClearing, setIsClearing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isClearing, setIsClearing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleClearData = async () => {
-    setIsClearing(true)
+    setIsClearing(true);
     try {
-      await financialAPI.clearAll()
+      await financialAPI.clearAll();
       toast({
-        title: "Success",
-        description: "All financial data has been cleared successfully",
-      })
-      navigate("/")
+        title: 'Success',
+        description: 'All financial data has been cleared successfully',
+      });
+      navigate('/');
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to clear data",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to clear data',
+        variant: 'destructive',
+      });
     } finally {
-      setIsClearing(false)
+      setIsClearing(false);
     }
-  }
+  };
 
   const handleDeleteAccount = async () => {
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      await userAPI.deleteAccount()
-      await supabase.auth.signOut()
+      await userAPI.deleteAccount();
+      await supabase.auth.signOut();
       toast({
-        title: "Account Deleted",
-        description: "Your account has been deleted successfully",
-      })
-      navigate("/auth")
+        title: 'Account Deleted',
+        description: 'Your account has been deleted successfully',
+      });
+      navigate('/auth');
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete account",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to delete account',
+        variant: 'destructive',
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -91,7 +93,9 @@ export default function Settings() {
         <GlassCard className="p-6 border-destructive/50">
           <div className="flex items-center gap-3 mb-6">
             <AlertTriangle className="h-6 w-6 text-destructive" />
-            <h2 className="text-xl font-semibold text-destructive">Danger Zone</h2>
+            <h2 className="text-xl font-semibold text-destructive">
+              Danger Zone
+            </h2>
           </div>
 
           <div className="space-y-4">
@@ -100,7 +104,8 @@ export default function Settings() {
               <div>
                 <h3 className="font-semibold mb-1">Clear All Financial Data</h3>
                 <p className="text-sm text-muted-foreground">
-                  Permanently delete all your financial particulars. Your login credentials will be preserved.
+                  Permanently delete all your financial particulars. Your login
+                  credentials will be preserved.
                 </p>
               </div>
               <AlertDialog>
@@ -112,10 +117,13 @@ export default function Settings() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete all your financial data
-                      from our servers. Your account and login credentials will remain intact.
+                      This action cannot be undone. This will permanently delete
+                      all your financial data from our servers. Your account and
+                      login credentials will remain intact.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -125,7 +133,7 @@ export default function Settings() {
                       disabled={isClearing}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isClearing ? "Clearing..." : "Yes, clear all data"}
+                      {isClearing ? 'Clearing...' : 'Yes, clear all data'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -135,9 +143,12 @@ export default function Settings() {
             {/* Delete Account */}
             <div className="flex items-center justify-between p-4 rounded-lg border border-destructive bg-destructive/5">
               <div>
-                <h3 className="font-semibold mb-1 text-destructive">Delete Account</h3>
+                <h3 className="font-semibold mb-1 text-destructive">
+                  Delete Account
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Permanently delete your account and all associated data. This action cannot be undone.
+                  Permanently delete your account and all associated data. This
+                  action cannot be undone.
                 </p>
               </div>
               <AlertDialog>
@@ -151,8 +162,9 @@ export default function Settings() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Account</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account,
-                      profile, and all financial data from our servers.
+                      This action cannot be undone. This will permanently delete
+                      your account, profile, and all financial data from our
+                      servers.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -162,7 +174,7 @@ export default function Settings() {
                       disabled={isDeleting}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isDeleting ? "Deleting..." : "Yes, delete my account"}
+                      {isDeleting ? 'Deleting...' : 'Yes, delete my account'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -172,5 +184,5 @@ export default function Settings() {
         </GlassCard>
       </motion.div>
     </div>
-  )
+  );
 }

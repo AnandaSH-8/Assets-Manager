@@ -11,12 +11,14 @@ Frontend (React) → API Services → Supabase Edge Functions → PostgreSQL Dat
 ## Available APIs
 
 ### 1. Authentication API (`/auth-api`)
+
 - **POST** `/signup` - Create new user account
 - **POST** `/signin` - Sign in user
-- **POST** `/signout` - Sign out user  
+- **POST** `/signout` - Sign out user
 - **GET** `/me` - Get current user info
 
 ### 2. Financial API (`/financial-api`)
+
 - **GET** `/all` - Get all financial particulars
 - **GET** `/stats` - Get financial statistics
 - **GET** `/{id}` - Get specific financial particular
@@ -25,6 +27,7 @@ Frontend (React) → API Services → Supabase Edge Functions → PostgreSQL Dat
 - **DELETE** `/{id}` - Delete financial particular
 
 ### 3. User API (`/user-api`)
+
 - **GET** `/profile` - Get user profile
 - **PUT** `/profile` - Update user profile
 - **DELETE** `/delete-account` - Delete user account
@@ -32,24 +35,29 @@ Frontend (React) → API Services → Supabase Edge Functions → PostgreSQL Dat
 ## Usage Examples
 
 ```typescript
-import { authAPI, financialAPI, userAPI } from '@/services/api'
+import { authAPI, financialAPI, userAPI } from '@/services/api';
 
 // Authentication
-const user = await authAPI.signUp('email@example.com', 'password', 'John Doe', 'johndoe')
-const session = await authAPI.signIn('email@example.com', 'password')
+const user = await authAPI.signUp(
+  'email@example.com',
+  'password',
+  'John Doe',
+  'johndoe',
+);
+const session = await authAPI.signIn('email@example.com', 'password');
 
 // Financial operations
-const financials = await financialAPI.getAll()
-const stats = await financialAPI.getStats()
+const financials = await financialAPI.getAll();
+const stats = await financialAPI.getStats();
 const newEntry = await financialAPI.create({
   category: 'Investment',
   description: 'Stock purchase',
-  amount: 1000
-})
+  amount: 1000,
+});
 
 // User operations
-const profile = await userAPI.getProfile()
-await userAPI.updateProfile({ name: 'John Smith' })
+const profile = await userAPI.getProfile();
+await userAPI.updateProfile({ name: 'John Smith' });
 ```
 
 ## Security Features
@@ -62,10 +70,12 @@ await userAPI.updateProfile({ name: 'John Smith' })
 ## Database Schema
 
 ### Tables
+
 - `profiles` - User profile information
 - `financial_particulars` - Financial entries with categories and amounts
 
 ### Policies
+
 - Users can only access their own data
 - All operations are authenticated and authorized
 - Automatic timestamps for created_at and updated_at
@@ -75,6 +85,7 @@ await userAPI.updateProfile({ name: 'John Smith' })
 Edge Functions are automatically deployed when you make changes. You can monitor them in the Supabase dashboard.
 
 For debugging, check:
+
 - Edge Function logs in Supabase dashboard
 - Network tab in browser dev tools
 - Console logs for API responses

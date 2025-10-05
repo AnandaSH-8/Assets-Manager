@@ -1,120 +1,153 @@
-import { motion } from "framer-motion"
-import { BarChart3, PieChart, TrendingUp, Calendar } from "lucide-react"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { useState, useEffect } from "react"
-import { financialAPI } from "@/services/api"
-import { useAuth } from "@/hooks/useAuth"
+import { motion } from 'framer-motion';
+import { BarChart3, PieChart, TrendingUp, Calendar } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { useState, useEffect } from 'react';
+import { financialAPI } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))'
-]
+  'hsl(var(--chart-5))',
+];
 
 export default function Statistics() {
-  const { user } = useAuth()
-  const [categoryData, setCategoryData] = useState<any[]>([])
-  const [monthlyData, setMonthlyData] = useState<any[]>([])
-  const [performanceData, setPerformanceData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth();
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
-        setIsLoading(false)
-        return
+        setIsLoading(false);
+        return;
       }
 
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const [statsResponse, allDataResponse] = await Promise.all([
           financialAPI.getStats(),
-          financialAPI.getAll()
-        ])
+          financialAPI.getAll(),
+        ]);
 
-        const stats = statsResponse.data
-        const allData = allDataResponse.data
+        const stats = statsResponse.data;
+        const allData = allDataResponse.data;
 
         // Process category data for pie chart
-        const categoryBreakdown = stats.category_breakdown || {}
-        const newCategoryData = Object.entries(categoryBreakdown).map(([name, value], index) => ({
-          name,
-          value: Number(value),
-          color: CHART_COLORS[index % CHART_COLORS.length]
-        }))
-        setCategoryData(newCategoryData)
+        const categoryBreakdown = stats.category_breakdown || {};
+        const newCategoryData = Object.entries(categoryBreakdown).map(
+          ([name, value], index) => ({
+            name,
+            value: Number(value),
+            color: CHART_COLORS[index % CHART_COLORS.length],
+          }),
+        );
+        setCategoryData(newCategoryData);
 
         // Process monthly data for bar chart
-        const monthlyGrouped: Record<string, { assets: number, investments: number }> = {}
+        const monthlyGrouped: Record<
+          string,
+          { assets: number; investments: number }
+        > = {};
         allData.forEach((item: any) => {
-          const month = item.month || 'Unknown'
+          const month = item.month || 'Unknown';
           if (!monthlyGrouped[month]) {
-            monthlyGrouped[month] = { assets: 0, investments: 0 }
+            monthlyGrouped[month] = { assets: 0, investments: 0 };
           }
-          monthlyGrouped[month].assets += Number(item.amount)
-          monthlyGrouped[month].investments += Number(item.amount)
-        })
+          monthlyGrouped[month].assets += Number(item.amount);
+          monthlyGrouped[month].investments += Number(item.amount);
+        });
 
-        const newMonthlyData = Object.entries(monthlyGrouped).map(([month, data]) => ({
-          month,
-          ...data
-        }))
-        setMonthlyData(newMonthlyData)
+        const newMonthlyData = Object.entries(monthlyGrouped).map(
+          ([month, data]) => ({
+            month,
+            ...data,
+          }),
+        );
+        setMonthlyData(newMonthlyData);
 
         // Process performance data by category
-        const performanceByCategory: Record<string, { invested: number, current: number, count: number }> = {}
+        const performanceByCategory: Record<
+          string,
+          { invested: number; current: number; count: number }
+        > = {};
         allData.forEach((item: any) => {
-          const category = item.category
+          const category = item.category;
           if (!performanceByCategory[category]) {
-            performanceByCategory[category] = { invested: 0, current: 0, count: 0 }
+            performanceByCategory[category] = {
+              invested: 0,
+              current: 0,
+              count: 0,
+            };
           }
-          const amount = Number(item.amount)
-          performanceByCategory[category].invested += amount
-          performanceByCategory[category].current += amount
-          performanceByCategory[category].count += 1
-        })
+          const amount = Number(item.amount);
+          performanceByCategory[category].invested += amount;
+          performanceByCategory[category].current += amount;
+          performanceByCategory[category].count += 1;
+        });
 
-        const newPerformanceData = Object.entries(performanceByCategory).map(([category, data]) => {
-          const returnPercent = data.invested > 0 
-            ? ((data.current - data.invested) / data.invested) * 100 
-            : 0
-          return {
-            category,
-            invested: data.invested,
-            current: data.current,
-            return: returnPercent
-          }
-        })
-        setPerformanceData(newPerformanceData)
-
+        const newPerformanceData = Object.entries(performanceByCategory).map(
+          ([category, data]) => {
+            const returnPercent =
+              data.invested > 0
+                ? ((data.current - data.invested) / data.invested) * 100
+                : 0;
+            return {
+              category,
+              invested: data.invested,
+              current: data.current,
+              return: returnPercent,
+            };
+          },
+        );
+        setPerformanceData(newPerformanceData);
       } catch (error) {
-        console.error("Error fetching statistics:", error)
+        console.error('Error fetching statistics:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [user])
+    fetchData();
+  }, [user]);
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value)
-  }
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
       </div>
-    )
+    );
   }
 
   if (categoryData.length === 0) {
@@ -122,10 +155,12 @@ export default function Statistics() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">No Data Available</h2>
-          <p className="text-muted-foreground">Add financial particulars to see statistics</p>
+          <p className="text-muted-foreground">
+            Add financial particulars to see statistics
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -145,7 +180,7 @@ export default function Statistics() {
             Detailed insights into your financial portfolio performance
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Select defaultValue="6months">
             <SelectTrigger className="w-40 h-10 rounded-xl">
@@ -159,7 +194,7 @@ export default function Statistics() {
               <SelectItem value="1year">Last Year</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" className="h-10 rounded-xl">
             <BarChart3 className="w-4 h-4 mr-2" />
             Export
@@ -178,7 +213,7 @@ export default function Statistics() {
             <PieChart className="h-6 w-6 text-primary" />
             <h2 className="text-xl font-semibold">Portfolio Distribution</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Pie Chart */}
             <div className="h-80">
@@ -189,7 +224,9 @@ export default function Statistics() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -198,30 +235,40 @@ export default function Statistics() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Tooltip formatter={value => formatCurrency(Number(value))} />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
 
             {/* Legend */}
             <div className="space-y-4">
-              {categoryData.map((item) => (
+              {categoryData.map(item => (
                 <motion.div
                   key={item.name}
                   className="flex items-center justify-between p-3 rounded-xl bg-accent/20 border border-border/50"
                   whileHover={{ scale: 1.02 }}
                 >
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
                     <span className="font-medium">{item.name}</span>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">{formatCurrency(item.value)}</p>
+                    <p className="font-semibold">
+                      {formatCurrency(item.value)}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {((item.value / categoryData.reduce((acc, curr) => acc + curr.value, 0)) * 100).toFixed(1)}%
+                      {(
+                        (item.value /
+                          categoryData.reduce(
+                            (acc, curr) => acc + curr.value,
+                            0,
+                          )) *
+                        100
+                      ).toFixed(1)}
+                      %
                     </p>
                   </div>
                 </motion.div>
@@ -242,42 +289,45 @@ export default function Statistics() {
             <TrendingUp className="h-6 w-6 text-success" />
             <h2 className="text-xl font-semibold">Monthly Performance</h2>
           </div>
-          
+
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="month" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
+                <XAxis
+                  dataKey="month"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
-                <YAxis 
+                <YAxis
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
-                  tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                  tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value, name) => [
-                    formatCurrency(Number(value)), 
-                    name === 'assets' ? 'Total Assets' : 'Total Investments'
+                    formatCurrency(Number(value)),
+                    name === 'assets' ? 'Total Assets' : 'Total Investments',
                   ]}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
                   }}
                 />
-                <Bar 
-                  dataKey="assets" 
-                  fill="hsl(var(--primary))" 
+                <Bar
+                  dataKey="assets"
+                  fill="hsl(var(--primary))"
                   radius={[4, 4, 0, 0]}
                   name="assets"
                 />
-                <Bar 
-                  dataKey="investments" 
-                  fill="hsl(var(--chart-3))" 
+                <Bar
+                  dataKey="investments"
+                  fill="hsl(var(--chart-3))"
                   radius={[4, 4, 0, 0]}
                   name="investments"
                 />
@@ -295,23 +345,33 @@ export default function Statistics() {
       >
         <GlassCard className="p-6">
           <h2 className="text-xl font-semibold mb-6">Category Performance</h2>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/50">
-                  <th className="text-left py-3 font-medium text-muted-foreground">Category</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Invested</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Current Value</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Return %</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Gain/Loss</th>
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Category
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Invested
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Current Value
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Return %
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Gain/Loss
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {performanceData.map((item, index) => {
-                  const gainLoss = item.current - item.invested
-                  const isProfit = gainLoss >= 0
-                  
+                  const gainLoss = item.current - item.invested;
+                  const isProfit = gainLoss >= 0;
+
                   return (
                     <motion.tr
                       key={item.category}
@@ -321,20 +381,30 @@ export default function Statistics() {
                       transition={{ delay: index * 0.1 }}
                     >
                       <td className="py-4 font-medium">{item.category}</td>
-                      <td className="py-4 text-right">{formatCurrency(item.invested)}</td>
-                      <td className="py-4 text-right font-medium">{formatCurrency(item.current)}</td>
-                      <td className={`py-4 text-right font-bold ${
-                        isProfit ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {isProfit ? '+' : ''}{item.return.toFixed(1)}%
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.invested)}
                       </td>
-                      <td className={`py-4 text-right font-bold ${
-                        isProfit ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {isProfit ? '+' : ''}{formatCurrency(gainLoss)}
+                      <td className="py-4 text-right font-medium">
+                        {formatCurrency(item.current)}
+                      </td>
+                      <td
+                        className={`py-4 text-right font-bold ${
+                          isProfit ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {isProfit ? '+' : ''}
+                        {item.return.toFixed(1)}%
+                      </td>
+                      <td
+                        className={`py-4 text-right font-bold ${
+                          isProfit ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {isProfit ? '+' : ''}
+                        {formatCurrency(gainLoss)}
                       </td>
                     </motion.tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -342,5 +412,5 @@ export default function Statistics() {
         </GlassCard>
       </motion.div>
     </div>
-  )
+  );
 }

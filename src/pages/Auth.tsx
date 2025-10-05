@@ -19,14 +19,16 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         navigate('/');
       }
@@ -40,9 +42,9 @@ const Auth = () => {
       lowercase: /[a-z]/.test(pwd),
       uppercase: /[A-Z]/.test(pwd),
       numbers: /\d/.test(pwd),
-      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
     };
-    
+
     return Object.values(checks).every(check => check);
   };
 
@@ -50,9 +52,14 @@ const Auth = () => {
     // Username: 3-30 chars, alphanumeric + underscore, no consecutive underscores
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
     const noConsecutiveUnderscores = !/__/.test(username);
-    const noStartEndUnderscore = !username.startsWith('_') && !username.endsWith('_');
-    
-    return usernameRegex.test(username) && noConsecutiveUnderscores && noStartEndUnderscore;
+    const noStartEndUnderscore =
+      !username.startsWith('_') && !username.endsWith('_');
+
+    return (
+      usernameRegex.test(username) &&
+      noConsecutiveUnderscores &&
+      noStartEndUnderscore
+    );
   };
 
   const sanitizeInput = (input: string) => {
@@ -61,46 +68,51 @@ const Auth = () => {
   };
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     // Email validation with more robust regex
     if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = 'Email is required';
+    } else if (
+      !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+        email,
+      )
+    ) {
+      newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Password validation
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     } else if (isSignUp && !validatePassword(password)) {
-      newErrors.password = "Password must meet all security requirements";
+      newErrors.password = 'Password must meet all security requirements';
     } else if (!isSignUp && password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (isSignUp) {
       // Name validation
       if (!name) {
-        newErrors.name = "Name is required";
+        newErrors.name = 'Name is required';
       } else if (name.trim().length < 2) {
-        newErrors.name = "Name must be at least 2 characters";
+        newErrors.name = 'Name must be at least 2 characters';
       } else if (name.trim().length > 50) {
-        newErrors.name = "Name must be less than 50 characters";
+        newErrors.name = 'Name must be less than 50 characters';
       }
 
       // Username validation
       if (!username) {
-        newErrors.username = "Username is required";
+        newErrors.username = 'Username is required';
       } else if (!validateUsername(username)) {
-        newErrors.username = "Username must be 3-30 characters, letters, numbers, and underscores only";
+        newErrors.username =
+          'Username must be 3-30 characters, letters, numbers, and underscores only';
       }
-      
+
       // Confirm password validation
       if (!confirmPassword) {
-        newErrors.confirmPassword = "Please confirm your password";
+        newErrors.confirmPassword = 'Please confirm your password';
       } else if (password !== confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
+        newErrors.confirmPassword = 'Passwords do not match';
       }
     }
 
@@ -110,14 +122,14 @@ const Auth = () => {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     try {
       setLoading(true);
-      
+
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
@@ -126,31 +138,31 @@ const Auth = () => {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               name: sanitizeInput(name.trim()),
-              username: sanitizeInput(username.trim().toLowerCase())
-            }
-          }
+              username: sanitizeInput(username.trim().toLowerCase()),
+            },
+          },
         });
-        
+
         if (error) throw error;
-        
+
         toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account."
+          title: 'Account created!',
+          description: 'Please check your email to verify your account.',
         });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
-          password
+          password,
         });
-        
+
         if (error) throw error;
         navigate('/');
       }
     } catch (error: any) {
       toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: error.message
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: error.message,
       });
     } finally {
       setLoading(false);
@@ -159,8 +171,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full bg-slate-150 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <GlassCard className="w-full max-w-sm sm:max-w-md lg:max-w-lg p-6 sm:p-8 space-y-4 sm:space-y-6"
-       style={{boxShadow: '0 -10px 25px rgba(0,0,0,0.1), 0 10px 25px rgba(0,0,0,0.1), -10px 0 25px rgba(0,0,0,0.1), 10px 0 25px rgba(0,0,0,0.1)'}}>
+      <GlassCard
+        className="w-full max-w-sm sm:max-w-md lg:max-w-lg p-6 sm:p-8 space-y-4 sm:space-y-6"
+        style={{
+          boxShadow:
+            '0 -10px 25px rgba(0,0,0,0.1), 0 10px 25px rgba(0,0,0,0.1), -10px 0 25px rgba(0,0,0,0.1), 10px 0 25px rgba(0,0,0,0.1)',
+        }}
+      >
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
             AssetsManager
@@ -181,7 +198,7 @@ const Auth = () => {
                     id="name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(sanitizeInput(e.target.value))}
+                    onChange={e => setName(sanitizeInput(e.target.value))}
                     className="pl-10"
                     placeholder="Enter your name"
                     error={errors.name}
@@ -197,7 +214,9 @@ const Auth = () => {
                     id="username"
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(sanitizeInput(e.target.value.toLowerCase()))}
+                    onChange={e =>
+                      setUsername(sanitizeInput(e.target.value.toLowerCase()))
+                    }
                     className="pl-10"
                     placeholder="Enter your username (min 3 characters)"
                     error={errors.username}
@@ -215,7 +234,7 @@ const Auth = () => {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 className="pl-10 border border-gray-300"
                 placeholder="Enter your email"
                 error={errors.email}
@@ -229,11 +248,15 @@ const Auth = () => {
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <NeomorphInput
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="pl-10 pr-10 border border-gray-300"
-                placeholder={isSignUp ? "Enter a strong password (min 12 characters)" : "Enter your password"}
+                placeholder={
+                  isSignUp
+                    ? 'Enter a strong password (min 12 characters)'
+                    : 'Enter your password'
+                }
                 error={errors.password}
               />
               <button
@@ -241,12 +264,14 @@ const Auth = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
-            {isSignUp && (
-              <PasswordStrengthMeter password={password} />
-            )}
+            {isSignUp && <PasswordStrengthMeter password={password} />}
           </div>
 
           {isSignUp && (
@@ -256,9 +281,9 @@ const Auth = () => {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <NeomorphInput
                   id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={e => setConfirmPassword(e.target.value)}
                   className="pl-10 pr-10"
                   placeholder="Confirm your password"
                   error={errors.confirmPassword}
@@ -268,18 +293,31 @@ const Auth = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading} style={{marginTop: '30px'}}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+            style={{ marginTop: '30px' }}
+          >
             {loading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
               <>
-                {isSignUp ? <UserPlus className="h-4 w-4 mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
+                {isSignUp ? (
+                  <UserPlus className="h-4 w-4 mr-2" />
+                ) : (
+                  <LogIn className="h-4 w-4 mr-2" />
+                )}
                 {isSignUp ? 'Create Account' : 'Sign In'}
               </>
             )}
@@ -292,8 +330,8 @@ const Auth = () => {
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-primary hover:underline"
           >
-            {isSignUp 
-              ? 'Already have an account? Sign in' 
+            {isSignUp
+              ? 'Already have an account? Sign in'
               : "Don't have an account? Sign up"}
           </button>
         </div>
