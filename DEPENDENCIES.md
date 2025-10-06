@@ -1,11 +1,13 @@
 # Dependencies Documentation
 
 ## Form & Validation
+
 - **@hookform/resolvers** - Validation resolvers for react-hook-form, integrates with Zod, Yup, and other validation libraries
 - **react-hook-form** - Performant forms with easy validation, minimal re-renders, and TypeScript support
 - **zod** - TypeScript-first schema validation with static type inference and runtime validation
 
 ## UI Components (Radix UI)
+
 - **@radix-ui/react-accordion** - Accessible collapsible content sections with keyboard navigation and ARIA support
 - **@radix-ui/react-alert-dialog** - Modal dialogs for critical confirmations with focus management and escape handling
 - **@radix-ui/react-aspect-ratio** - Maintains consistent aspect ratios for responsive media and content containers
@@ -35,16 +37,19 @@
 - **@radix-ui/react-tooltip** - Contextual help tooltips with smart positioning and delay controls
 
 ## Data & State Management
+
 - **@supabase/supabase-js** - JavaScript client for Supabase with auth, database, storage, and real-time subscriptions
 - **@tanstack/react-query** - Powerful data synchronization with caching, background updates, and optimistic updates
 
 ## Styling & CSS
+
 - **class-variance-authority** - Type-safe utility for creating component variants with conditional classes
 - **clsx** - Lightweight utility for conditionally joining CSS class names with various input types
 - **tailwind-merge** - Intelligently merges Tailwind CSS classes, resolving conflicts and duplicates
 - **tailwindcss-animate** - Animation utilities and keyframes for Tailwind CSS with smooth transitions
 
 ## UI Components (Other)
+
 - **cmdk** - Fast command palette component with fuzzy search and keyboard shortcuts
 - **embla-carousel-react** - Lightweight carousel with touch/drag support, autoplay, and infinite scroll
 - **input-otp** - One-time password input with auto-focus, paste handling, and validation
@@ -53,6 +58,7 @@
 - **vaul** - Mobile-first drawer component with gesture support and smooth animations
 
 ## Utilities
+
 - **date-fns** - Modern date utility library with immutable functions and tree-shaking support
 - **framer-motion** - Production-ready motion library with declarative animations and gestures
 - **lucide-react** - Beautiful SVG icon library with consistent design and tree-shaking
@@ -61,6 +67,7 @@
 - **sonner** - Elegant toast notifications with stacking, positioning, and rich content support
 
 ## Core React
+
 - **react** - JavaScript library for building user interfaces with component-based architecture
 - **react-dom** - React renderer for web browsers with DOM manipulation and event handling
 - **react-router-dom** - Declarative routing for React apps with nested routes and code splitting

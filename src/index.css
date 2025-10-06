@@ -74,7 +74,8 @@
 
     /* Shadows */
     --shadow-glass: 0 8px 32px hsl(220 15% 15% / 0.1); /* hsl(220, 15%, 15%) */
-    --shadow-neomorph: 8px 8px 16px hsl(220 15% 85%),
+    --shadow-neomorph:
+      8px 8px 16px hsl(220 15% 85%),
       /* hsl(220, 15%, 85%) */ -8px -8px 16px hsl(220 20% 100%); /* hsl(220, 20%, 100%) */
     --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.15); /* hsl(142, 76%, 36%) */
 
@@ -166,7 +167,8 @@
 
     /* Dark shadows */
     --shadow-glass: 0 8px 32px hsl(220 25% 5% / 0.3); /* hsl(220, 25%, 5%) */
-    --shadow-neomorph: 8px 8px 16px hsl(220 25% 5%),
+    --shadow-neomorph:
+      8px 8px 16px hsl(220 25% 5%),
       /* hsl(220, 25%, 5%) */ -8px -8px 16px hsl(220 20% 18%); /* hsl(220, 20%, 18%) */
     --shadow-hover: 0 12px 48px hsl(142 76% 36% / 0.25); /* hsl(142, 76%, 36%) */
 

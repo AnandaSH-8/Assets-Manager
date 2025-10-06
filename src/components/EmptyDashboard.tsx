@@ -1,12 +1,12 @@
-import { motion } from "framer-motion"
-import { Plus, Wallet, TrendingUp, BarChart3 } from "lucide-react"
-import { GlassCard } from "@/components/ui/glass-card" 
-import { Button } from "@/components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { motion } from 'framer-motion';
+import { Plus, Wallet, TrendingUp, BarChart3 } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function EmptyDashboard() {
-  const navigate = useNavigate()
-  
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-8 p-6">
       {/* Welcome Section */}
@@ -41,17 +41,17 @@ export default function EmptyDashboard() {
             <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
               <Wallet className="w-10 h-10 text-primary" />
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="text-2xl font-semibold">No Assets Added Yet</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Get started by adding your first financial asset. Track investments, savings, 
-                and watch your portfolio grow over time.
+                Get started by adding your first financial asset. Track
+                investments, savings, and watch your portfolio grow over time.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              <Button
                 onClick={() => navigate('/add-particulars')}
                 className="h-12 px-8 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
               >
@@ -108,9 +108,8 @@ export default function EmptyDashboard() {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="max-w-3xl mx-auto"
       >
-        <GlassCard className="p-8">
+        {/* <GlassCard className="p-8">
           <h3 className="text-xl font-semibold mb-6 text-center">
-            {/* Built with Modern Technology */}
             Powered by Modern Web Technologies
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -131,8 +130,8 @@ export default function EmptyDashboard() {
               <div className="text-sm text-muted-foreground">Styling</div>
             </div>
           </div>
-        </GlassCard>
+        </GlassCard> */}
       </motion.div>
     </div>
-  )
+  );
 }

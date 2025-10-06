@@ -1,56 +1,68 @@
-import { motion } from "framer-motion"
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  PiggyBank, 
+import { motion } from 'framer-motion';
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  PiggyBank,
   IndianRupee,
   Plus,
-  BarChart3
-} from "lucide-react"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts'
-import EmptyDashboard from "@/components/EmptyDashboard"
-import { useState, useEffect } from "react"
-import { financialAPI } from "@/services/api"
-import { useAuth } from "@/hooks/useAuth"
-import { useNavigate } from "react-router-dom"
+  BarChart3,
+} from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Area,
+  AreaChart,
+} from 'recharts';
+import EmptyDashboard from '@/components/EmptyDashboard';
+import { useState, useEffect } from 'react';
+import { financialAPI } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface SummaryData {
-  totalLiquidAssets: number
-  totalInvestments: number
-  monthlyGrowth: number
-  totalGrowth: number
-  liquidAssetsGrowthPercent: number
-  investmentsGrowthPercent: number
-  monthlyGrowthPercent: number
-  totalGrowthPercent: number
+  totalLiquidAssets: number;
+  totalInvestments: number;
+  monthlyGrowth: number;
+  totalGrowth: number;
+  liquidAssetsGrowthPercent: number;
+  investmentsGrowthPercent: number;
+  monthlyGrowthPercent: number;
+  totalGrowthPercent: number;
 }
 
 interface ChartDataItem {
-  month: string
-  assets: number
-  investments: number
+  month: string;
+  assets: number;
+  investments: number;
 }
 
 interface GrowthDataItem {
-  month: string
-  growth: number
+  month: string;
+  growth: number;
 }
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(value)
-}
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
 export default function Dashboard() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [hasData, setHasData] = useState(false)
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [hasData, setHasData] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryData>({
     totalLiquidAssets: 0,
     totalInvestments: 0,
@@ -59,167 +71,229 @@ export default function Dashboard() {
     liquidAssetsGrowthPercent: 0,
     investmentsGrowthPercent: 0,
     monthlyGrowthPercent: 0,
-    totalGrowthPercent: 0
-  })
-  const [financialData, setFinancialData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [chartData, setChartData] = useState<ChartDataItem[]>([])
-  const [growthData, setGrowthData] = useState<GrowthDataItem[]>([])
+    totalGrowthPercent: 0,
+  });
+  const [financialData, setFinancialData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [growthData, setGrowthData] = useState<GrowthDataItem[]>([]);
 
   // Fetch real data from Supabase
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
-        setIsLoading(false)
-        return
+        setIsLoading(false);
+        return;
       }
 
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const [statsResponse, allDataResponse] = await Promise.all([
           financialAPI.getStats(),
-          financialAPI.getAll()
-        ])
+          financialAPI.getAll(),
+        ]);
 
-        const stats = statsResponse.data
-        const allData = allDataResponse.data
+        const stats = statsResponse.data;
+        const allData = allDataResponse.data;
 
-        setFinancialData(allData)
-        
+        setFinancialData(allData);
+
         // Find the latest month/year entry
         const sortedData = [...allData].sort((a: any, b: any) => {
-          const yearDiff = (b.year || 0) - (a.year || 0)
-          if (yearDiff !== 0) return yearDiff
-          
-          const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-          const aIndex = monthOrder.indexOf(a.month || '')
-          const bIndex = monthOrder.indexOf(b.month || '')
-          return bIndex - aIndex
-        })
-        
-        const latestEntry = sortedData[0]
-        const latestMonth = latestEntry?.month
-        const latestYear = latestEntry?.year
-        
+          const yearDiff = (b.year || 0) - (a.year || 0);
+          if (yearDiff !== 0) return yearDiff;
+
+          const monthOrder = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+          ];
+          const aIndex = monthOrder.indexOf(a.month || '');
+          const bIndex = monthOrder.indexOf(b.month || '');
+          return bIndex - aIndex;
+        });
+
+        const latestEntry = sortedData[0];
+        const latestMonth = latestEntry?.month;
+        const latestYear = latestEntry?.year;
+
         // Calculate totals for latest month only
-        const latestMonthData = allData.filter((item: any) => 
-          item.month === latestMonth && item.year === latestYear
-        )
-        
-        const latestMonthCash = latestMonthData.reduce((sum: number, item: any) => 
-          sum + Number(item.cash || 0), 0
-        )
-        const latestMonthInvestment = latestMonthData.reduce((sum: number, item: any) => 
-          sum + Number(item.investment || 0), 0
-        )
-        
+        const latestMonthData = allData.filter(
+          (item: any) => item.month === latestMonth && item.year === latestYear,
+        );
+
+        const latestMonthCash = latestMonthData.reduce(
+          (sum: number, item: any) => sum + Number(item.cash || 0),
+          0,
+        );
+        const latestMonthInvestment = latestMonthData.reduce(
+          (sum: number, item: any) => sum + Number(item.investment || 0),
+          0,
+        );
+
         // Sort months chronologically
-        const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        
+        const monthOrder = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ];
+
         // Group data by month for charts
-        const monthlyData: Record<string, { cash: number, investment: number, count: number }> = {}
+        const monthlyData: Record<
+          string,
+          { cash: number; investment: number; count: number }
+        > = {};
         allData.forEach((item: any) => {
-          const month = item.month || 'Unknown'
+          const month = item.month || 'Unknown';
           if (!monthlyData[month]) {
-            monthlyData[month] = { cash: 0, investment: 0, count: 0 }
+            monthlyData[month] = { cash: 0, investment: 0, count: 0 };
           }
-          monthlyData[month].cash += Number(item.cash || 0)
-          monthlyData[month].investment += Number(item.investment || 0)
-          monthlyData[month].count += 1
-        })
+          monthlyData[month].cash += Number(item.cash || 0);
+          monthlyData[month].investment += Number(item.investment || 0);
+          monthlyData[month].count += 1;
+        });
 
         // Convert to chart data format and sort by month order
         const months = Object.keys(monthlyData).sort((a, b) => {
-          const indexA = monthOrder.indexOf(a)
-          const indexB = monthOrder.indexOf(b)
-          return indexA - indexB
-        })
-        
+          const indexA = monthOrder.indexOf(a);
+          const indexB = monthOrder.indexOf(b);
+          return indexA - indexB;
+        });
+
         const newChartData = months.map(month => ({
           month,
           assets: monthlyData[month].cash,
-          investments: monthlyData[month].investment
-        }))
-        setChartData(newChartData)
+          investments: monthlyData[month].investment,
+        }));
+        setChartData(newChartData);
 
         // Calculate growth data (comparison with previous month for total)
         const newGrowthData = months.map((month, index) => {
           if (index === 0) {
-            return { month, growth: 0 }
+            return { month, growth: 0 };
           }
-          const currentTotal = monthlyData[month].cash + monthlyData[month].investment
-          const previousMonth = months[index - 1]
-          const previousTotal = monthlyData[previousMonth].cash + monthlyData[previousMonth].investment
-          const growth = previousTotal > 0 
-            ? ((currentTotal - previousTotal) / previousTotal) * 100 
-            : 0
-          return { month, growth: Number(growth.toFixed(2)) }
-        })
-        setGrowthData(newGrowthData)
-        
+          const currentTotal =
+            monthlyData[month].cash + monthlyData[month].investment;
+          const previousMonth = months[index - 1];
+          const previousTotal =
+            monthlyData[previousMonth].cash +
+            monthlyData[previousMonth].investment;
+          const growth =
+            previousTotal > 0
+              ? ((currentTotal - previousTotal) / previousTotal) * 100
+              : 0;
+          return { month, growth: Number(growth.toFixed(2)) };
+        });
+        setGrowthData(newGrowthData);
+
         // Calculate actual percentage changes
-        const currentMonthCash = months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0
-        const previousMonthCash = months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0
-        const firstMonthCash = months.length > 0 ? monthlyData[months[0]].cash : 0
-        
-        const currentMonthInvestment = months.length > 0 ? monthlyData[months[months.length - 1]].investment : 0
-        const previousMonthInvestment = months.length > 1 ? monthlyData[months[months.length - 2]].investment : 0
-        const firstMonthInvestment = months.length > 0 ? monthlyData[months[0]].investment : 0
-        
-        const liquidAssetsGrowthPercent = previousMonthCash > 0 
-          ? ((currentMonthCash - previousMonthCash) / previousMonthCash) * 100 
-          : 0
-        
-        const investmentsGrowthPercent = previousMonthInvestment > 0 
-          ? ((currentMonthInvestment - previousMonthInvestment) / previousMonthInvestment) * 100 
-          : 0
-        
-        const monthlyGrowthValue = newGrowthData.length > 0 ? newGrowthData[newGrowthData.length - 1].growth : 0
-        const previousMonthGrowthValue = newGrowthData.length > 1 ? newGrowthData[newGrowthData.length - 2].growth : 0
-        const monthlyGrowthPercent = previousMonthGrowthValue !== 0 
-          ? ((monthlyGrowthValue - previousMonthGrowthValue) / Math.abs(previousMonthGrowthValue)) * 100
-          : 0
-        
-        const totalGrowthAmount = (currentMonthCash + currentMonthInvestment) - (firstMonthCash + firstMonthInvestment)
-        const firstMonthTotal = firstMonthCash + firstMonthInvestment
-        const totalGrowthPercent = firstMonthTotal > 0 
-          ? (totalGrowthAmount / firstMonthTotal) * 100 
-          : 0
-        
+        const currentMonthCash =
+          months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0;
+        const previousMonthCash =
+          months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0;
+        const firstMonthCash =
+          months.length > 0 ? monthlyData[months[0]].cash : 0;
+
+        const currentMonthInvestment =
+          months.length > 0
+            ? monthlyData[months[months.length - 1]].investment
+            : 0;
+        const previousMonthInvestment =
+          months.length > 1
+            ? monthlyData[months[months.length - 2]].investment
+            : 0;
+        const firstMonthInvestment =
+          months.length > 0 ? monthlyData[months[0]].investment : 0;
+
+        const liquidAssetsGrowthPercent =
+          previousMonthCash > 0
+            ? ((currentMonthCash - previousMonthCash) / previousMonthCash) * 100
+            : 0;
+
+        const investmentsGrowthPercent =
+          previousMonthInvestment > 0
+            ? ((currentMonthInvestment - previousMonthInvestment) /
+                previousMonthInvestment) *
+              100
+            : 0;
+
+        const monthlyGrowthValue =
+          newGrowthData.length > 0
+            ? newGrowthData[newGrowthData.length - 1].growth
+            : 0;
+        const previousMonthGrowthValue =
+          newGrowthData.length > 1
+            ? newGrowthData[newGrowthData.length - 2].growth
+            : 0;
+        const monthlyGrowthPercent =
+          previousMonthGrowthValue !== 0
+            ? ((monthlyGrowthValue - previousMonthGrowthValue) /
+                Math.abs(previousMonthGrowthValue)) *
+              100
+            : 0;
+
+        const totalGrowthAmount =
+          currentMonthCash +
+          currentMonthInvestment -
+          (firstMonthCash + firstMonthInvestment);
+        const firstMonthTotal = firstMonthCash + firstMonthInvestment;
+        const totalGrowthPercent =
+          firstMonthTotal > 0 ? (totalGrowthAmount / firstMonthTotal) * 100 : 0;
+
         // Calculate summary data using latest month totals
         setSummaryData({
           totalLiquidAssets: latestMonthCash,
           totalInvestments: latestMonthInvestment,
           monthlyGrowth: monthlyGrowthValue,
           totalGrowth: totalGrowthAmount,
-          liquidAssetsGrowthPercent: Number(liquidAssetsGrowthPercent.toFixed(2)),
+          liquidAssetsGrowthPercent: Number(
+            liquidAssetsGrowthPercent.toFixed(2),
+          ),
           investmentsGrowthPercent: Number(investmentsGrowthPercent.toFixed(2)),
           monthlyGrowthPercent: Number(monthlyGrowthPercent.toFixed(2)),
-          totalGrowthPercent: Number(totalGrowthPercent.toFixed(2))
-        })
+          totalGrowthPercent: Number(totalGrowthPercent.toFixed(2)),
+        });
 
-        setHasData(allData.length > 0)
+        setHasData(allData.length > 0);
       } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-        setHasData(false)
+        console.error('Error fetching dashboard data:', error);
+        setHasData(false);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [user])
+    fetchData();
+  }, [user]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
       </div>
-    )
+    );
   }
 
   if (!hasData) {
-    return <EmptyDashboard />
+    return <EmptyDashboard />;
   }
 
   return (
@@ -248,7 +322,9 @@ export default function Dashboard() {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Liquid Assets</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Liquid Assets
+              </p>
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(summaryData.totalLiquidAssets)}
               </p>
@@ -263,8 +339,15 @@ export default function Dashboard() {
             ) : (
               <TrendingDown className="h-4 w-4 text-destructive mr-1" />
             )}
-            <span className={summaryData.liquidAssetsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
-              {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}{summaryData.liquidAssetsGrowthPercent}%
+            <span
+              className={
+                summaryData.liquidAssetsGrowthPercent >= 0
+                  ? 'text-success font-medium'
+                  : 'text-destructive font-medium'
+              }
+            >
+              {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
+              {summaryData.liquidAssetsGrowthPercent}%
             </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
@@ -273,7 +356,9 @@ export default function Dashboard() {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Investments</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Investments
+              </p>
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(summaryData.totalInvestments)}
               </p>
@@ -288,8 +373,15 @@ export default function Dashboard() {
             ) : (
               <TrendingDown className="h-4 w-4 text-destructive mr-1" />
             )}
-            <span className={summaryData.investmentsGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
-              {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}{summaryData.investmentsGrowthPercent}%
+            <span
+              className={
+                summaryData.investmentsGrowthPercent >= 0
+                  ? 'text-success font-medium'
+                  : 'text-destructive font-medium'
+              }
+            >
+              {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
+              {summaryData.investmentsGrowthPercent}%
             </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
@@ -298,7 +390,9 @@ export default function Dashboard() {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Monthly Growth</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Monthly Growth
+              </p>
               <p className="text-2xl font-bold text-foreground">
                 {summaryData.monthlyGrowth}%
               </p>
@@ -313,8 +407,15 @@ export default function Dashboard() {
             ) : (
               <TrendingDown className="h-4 w-4 text-destructive mr-1" />
             )}
-            <span className={summaryData.monthlyGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
-              {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}{summaryData.monthlyGrowthPercent}%
+            <span
+              className={
+                summaryData.monthlyGrowthPercent >= 0
+                  ? 'text-success font-medium'
+                  : 'text-destructive font-medium'
+              }
+            >
+              {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
+              {summaryData.monthlyGrowthPercent}%
             </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
@@ -323,7 +424,9 @@ export default function Dashboard() {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Growth</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Growth
+              </p>
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(summaryData.totalGrowth)}
               </p>
@@ -338,8 +441,15 @@ export default function Dashboard() {
             ) : (
               <TrendingDown className="h-4 w-4 text-destructive mr-1" />
             )}
-            <span className={summaryData.totalGrowthPercent >= 0 ? "text-success font-medium" : "text-destructive font-medium"}>
-              {summaryData.totalGrowthPercent >= 0 ? '+' : ''}{summaryData.totalGrowthPercent}%
+            <span
+              className={
+                summaryData.totalGrowthPercent >= 0
+                  ? 'text-success font-medium'
+                  : 'text-destructive font-medium'
+              }
+            >
+              {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
+              {summaryData.totalGrowthPercent}%
             </span>
             <span className="text-muted-foreground ml-1">total growth</span>
           </div>
@@ -355,16 +465,16 @@ export default function Dashboard() {
         <GlassCard className="p-6">
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="flex gap-4">
-            <Button 
+            <Button
               onClick={() => navigate('/add-particulars')}
               className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add New Asset
             </Button>
-            <Button 
-              onClick={() => navigate('/statistics')} 
-              variant="outline" 
+            <Button
+              onClick={() => navigate('/statistics')}
+              variant="outline"
               className="flex-1 h-12 hover:bg-accent/50"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
@@ -383,39 +493,44 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Assets vs Investments</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Assets vs Investments
+            </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="month" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="month"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                   />
-                  <YAxis 
+                  <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
-                    tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                    tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                   />
-                  <Tooltip 
-                    formatter={(value) => [formatCurrency(Number(value)), '']}
+                  <Tooltip
+                    formatter={value => [formatCurrency(Number(value)), '']}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                     contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
                     }}
                   />
-                  <Bar 
-                    dataKey="assets" 
-                    fill="hsl(var(--primary))" 
+                  <Bar
+                    dataKey="assets"
+                    fill="hsl(var(--primary))"
                     radius={[4, 4, 0, 0]}
                     name="Liquid Assets (Cash)"
                   />
-                  <Bar 
-                    dataKey="investments" 
-                    fill="hsl(var(--chart-3))" 
+                  <Bar
+                    dataKey="investments"
+                    fill="hsl(var(--chart-3))"
                     radius={[4, 4, 0, 0]}
                     name="Investments"
                   />
@@ -436,30 +551,47 @@ export default function Dashboard() {
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={growthData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="month" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="month"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                   />
-                  <YAxis 
+                  <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
-                    tickFormatter={(value) => `${value}%`}
+                    tickFormatter={value => `${value}%`}
                   />
-                  <Tooltip 
-                    formatter={(value) => [`${value}%`, 'Growth']}
+                  <Tooltip
+                    formatter={value => [`${value}%`, 'Growth']}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                     contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
                     }}
                   />
                   <defs>
-                    <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0.1}/>
+                    <linearGradient
+                      id="growthGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--success))"
+                        stopOpacity={0.3}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--success))"
+                        stopOpacity={0.1}
+                      />
                     </linearGradient>
                   </defs>
                   <Area
@@ -476,5 +608,5 @@ export default function Dashboard() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

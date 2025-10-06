@@ -1,38 +1,62 @@
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { TrendingUp, Calendar, BarChart3, ArrowUpDown } from "lucide-react"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, Calendar, BarChart3, ArrowUpDown } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 
 // Mock comparison data
 const periodComparison = [
-  { 
-    category: 'Bank Account', 
-    q1Assets: 420000, q1Investments: 420000,
-    q2Assets: 450000, q2Investments: 430000,
-    growth: 7.1
+  {
+    category: 'Bank Account',
+    q1Assets: 420000,
+    q1Investments: 420000,
+    q2Assets: 450000,
+    q2Investments: 430000,
+    growth: 7.1,
   },
-  { 
-    category: 'Mutual Fund', 
-    q1Assets: 280000, q1Investments: 250000,
-    q2Assets: 320000, q2Investments: 270000,
-    growth: 14.3
+  {
+    category: 'Mutual Fund',
+    q1Assets: 280000,
+    q1Investments: 250000,
+    q2Assets: 320000,
+    q2Investments: 270000,
+    growth: 14.3,
   },
-  { 
-    category: 'Stocks', 
-    q1Assets: 230000, q1Investments: 200000,
-    q2Assets: 280000, q2Investments: 220000,
-    growth: 21.7
+  {
+    category: 'Stocks',
+    q1Assets: 230000,
+    q1Investments: 200000,
+    q2Assets: 280000,
+    q2Investments: 220000,
+    growth: 21.7,
   },
-  { 
-    category: 'Fixed Deposit', 
-    q1Assets: 145000, q1Investments: 140000,
-    q2Assets: 150000, q2Investments: 145000,
-    growth: 3.4
-  }
-]
+  {
+    category: 'Fixed Deposit',
+    q1Assets: 145000,
+    q1Investments: 140000,
+    q2Assets: 150000,
+    q2Investments: 145000,
+    growth: 3.4,
+  },
+];
 
 const monthlyComparison = [
   { month: 'Jan', period1: 1100000, period2: 950000 },
@@ -40,26 +64,32 @@ const monthlyComparison = [
   { month: 'Mar', period1: 1200000, period2: 1080000 },
   { month: 'Apr', period1: 1250000, period2: 1120000 },
   { month: 'May', period1: 1280000, period2: 1180000 },
-  { month: 'Jun', period1: 1320000, period2: 1220000 }
-]
+  { month: 'Jun', period1: 1320000, period2: 1220000 },
+];
 
 export default function Comparison() {
-  const [selectedPeriod1, setSelectedPeriod1] = useState("q2-2024")
-  const [selectedPeriod2, setSelectedPeriod2] = useState("q1-2024")
+  const [selectedPeriod1, setSelectedPeriod1] = useState('q2-2024');
+  const [selectedPeriod2, setSelectedPeriod2] = useState('q1-2024');
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value)
-  }
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
   const calculateTotalGrowth = () => {
-    const period1Total = periodComparison.reduce((acc, item) => acc + item.q2Assets, 0)
-    const period2Total = periodComparison.reduce((acc, item) => acc + item.q1Assets, 0)
-    return ((period1Total - period2Total) / period2Total * 100).toFixed(1)
-  }
+    const period1Total = periodComparison.reduce(
+      (acc, item) => acc + item.q2Assets,
+      0,
+    );
+    const period2Total = periodComparison.reduce(
+      (acc, item) => acc + item.q1Assets,
+      0,
+    );
+    return (((period1Total - period2Total) / period2Total) * 100).toFixed(1);
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -88,11 +118,14 @@ export default function Comparison() {
             <Calendar className="h-6 w-6 text-primary" />
             <h2 className="text-xl font-semibold">Select Periods to Compare</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             <div>
               <label className="block text-sm font-medium mb-2">Period 1</label>
-              <Select value={selectedPeriod1} onValueChange={setSelectedPeriod1}>
+              <Select
+                value={selectedPeriod1}
+                onValueChange={setSelectedPeriod1}
+              >
                 <SelectTrigger className="h-12 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
@@ -113,7 +146,10 @@ export default function Comparison() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Period 2</label>
-              <Select value={selectedPeriod2} onValueChange={setSelectedPeriod2}>
+              <Select
+                value={selectedPeriod2}
+                onValueChange={setSelectedPeriod2}
+              >
                 <SelectTrigger className="h-12 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
@@ -138,15 +174,23 @@ export default function Comparison() {
       >
         <GlassCard hover className="p-6">
           <div className="text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Overall Growth</p>
-            <p className="text-3xl font-bold text-success">+{calculateTotalGrowth()}%</p>
-            <p className="text-xs text-muted-foreground mt-1">Period over period</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              Overall Growth
+            </p>
+            <p className="text-3xl font-bold text-success">
+              +{calculateTotalGrowth()}%
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Period over period
+            </p>
           </div>
         </GlassCard>
 
         <GlassCard hover className="p-6">
           <div className="text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Best Performer</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              Best Performer
+            </p>
             <p className="text-2xl font-bold text-primary">Stocks</p>
             <p className="text-xs text-success mt-1">+21.7% growth</p>
           </div>
@@ -154,11 +198,15 @@ export default function Comparison() {
 
         <GlassCard hover className="p-6">
           <div className="text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Total Difference</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              Total Difference
+            </p>
             <p className="text-2xl font-bold text-foreground">
               {formatCurrency(120000)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Absolute increase</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Absolute increase
+            </p>
           </div>
         </GlassCard>
       </motion.div>
@@ -174,42 +222,45 @@ export default function Comparison() {
             <BarChart3 className="h-6 w-6 text-chart-3" />
             <h2 className="text-xl font-semibold">Category-wise Comparison</h2>
           </div>
-          
+
           <div className="h-80 mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={periodComparison}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="category" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
+                <XAxis
+                  dataKey="category"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
-                <YAxis 
+                <YAxis
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
-                  tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                  tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value, name) => [
-                    formatCurrency(Number(value)), 
-                    name === 'q2Assets' ? 'Q2 2024' : 'Q1 2024'
+                    formatCurrency(Number(value)),
+                    name === 'q2Assets' ? 'Q2 2024' : 'Q1 2024',
                   ]}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
                   }}
                 />
-                <Bar 
-                  dataKey="q2Assets" 
-                  fill="hsl(var(--primary))" 
+                <Bar
+                  dataKey="q2Assets"
+                  fill="hsl(var(--primary))"
                   radius={[4, 4, 0, 0]}
                   name="q2Assets"
                 />
-                <Bar 
-                  dataKey="q1Assets" 
-                  fill="hsl(var(--chart-2))" 
+                <Bar
+                  dataKey="q1Assets"
+                  fill="hsl(var(--chart-2))"
                   radius={[4, 4, 0, 0]}
                   name="q1Assets"
                 />
@@ -222,18 +273,28 @@ export default function Comparison() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/50">
-                  <th className="text-left py-3 font-medium text-muted-foreground">Category</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Q2 2024</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Q1 2024</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Growth %</th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">Difference</th>
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Category
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Q2 2024
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Q1 2024
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Growth %
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Difference
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {periodComparison.map((item, index) => {
-                  const difference = item.q2Assets - item.q1Assets
-                  const isPositive = difference >= 0
-                  
+                  const difference = item.q2Assets - item.q1Assets;
+                  const isPositive = difference >= 0;
+
                   return (
                     <motion.tr
                       key={item.category}
@@ -243,20 +304,30 @@ export default function Comparison() {
                       transition={{ delay: index * 0.1 }}
                     >
                       <td className="py-4 font-medium">{item.category}</td>
-                      <td className="py-4 text-right">{formatCurrency(item.q2Assets)}</td>
-                      <td className="py-4 text-right">{formatCurrency(item.q1Assets)}</td>
-                      <td className={`py-4 text-right font-bold ${
-                        isPositive ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {isPositive ? '+' : ''}{item.growth.toFixed(1)}%
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.q2Assets)}
                       </td>
-                      <td className={`py-4 text-right font-bold ${
-                        isPositive ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {isPositive ? '+' : ''}{formatCurrency(difference)}
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.q1Assets)}
+                      </td>
+                      <td
+                        className={`py-4 text-right font-bold ${
+                          isPositive ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {isPositive ? '+' : ''}
+                        {item.growth.toFixed(1)}%
+                      </td>
+                      <td
+                        className={`py-4 text-right font-bold ${
+                          isPositive ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {isPositive ? '+' : ''}
+                        {formatCurrency(difference)}
                       </td>
                     </motion.tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -275,31 +346,34 @@ export default function Comparison() {
             <TrendingUp className="h-6 w-6 text-success" />
             <h2 className="text-xl font-semibold">Monthly Trend Comparison</h2>
           </div>
-          
+
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyComparison}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="month" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
+                <XAxis
+                  dataKey="month"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
-                <YAxis 
+                <YAxis
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
-                  tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                  tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value, name) => [
-                    formatCurrency(Number(value)), 
-                    name === 'period1' ? 'Q2 2024' : 'Q1 2024'
+                    formatCurrency(Number(value)),
+                    name === 'period1' ? 'Q2 2024' : 'Q1 2024',
                   ]}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
                   }}
                 />
                 <Line
@@ -325,5 +399,5 @@ export default function Comparison() {
         </GlassCard>
       </motion.div>
     </div>
-  )
+  );
 }
