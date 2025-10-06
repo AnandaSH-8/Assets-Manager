@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, PieChart, TrendingUp, Calendar } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const CHART_COLORS = [
 ];
 
 export default function Statistics() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [categoryData, setCategoryData] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
@@ -128,34 +130,17 @@ export default function Statistics() {
         );
         setPerformanceData(newPerformanceData);
 
-        // Process data by title
-        const titleGrouped: Record<
-          string,
-          {
-            title: string;
-            category: string;
-            cash: number;
-            investment: number;
-            currentValue: number;
-          }
-        > = {};
-        allData.forEach((item: any) => {
-          const title = item.description || 'Untitled';
-          if (!titleGrouped[title]) {
-            titleGrouped[title] = {
-              title,
-              category: item.category,
-              cash: 0,
-              investment: 0,
-              currentValue: 0,
-            };
-          }
-          titleGrouped[title].cash += Number(item.cash || 0);
-          titleGrouped[title].investment += Number(item.investment || 0);
-          titleGrouped[title].currentValue += Number(item.current_value || 0);
-        });
-
-        const newTitleData = Object.values(titleGrouped);
+        // Process individual records for title-based table
+        const newTitleData = allData.map((item: any) => ({
+          id: item.id,
+          title: item.description || 'Untitled',
+          category: item.category,
+          cash: Number(item.cash || 0),
+          investment: Number(item.investment || 0),
+          currentValue: Number(item.current_value || 0),
+          month: item.month,
+          year: item.year,
+        }));
         setTitleData(newTitleData);
       } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -413,11 +398,12 @@ export default function Statistics() {
 
                   return (
                     <motion.tr
-                      key={item.title}
-                      className="border-b border-border/20 hover:bg-accent/20"
+                      key={item.id}
+                      className="border-b border-border/20 hover:bg-accent/20 cursor-pointer"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
+                      onClick={() => navigate('/add-particulars', { state: { editData: item } })}
                     >
                       <td className="py-4 font-medium">{item.title}</td>
                       <td className="py-4">{item.category}</td>

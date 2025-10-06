@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Save, Plus, Wallet, TrendingUp } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { NeomorphInput } from '@/components/ui/neomorph-input';
@@ -44,7 +45,12 @@ const MONTHS = [
 
 export default function AddParticulars() {
   const { toast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const editData = location.state?.editData;
+  const isEditMode = !!editData;
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -59,7 +65,7 @@ export default function AddParticulars() {
   const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
   const [isCustom, setIsCustom] = useState(false);
 
-  // Fetch saved titles on component mount
+  // Fetch saved titles and populate form if editing
   useEffect(() => {
     const fetchTitles = async () => {
       try {
@@ -70,7 +76,19 @@ export default function AddParticulars() {
       }
     };
     fetchTitles();
-  }, []);
+
+    // Pre-fill form if editing
+    if (editData) {
+      setFormData({
+        title: editData.title || '',
+        category: editData.category || '',
+        actualCash: editData.cash?.toString() || '0',
+        investedCash: editData.investment?.toString() || '0',
+        currentValue: editData.currentValue?.toString() || '0',
+        month: editData.month || '',
+      });
+    }
+  }, [editData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -138,31 +156,53 @@ export default function AddParticulars() {
       const currentValue = Number(formData.currentValue);
       const totalAmount = cashAmount + investmentAmount;
 
-      await financialAPI.create({
-        category: formData.category,
-        description: formData.title,
-        amount: totalAmount,
-        cash: cashAmount,
-        investment: investmentAmount,
-        current_value: currentValue,
-        month: formData.month,
-        year: new Date().getFullYear(),
-      });
+      if (isEditMode && editData?.id) {
+        // Update existing record
+        await financialAPI.update(editData.id, {
+          category: formData.category,
+          description: formData.title,
+          amount: totalAmount,
+          cash: cashAmount,
+          investment: investmentAmount,
+          current_value: currentValue,
+          month: formData.month,
+        });
 
-      toast({
-        title: 'Success!',
-        description: 'Financial particular has been added successfully.',
-      });
+        toast({
+          title: 'Success!',
+          description: 'Financial particular has been updated successfully.',
+        });
 
-      // Reset form
-      setFormData({
-        title: '',
-        category: '',
-        actualCash: '',
-        investedCash: '',
-        currentValue: '',
-        month: '',
-      });
+        // Navigate back to statistics
+        navigate('/statistics');
+      } else {
+        // Create new record
+        await financialAPI.create({
+          category: formData.category,
+          description: formData.title,
+          amount: totalAmount,
+          cash: cashAmount,
+          investment: investmentAmount,
+          current_value: currentValue,
+          month: formData.month,
+          year: new Date().getFullYear(),
+        });
+
+        toast({
+          title: 'Success!',
+          description: 'Financial particular has been added successfully.',
+        });
+
+        // Reset form
+        setFormData({
+          title: '',
+          category: '',
+          actualCash: '',
+          investedCash: '',
+          currentValue: '',
+          month: '',
+        });
+      }
     } catch (error) {
       console.error('Error saving financial particular:', error);
       toast({
@@ -195,11 +235,12 @@ export default function AddParticulars() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Add Financial Particulars
+          {isEditMode ? 'Edit' : 'Add'} Financial Particulars
         </h1>
         <p className="text-muted-foreground text-lg">
-          Add new assets, investments, or financial entries to track your
-          portfolio
+          {isEditMode
+            ? 'Update your financial particular details'
+            : 'Add new assets, investments, or financial entries to track your portfolio'}
         </p>
       </motion.div>
 
@@ -217,7 +258,9 @@ export default function AddParticulars() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Plus className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-2xl font-semibold">New Financial Entry</h2>
+                <h2 className="text-2xl font-semibold">
+                  {isEditMode ? 'Edit' : 'New'} Financial Entry
+                </h2>
               </div>
 
               {/* Title Field - Dropdown + Input */}
@@ -394,7 +437,11 @@ export default function AddParticulars() {
                   className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : 'Add Particular'}
+                  {isSubmitting
+                    ? 'Saving...'
+                    : isEditMode
+                      ? 'Update Particular'
+                      : 'Add Particular'}
                 </Button>
               </motion.div>
             </form>
