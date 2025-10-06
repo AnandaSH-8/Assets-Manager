@@ -104,6 +104,7 @@ export const financialAPI = {
     amount: number;
     cash?: number;
     investment?: number;
+    current_value?: number;
     month?: string;
     year?: number;
   }) => {
@@ -122,6 +123,7 @@ export const financialAPI = {
       amount?: number;
       cash?: number;
       investment?: number;
+      current_value?: number;
       month?: string;
     },
   ) => {

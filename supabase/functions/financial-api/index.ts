@@ -115,7 +115,7 @@ Deno.serve(async req => {
     );
   }
 });
-async function getAllFinancials(supabase, userId) {
+async function getAllFinancials(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('*')
@@ -150,7 +150,7 @@ async function getAllFinancials(supabase, userId) {
     },
   );
 }
-async function getFinancial(supabase, id, userId) {
+async function getFinancial(supabase: any, id: string, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('*')
@@ -184,8 +184,8 @@ async function getFinancial(supabase, id, userId) {
     },
   );
 }
-async function createFinancial(req, supabase, userId) {
-  const { category, description, amount, cash, investment, month } =
+async function createFinancial(req: Request, supabase: any, userId: string) {
+  const { category, description, amount, cash, investment, current_value, month, year } =
     await req.json();
   if (!category || !amount) {
     return new Response(
@@ -210,7 +210,9 @@ async function createFinancial(req, supabase, userId) {
       amount,
       cash: cash || 0,
       investment: investment || 0,
+      current_value: current_value || 0,
       month,
+      year: year || new Date().getFullYear(),
     })
     .select()
     .single();
@@ -243,7 +245,7 @@ async function createFinancial(req, supabase, userId) {
     },
   );
 }
-async function updateFinancial(req, supabase, id, userId) {
+async function updateFinancial(req: Request, supabase: any, id: string, userId: string) {
   const updates = await req.json();
   const { data, error } = await supabase
     .from('financial_particulars')
@@ -280,7 +282,7 @@ async function updateFinancial(req, supabase, id, userId) {
     },
   );
 }
-async function deleteFinancial(supabase, id, userId) {
+async function deleteFinancial(supabase: any, id: string, userId: string) {
   const { error } = await supabase
     .from('financial_particulars')
     .delete()
@@ -364,7 +366,7 @@ async function getFinancialStats(supabase, userId) {
     },
   );
 }
-async function clearAllFinancials(supabase, userId) {
+async function clearAllFinancials(supabase: any, userId: string) {
   const { error } = await supabase
     .from('financial_particulars')
     .delete()

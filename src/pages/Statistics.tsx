@@ -24,6 +24,7 @@ import {
 import { useState, useEffect } from 'react';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
+import { FileText } from 'lucide-react';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -38,6 +39,7 @@ export default function Statistics() {
   const [categoryData, setCategoryData] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [titleData, setTitleData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -125,6 +127,36 @@ export default function Statistics() {
           },
         );
         setPerformanceData(newPerformanceData);
+
+        // Process data by title
+        const titleGrouped: Record<
+          string,
+          {
+            title: string;
+            category: string;
+            cash: number;
+            investment: number;
+            currentValue: number;
+          }
+        > = {};
+        allData.forEach((item: any) => {
+          const title = item.description || 'Untitled';
+          if (!titleGrouped[title]) {
+            titleGrouped[title] = {
+              title,
+              category: item.category,
+              cash: 0,
+              investment: 0,
+              currentValue: 0,
+            };
+          }
+          titleGrouped[title].cash += Number(item.cash || 0);
+          titleGrouped[title].investment += Number(item.investment || 0);
+          titleGrouped[title].currentValue += Number(item.current_value || 0);
+        });
+
+        const newTitleData = Object.values(titleGrouped);
+        setTitleData(newTitleData);
       } catch (error) {
         console.error('Error fetching statistics:', error);
       } finally {
@@ -337,11 +369,89 @@ export default function Statistics() {
         </GlassCard>
       </motion.div>
 
-      {/* Category Performance */}
+      {/* Title-based Performance */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <GlassCard className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Assets by Title</h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border/50">
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Title
+                  </th>
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Category
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Cash at Bank
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Cash Invested
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Current Value
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Gain/Loss
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {titleData.map((item, index) => {
+                  const totalInvested = item.cash + item.investment;
+                  const gainLoss = item.currentValue - totalInvested;
+                  const isProfit = gainLoss >= 0;
+
+                  return (
+                    <motion.tr
+                      key={item.title}
+                      className="border-b border-border/20 hover:bg-accent/20"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <td className="py-4 font-medium">{item.title}</td>
+                      <td className="py-4">{item.category}</td>
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.cash)}
+                      </td>
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.investment)}
+                      </td>
+                      <td className="py-4 text-right font-medium">
+                        {formatCurrency(item.currentValue)}
+                      </td>
+                      <td
+                        className={`py-4 text-right font-bold ${
+                          isProfit ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {isProfit ? '+' : ''}
+                        {formatCurrency(gainLoss)}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </motion.div>
+
+      {/* Category Performance */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
       >
         <GlassCard className="p-6">
           <h2 className="text-xl font-semibold mb-6">Category Performance</h2>

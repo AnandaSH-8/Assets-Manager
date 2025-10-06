@@ -50,6 +50,7 @@ export default function AddParticulars() {
     category: '',
     actualCash: '',
     investedCash: '',
+    currentValue: '',
     month: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -93,6 +94,9 @@ export default function AddParticulars() {
     if (!formData.investedCash || isNaN(Number(formData.investedCash))) {
       newErrors.investedCash = 'Valid invested cash amount is required';
     }
+    if (!formData.currentValue || isNaN(Number(formData.currentValue))) {
+      newErrors.currentValue = 'Valid current value is required';
+    }
     if (!formData.month) {
       newErrors.month = 'Month is required';
     }
@@ -131,6 +135,7 @@ export default function AddParticulars() {
     try {
       const cashAmount = Number(formData.actualCash);
       const investmentAmount = Number(formData.investedCash);
+      const currentValue = Number(formData.currentValue);
       const totalAmount = cashAmount + investmentAmount;
 
       await financialAPI.create({
@@ -139,6 +144,7 @@ export default function AddParticulars() {
         amount: totalAmount,
         cash: cashAmount,
         investment: investmentAmount,
+        current_value: currentValue,
         month: formData.month,
         year: new Date().getFullYear(),
       });
@@ -154,6 +160,7 @@ export default function AddParticulars() {
         category: '',
         actualCash: '',
         investedCash: '',
+        currentValue: '',
         month: '',
       });
     } catch (error) {
@@ -298,7 +305,7 @@ export default function AddParticulars() {
               </div>
 
               {/* Amount Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label htmlFor="actualCash" className="text-sm font-medium">
                     Actual Cash (₹)
@@ -329,6 +336,22 @@ export default function AddParticulars() {
                     }
                     placeholder="0"
                     error={errors.investedCash}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="currentValue" className="text-sm font-medium">
+                    Current Value (₹)
+                  </label>
+                  <NeomorphInput
+                    id="currentValue"
+                    type="number"
+                    className="border border-gray-300"
+                    value={formData.currentValue}
+                    onChange={e =>
+                      handleInputChange('currentValue', e.target.value)
+                    }
+                    placeholder="0"
+                    error={errors.currentValue}
                   />
                 </div>
               </div>
@@ -418,6 +441,16 @@ export default function AddParticulars() {
                 <span className="font-medium text-warning">
                   {formData.investedCash
                     ? formatCurrency(Number(formData.investedCash))
+                    : '₹0'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Current Value:
+                </span>
+                <span className="font-medium text-primary">
+                  {formData.currentValue
+                    ? formatCurrency(Number(formData.currentValue))
                     : '₹0'}
                 </span>
               </div>
