@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, PieChart, TrendingUp, Calendar } from 'lucide-react';
+import { BarChart3, PieChart, Calendar } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,11 +14,6 @@ import {
   PieChart as RechartsPieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
@@ -39,7 +34,6 @@ export default function Statistics() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [categoryData, setCategoryData] = useState<any[]>([]);
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any[]>([]);
   const [titleData, setTitleData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,28 +65,6 @@ export default function Statistics() {
           }),
         );
         setCategoryData(newCategoryData);
-
-        // Process monthly data for bar chart
-        const monthlyGrouped: Record<
-          string,
-          { assets: number; investments: number }
-        > = {};
-        allData.forEach((item: any) => {
-          const month = item.month || 'Unknown';
-          if (!monthlyGrouped[month]) {
-            monthlyGrouped[month] = { assets: 0, investments: 0 };
-          }
-          monthlyGrouped[month].assets += Number(item.amount);
-          monthlyGrouped[month].investments += Number(item.amount);
-        });
-
-        const newMonthlyData = Object.entries(monthlyGrouped).map(
-          ([month, data]) => ({
-            month,
-            ...data,
-          }),
-        );
-        setMonthlyData(newMonthlyData);
 
         // Process performance data by category
         const performanceByCategory: Record<
@@ -296,66 +268,6 @@ export default function Statistics() {
         </GlassCard>
       </motion.div>
 
-      {/* Monthly Performance */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <GlassCard className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <TrendingUp className="h-6 w-6 text-success" />
-            <h2 className="text-xl font-semibold">Monthly Performance</h2>
-          </div>
-
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis
-                  dataKey="month"
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                />
-                <YAxis
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
-                />
-                <Tooltip
-                  formatter={(value, name) => [
-                    formatCurrency(Number(value)),
-                    name === 'assets' ? 'Total Assets' : 'Total Investments',
-                  ]}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Bar
-                  dataKey="assets"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                  name="assets"
-                />
-                <Bar
-                  dataKey="investments"
-                  fill="hsl(var(--chart-3))"
-                  radius={[4, 4, 0, 0]}
-                  name="investments"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-      </motion.div>
-
-      {/* Title-based Performance */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -505,6 +417,82 @@ export default function Statistics() {
                 })}
               </tbody>
             </table>
+          </div>
+        </GlassCard>
+      </motion.div>
+
+      {/* Portfolio Distribution */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <GlassCard className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <PieChart className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Portfolio Distribution</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Pie Chart */}
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={value => formatCurrency(Number(value))} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Legend */}
+            <div className="space-y-4">
+              {categoryData.map(item => (
+                <motion.div
+                  key={item.name}
+                  className="flex items-center justify-between p-3 rounded-xl bg-accent/20 border border-border/50"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      {formatCurrency(item.value)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {(
+                        (item.value /
+                          categoryData.reduce(
+                            (acc, curr) => acc + curr.value,
+                            0,
+                          )) *
+                        100
+                      ).toFixed(1)}
+                      %
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </GlassCard>
       </motion.div>
