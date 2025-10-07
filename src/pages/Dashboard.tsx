@@ -334,11 +334,11 @@ export default function Dashboard() {
               <Wallet className="h-6 w-6 text-primary" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
+          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
             {summaryData.liquidAssetsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-success mr-1" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
             )}
             <span
               className={
@@ -350,7 +350,7 @@ export default function Dashboard() {
               {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
               {summaryData.liquidAssetsGrowthPercent}%
             </span>
-            <span className="text-muted-foreground ml-1">from last month</span>
+            <span className="text-muted-foreground">from last month</span>
           </div>
         </GlassCard>
 
@@ -368,11 +368,11 @@ export default function Dashboard() {
               <PiggyBank className="h-6 w-6 text-chart-3" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
+          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
             {summaryData.investmentsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-success mr-1" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
             )}
             <span
               className={
@@ -384,7 +384,7 @@ export default function Dashboard() {
               {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
               {summaryData.investmentsGrowthPercent}%
             </span>
-            <span className="text-muted-foreground ml-1">from last month</span>
+            <span className="text-muted-foreground">from last month</span>
           </div>
         </GlassCard>
 
@@ -402,11 +402,11 @@ export default function Dashboard() {
               <TrendingUp className="h-6 w-6 text-success" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
+          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
             {summaryData.monthlyGrowthPercent >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-success mr-1" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
             )}
             <span
               className={
@@ -418,7 +418,7 @@ export default function Dashboard() {
               {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
               {summaryData.monthlyGrowthPercent}%
             </span>
-            <span className="text-muted-foreground ml-1">from last month</span>
+            <span className="text-muted-foreground">from last month</span>
           </div>
         </GlassCard>
 
@@ -436,11 +436,11 @@ export default function Dashboard() {
               <IndianRupee className="h-6 w-6 text-chart-4" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
+          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
             {summaryData.totalGrowthPercent >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-success mr-1" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive mr-1" />
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
             )}
             <span
               className={
@@ -452,7 +452,7 @@ export default function Dashboard() {
               {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
               {summaryData.totalGrowthPercent}%
             </span>
-            <span className="text-muted-foreground ml-1">total growth</span>
+            <span className="text-muted-foreground">total growth</span>
           </div>
         </GlassCard>
       </motion.div>
