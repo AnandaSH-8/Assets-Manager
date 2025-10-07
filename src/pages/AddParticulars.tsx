@@ -91,7 +91,27 @@ export default function AddParticulars() {
   }, [editData]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newData = { ...formData, [field]: value };
+    
+    // Handle category change - reset appropriate fields
+    if (field === 'category') {
+      if (cashOnlyCategories.includes(value)) {
+        // Switching to cash-only category
+        newData.investedCash = '0';
+        newData.currentValue = newData.actualCash || '0';
+      } else {
+        // Switching to investment category
+        newData.actualCash = '0';
+      }
+    }
+    
+    // Auto-sync current value with actual cash for cash-only categories
+    if (field === 'actualCash' && cashOnlyCategories.includes(formData.category)) {
+      newData.currentValue = value;
+      newData.investedCash = '0';
+    }
+    
+    setFormData(newData);
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -99,6 +119,7 @@ export default function AddParticulars() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+    const isCashOnly = cashOnlyCategories.includes(formData.category);
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
@@ -106,15 +127,22 @@ export default function AddParticulars() {
     if (!formData.category) {
       newErrors.category = 'Category is required';
     }
-    if (!formData.actualCash || isNaN(Number(formData.actualCash))) {
-      newErrors.actualCash = 'Valid actual cash amount is required';
+    
+    // For cash-only categories, only validate actual cash
+    if (isCashOnly) {
+      if (!formData.actualCash || isNaN(Number(formData.actualCash))) {
+        newErrors.actualCash = 'Valid actual cash amount is required';
+      }
+    } else {
+      // For investment categories, validate invested cash and current value
+      if (!formData.investedCash || isNaN(Number(formData.investedCash))) {
+        newErrors.investedCash = 'Valid invested cash amount is required';
+      }
+      if (!formData.currentValue || isNaN(Number(formData.currentValue))) {
+        newErrors.currentValue = 'Valid current value is required';
+      }
     }
-    if (!formData.investedCash || isNaN(Number(formData.investedCash))) {
-      newErrors.investedCash = 'Valid invested cash amount is required';
-    }
-    if (!formData.currentValue || isNaN(Number(formData.currentValue))) {
-      newErrors.currentValue = 'Valid current value is required';
-    }
+    
     if (!formData.month) {
       newErrors.month = 'Month is required';
     }
@@ -151,9 +179,10 @@ export default function AddParticulars() {
     setIsSubmitting(true);
 
     try {
-      const cashAmount = Number(formData.actualCash);
-      const investmentAmount = Number(formData.investedCash);
-      const currentValue = Number(formData.currentValue);
+      const isCashOnly = cashOnlyCategories.includes(formData.category);
+      const cashAmount = isCashOnly ? Number(formData.actualCash) : 0;
+      const investmentAmount = isCashOnly ? 0 : Number(formData.investedCash);
+      const currentValue = isCashOnly ? Number(formData.actualCash) : Number(formData.currentValue);
       const totalAmount = cashAmount + investmentAmount;
 
       if (isEditMode && editData?.id) {
@@ -222,9 +251,19 @@ export default function AddParticulars() {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
+
+  // Categories that only show Actual Cash
+  const cashOnlyCategories = [
+    'Bank Account',
+    'Cash in Hand',
+    'Recurring Deposit',
+    'Provident Fund',
+  ];
+  const isCashOnlyCategory = cashOnlyCategories.includes(formData.category);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -347,56 +386,72 @@ export default function AddParticulars() {
                 )}
               </div>
 
-              {/* Amount Fields */}
+              {/* Amount Fields - Conditional based on category */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="actualCash" className="text-sm font-medium">
-                    Actual Cash (₹)
-                  </label>
-                  <NeomorphInput
-                    id="actualCash"
-                    type="number"
-                    className="border border-gray-300"
-                    value={formData.actualCash}
-                    onChange={e =>
-                      handleInputChange('actualCash', e.target.value)
-                    }
-                    placeholder="0"
-                    error={errors.actualCash}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="investedCash" className="text-sm font-medium">
-                    Invested Cash (₹)
-                  </label>
-                  <NeomorphInput
-                    id="investedCash"
-                    type="number"
-                    className="border border-gray-300"
-                    value={formData.investedCash}
-                    onChange={e =>
-                      handleInputChange('investedCash', e.target.value)
-                    }
-                    placeholder="0"
-                    error={errors.investedCash}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="currentValue" className="text-sm font-medium">
-                    Current Value (₹)
-                  </label>
-                  <NeomorphInput
-                    id="currentValue"
-                    type="number"
-                    className="border border-gray-300"
-                    value={formData.currentValue}
-                    onChange={e =>
-                      handleInputChange('currentValue', e.target.value)
-                    }
-                    placeholder="0"
-                    error={errors.currentValue}
-                  />
-                </div>
+                {isCashOnlyCategory ? (
+                  // For Bank Account, Cash in Hand, RD, PF - Show only Actual Cash
+                  <div className="space-y-2 md:col-span-3">
+                    <label htmlFor="actualCash" className="text-sm font-medium">
+                      Actual Cash (₹)
+                    </label>
+                    <NeomorphInput
+                      id="actualCash"
+                      type="number"
+                      step="0.01"
+                      className="border border-gray-300"
+                      value={formData.actualCash}
+                      onChange={e =>
+                        handleInputChange('actualCash', e.target.value)
+                      }
+                      placeholder="0.00"
+                      error={errors.actualCash}
+                    />
+                  </div>
+                ) : (
+                  // For investments - Show Invested Cash and Current Value
+                  <>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="investedCash"
+                        className="text-sm font-medium"
+                      >
+                        Invested Cash (₹)
+                      </label>
+                      <NeomorphInput
+                        id="investedCash"
+                        type="number"
+                        step="0.01"
+                        className="border border-gray-300"
+                        value={formData.investedCash}
+                        onChange={e =>
+                          handleInputChange('investedCash', e.target.value)
+                        }
+                        placeholder="0.00"
+                        error={errors.investedCash}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="currentValue"
+                        className="text-sm font-medium"
+                      >
+                        Current Value (₹)
+                      </label>
+                      <NeomorphInput
+                        id="currentValue"
+                        type="number"
+                        step="0.01"
+                        className="border border-gray-300"
+                        value={formData.currentValue}
+                        onChange={e =>
+                          handleInputChange('currentValue', e.target.value)
+                        }
+                        placeholder="0.00"
+                        error={errors.currentValue}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Month Field */}
