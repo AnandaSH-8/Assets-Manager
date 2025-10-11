@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, PieChart, Calendar } from 'lucide-react';
+import { BarChart3, PieChart, Calendar, Download } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   PieChart as RechartsPieChart,
   Pie,
@@ -21,6 +27,9 @@ import { useState, useEffect } from 'react';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { FileText } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -37,6 +46,8 @@ export default function Statistics() {
   const [performanceData, setPerformanceData] = useState<any[]>([]);
   const [titleData, setTitleData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('6months');
+  const [allData, setAllData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +64,11 @@ export default function Statistics() {
         ]);
 
         const stats = statsResponse.data;
-        const allData = allDataResponse.data;
+        const fetchedData = allDataResponse.data;
+        setAllData(fetchedData);
+        
+        // Filter data by date range
+        const filteredData = filterDataByRange(fetchedData, dateRange);
 
         // Process category data for pie chart
         const categoryBreakdown = stats.category_breakdown || {};
@@ -71,7 +86,7 @@ export default function Statistics() {
           string,
           { invested: number; current: number; count: number }
         > = {};
-        allData.forEach((item: any) => {
+        filteredData.forEach((item: any) => {
           const category = item.category;
           if (!performanceByCategory[category]) {
             performanceByCategory[category] = {
@@ -103,7 +118,7 @@ export default function Statistics() {
         setPerformanceData(newPerformanceData);
 
         // Process individual records for title-based table
-        const newTitleData = allData.map((item: any) => ({
+        const newTitleData = filteredData.map((item: any) => ({
           id: item.id,
           title: item.description || 'Untitled',
           category: item.category,
@@ -122,7 +137,123 @@ export default function Statistics() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, dateRange]);
+
+  const filterDataByRange = (data: any[], range: string) => {
+    const now = new Date();
+    const cutoffDate = new Date();
+
+    switch (range) {
+      case '1month':
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+      case '3months':
+        cutoffDate.setMonth(now.getMonth() - 3);
+        break;
+      case '6months':
+        cutoffDate.setMonth(now.getMonth() - 6);
+        break;
+      case '1year':
+        cutoffDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        return data;
+    }
+
+    return data.filter((item: any) => {
+      const itemDate = new Date(item.date_added || item.created_at);
+      return itemDate >= cutoffDate;
+    });
+  };
+
+  const exportToExcel = () => {
+    // Prepare title data
+    const titleSheet = titleData.map((item) => {
+      const totalInvested = item.cash + item.investment;
+      const gainLoss = item.currentValue - totalInvested;
+      return {
+        Title: item.title,
+        Category: item.category,
+        'Cash at Bank': item.cash,
+        'Cash Invested': item.investment,
+        'Current Value': item.currentValue,
+        'Gain/Loss': gainLoss,
+      };
+    });
+
+    // Prepare category performance data
+    const performanceSheet = performanceData.map((item) => ({
+      Category: item.category,
+      Invested: item.invested,
+      'Current Value': item.current,
+      'Return %': item.return.toFixed(2),
+      'Gain/Loss': item.current - item.invested,
+    }));
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws1 = XLSX.utils.json_to_sheet(titleSheet);
+    const ws2 = XLSX.utils.json_to_sheet(performanceSheet);
+
+    XLSX.utils.book_append_sheet(wb, ws1, 'Assets by Title');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Category Performance');
+
+    // Save file
+    XLSX.writeFile(wb, `Portfolio_Statistics_${new Date().toLocaleDateString()}.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Portfolio Statistics', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+    // Assets by Title table
+    const titleTableData = titleData.map((item) => {
+      const totalInvested = item.cash + item.investment;
+      const gainLoss = item.currentValue - totalInvested;
+      return [
+        item.title,
+        item.category,
+        formatCurrency(item.cash),
+        formatCurrency(item.investment),
+        formatCurrency(item.currentValue),
+        formatCurrency(gainLoss),
+      ];
+    });
+
+    autoTable(doc, {
+      head: [['Title', 'Category', 'Cash at Bank', 'Cash Invested', 'Current Value', 'Gain/Loss']],
+      body: titleTableData,
+      startY: 35,
+      theme: 'grid',
+      headStyles: { fillColor: [79, 70, 229] },
+    });
+
+    // Category Performance table
+    const performanceTableData = performanceData.map((item) => [
+      item.category,
+      formatCurrency(item.invested),
+      formatCurrency(item.current),
+      `${item.return.toFixed(2)}%`,
+      formatCurrency(item.current - item.invested),
+    ]);
+
+    autoTable(doc, {
+      head: [['Category', 'Invested', 'Current Value', 'Return %', 'Gain/Loss']],
+      body: performanceTableData,
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      theme: 'grid',
+      headStyles: { fillColor: [79, 70, 229] },
+    });
+
+    // Save file
+    doc.save(`Portfolio_Statistics_${new Date().toLocaleDateString()}.pdf`);
+  };
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -172,7 +303,7 @@ export default function Statistics() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Select defaultValue="6months">
+          <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-40 h-10 rounded-xl">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
@@ -185,89 +316,28 @@ export default function Statistics() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline" className="h-10 rounded-xl">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 rounded-xl">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportToExcel}>
+                <FileText className="w-4 h-4 mr-2" />
+                Export as Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToPDF}>
+                <FileText className="w-4 h-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </motion.div>
 
-      {/* Portfolio Distribution */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <GlassCard className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <PieChart className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-semibold">Portfolio Distribution</h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Pie Chart */}
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={value => formatCurrency(Number(value))} />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Legend */}
-            <div className="space-y-4">
-              {categoryData.map(item => (
-                <motion.div
-                  key={item.name}
-                  className="flex items-center justify-between p-3 rounded-xl bg-accent/20 border border-border/50"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="font-medium">{item.name}</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">
-                      {formatCurrency(item.value)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {(
-                        (item.value /
-                          categoryData.reduce(
-                            (acc, curr) => acc + curr.value,
-                            0,
-                          )) *
-                        100
-                      ).toFixed(1)}
-                      %
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </GlassCard>
-      </motion.div>
-
+      {/* Assets by Title */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -425,7 +495,7 @@ export default function Statistics() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
       >
         <GlassCard className="p-6">
           <div className="flex items-center gap-3 mb-6">
