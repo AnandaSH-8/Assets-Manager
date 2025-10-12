@@ -55,6 +55,13 @@ const navigationItems = [
     alwaysShow: false,
   },
   {
+    title: 'View Analytics',
+    url: '/statistics',
+    icon: BarChart3,
+    description: 'Analytics and reports',
+    alwaysShow: true,
+  },
+  {
     title: 'Comparison',
     url: '/comparison',
     icon: TrendingUp,

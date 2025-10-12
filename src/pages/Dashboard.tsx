@@ -11,6 +11,14 @@ import {
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
   BarChart,
   Bar,
   XAxis,
@@ -320,73 +328,135 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Liquid Assets
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalLiquidAssets)}
-              </p>
-            </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Wallet className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.liquidAssetsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.liquidAssetsGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.liquidAssetsGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+        <Dialog>
+          <DialogTrigger asChild>
+            <GlassCard hover className="p-6 cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Liquid Assets
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(summaryData.totalLiquidAssets)}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Wallet className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                {summaryData.liquidAssetsGrowthPercent >= 0 ? (
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                )}
+                <span
+                  className={
+                    summaryData.liquidAssetsGrowthPercent >= 0
+                      ? 'text-success font-medium'
+                      : 'text-destructive font-medium'
+                  }
+                >
+                  {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
+                  {summaryData.liquidAssetsGrowthPercent}%
+                </span>
+                <span className="text-muted-foreground">from last month</span>
+              </div>
+            </GlassCard>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Liquid Assets Breakdown</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[500px] pr-4">
+              <div className="space-y-3">
+                {financialData
+                  .filter((item: any) => Number(item.cash || 0) > 0)
+                  .map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.category} • {item.month} {item.year}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-primary">
+                        {formatCurrency(Number(item.cash || 0))}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Investments
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalInvestments)}
-              </p>
-            </div>
-            <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
-              <PiggyBank className="h-6 w-6 text-chart-3" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.investmentsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.investmentsGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.investmentsGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+        <Dialog>
+          <DialogTrigger asChild>
+            <GlassCard hover className="p-6 cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Investments
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(summaryData.totalInvestments)}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
+                  <PiggyBank className="h-6 w-6 text-chart-3" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                {summaryData.investmentsGrowthPercent >= 0 ? (
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                )}
+                <span
+                  className={
+                    summaryData.investmentsGrowthPercent >= 0
+                      ? 'text-success font-medium'
+                      : 'text-destructive font-medium'
+                  }
+                >
+                  {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
+                  {summaryData.investmentsGrowthPercent}%
+                </span>
+                <span className="text-muted-foreground">from last month</span>
+              </div>
+            </GlassCard>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Investments Breakdown</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[500px] pr-4">
+              <div className="space-y-3">
+                {financialData
+                  .filter((item: any) => Number(item.investment || 0) > 0)
+                  .map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.category} • {item.month} {item.year}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-chart-3">
+                        {formatCurrency(Number(item.investment || 0))}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
 
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
