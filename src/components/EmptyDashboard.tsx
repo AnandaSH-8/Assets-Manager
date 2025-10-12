@@ -17,7 +17,7 @@ export default function EmptyDashboard() {
         className="text-center"
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Welcome to AssetsManager
+          Welcome to Assets Manager
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
           Start building your financial portfolio by adding your first asset

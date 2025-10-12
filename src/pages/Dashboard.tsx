@@ -314,7 +314,7 @@ export default function Dashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Welcome to AssetsManager
+          Welcome to Assets Manager
         </h1>
         <p className="text-muted-foreground text-lg">
           Track, manage, and grow your financial portfolio with ease
