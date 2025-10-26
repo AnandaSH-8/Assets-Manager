@@ -62,7 +62,7 @@ export default function AddParticulars() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savedTitles, setSavedTitles] = useState<string[]>([]);
-  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
+
   const [isCustom, setIsCustom] = useState(false);
 
   // Fetch saved titles and populate form if editing
@@ -95,7 +95,7 @@ export default function AddParticulars() {
     
     // Handle category change - reset appropriate fields
     if (field === 'category') {
-      if (cashOnlyCategories.includes(value)) {
+      if (cashOnlyCategories.has(value)) {
         // Switching to cash-only category
         newData.investedCash = '0';
         newData.currentValue = newData.actualCash || '0';
@@ -106,7 +106,7 @@ export default function AddParticulars() {
     }
     
     // Auto-sync current value with actual cash for cash-only categories
-    if (field === 'actualCash' && cashOnlyCategories.includes(formData.category)) {
+    if (field === 'actualCash' && cashOnlyCategories.has(formData.category)) {
       newData.currentValue = value;
       newData.investedCash = '0';
     }
@@ -119,7 +119,7 @@ export default function AddParticulars() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    const isCashOnly = cashOnlyCategories.includes(formData.category);
+    const isCashOnly = cashOnlyCategories.has(formData.category);
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
@@ -151,9 +151,6 @@ export default function AddParticulars() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const filteredTitles = savedTitles.filter(title =>
-    title.toLowerCase().includes(formData.title.toLowerCase()),
-  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,7 +176,7 @@ export default function AddParticulars() {
     setIsSubmitting(true);
 
     try {
-      const isCashOnly = cashOnlyCategories.includes(formData.category);
+      const isCashOnly = cashOnlyCategories.has(formData.category);
       const cashAmount = isCashOnly ? Number(formData.actualCash) : 0;
       const investmentAmount = isCashOnly ? 0 : Number(formData.investedCash);
       const currentValue = isCashOnly ? Number(formData.actualCash) : Number(formData.currentValue);
@@ -205,6 +202,7 @@ export default function AddParticulars() {
         // Navigate back to statistics
         navigate('/statistics');
       } else {
+
         // Create new record
         await financialAPI.create({
           category: formData.category,
@@ -217,10 +215,13 @@ export default function AddParticulars() {
           year: new Date().getFullYear(),
         });
 
+        if(!savedTitles.includes(formData.title)) setSavedTitles([ ...savedTitles, formData.title]);
+
         toast({
           title: 'Success!',
           description: 'Financial particular has been added successfully.',
         });
+
 
         // Reset form
         setFormData({
@@ -257,13 +258,16 @@ export default function AddParticulars() {
   };
 
   // Categories that only show Actual Cash
-  const cashOnlyCategories = [
+  const cashOnlyCategories = new Set([
     'Bank Account',
     'Cash in Hand',
     'Recurring Deposit',
     'Provident Fund',
-  ];
-  const isCashOnlyCategory = cashOnlyCategories.includes(formData.category);
+  ]);
+  const isCashOnlyCategory = cashOnlyCategories.has(formData.category);
+
+  const buttonText = isEditMode ? 'Update Particular' : 'Add Particular';
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -494,9 +498,7 @@ export default function AddParticulars() {
                   <Save className="w-4 h-4 mr-2" />
                   {isSubmitting
                     ? 'Saving...'
-                    : isEditMode
-                      ? 'Update Particular'
-                      : 'Add Particular'}
+                    : buttonText}
                 </Button>
               </motion.div>
             </form>
