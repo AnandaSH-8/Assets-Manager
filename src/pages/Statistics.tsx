@@ -84,22 +84,36 @@ export default function Statistics() {
         // Process performance data by category
         const performanceByCategory: Record<
           string,
-          { invested: number; current: number; count: number }
+          { liquid: number;invested: number; current: number; count: number }
         > = {};
-        filteredData.forEach((item: any) => {
+        console.log(filteredData)
+        for(let item of filteredData) {
           const category = item.category;
           if (!performanceByCategory[category]) {
             performanceByCategory[category] = {
+              liquid:0,
               invested: 0,
               current: 0,
               count: 0,
             };
           }
-          const amount = Number(item.amount);
-          performanceByCategory[category].invested += amount;
-          performanceByCategory[category].current += amount;
-          performanceByCategory[category].count += 1;
-        });
+          if(category == 'Cash in Hand' || category == 'Bank Account'){
+            performanceByCategory[category].liquid += Number(item.cash);
+          }
+          else {
+            if(category == 'Recurring Deposit' ||  category == 'Provident Fund'){
+              performanceByCategory[category].invested += Number(item.amount);
+              performanceByCategory[category].current += Number(item.amount);
+            } else {
+              performanceByCategory[category].invested += Number(item.investment);
+              performanceByCategory[category].current += Number(item.current_value);
+            }
+            
+            performanceByCategory[category].count += 1;
+          }
+        };
+
+
 
         const newPerformanceData = Object.entries(performanceByCategory).map(
           ([category, data]) => {
@@ -109,6 +123,7 @@ export default function Statistics() {
                 : 0;
             return {
               category,
+              liquid: data.liquid,
               invested: data.invested,
               current: data.current,
               return: returnPercent,
@@ -184,6 +199,7 @@ export default function Statistics() {
     // Prepare category performance data
     const performanceSheet = performanceData.map((item) => ({
       Category: item.category,
+      Liquid: item.liquid,
       Invested: item.invested,
       'Current Value': item.current,
       'Return %': item.return.toFixed(2),
@@ -235,6 +251,7 @@ export default function Statistics() {
 
     // Category Performance table
     const performanceTableData = performanceData.map((item) => [
+      item.liquid,
       item.category,
       formatCurrency(item.invested),
       formatCurrency(item.current),
@@ -342,75 +359,128 @@ export default function Statistics() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <GlassCard className="p-6">
+        <GlassCard className="p-6 group">
           <div className="flex items-center gap-3 mb-6">
             <FileText className="h-6 w-6 text-primary" />
             <h2 className="text-xl font-semibold">Assets by Title</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left py-3 font-medium text-muted-foreground">
-                    Title
-                  </th>
-                  <th className="text-left py-3 font-medium text-muted-foreground">
-                    Category
-                  </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Cash at Bank
-                  </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Cash Invested
-                  </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Current Value
-                  </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Gain/Loss
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {titleData.map((item, index) => {
-                  const totalInvested = item.cash + item.investment;
-                  const gainLoss = item.currentValue - totalInvested;
-                  const isProfit = gainLoss >= 0;
+          <div className="h-[28rem] flex flex-col">
+            {/* Fixed Header */}
+            <div className="border-b border-border/50">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left py-3 font-medium text-muted-foreground w-1/6">
+                      Title
+                    </th>
+                    <th className="text-left py-3 font-medium text-muted-foreground w-1/6">
+                      Category
+                    </th>
+                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                      Cash at Bank
+                    </th>
+                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                      Cash Invested
+                    </th>
+                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                      Current Value
+                    </th>
+                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                      Gain/Loss
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-track]:bg-transparent">
+              <table className="w-full">
+                <tbody>
+                  {titleData.map((item, index) => {
+                    const gainLoss = item.cash == 0 ? item.currentValue - item.investment : item.cash;
+                    const isProfit = gainLoss >= 0;
 
-                  return (
-                    <motion.tr
-                      key={item.id}
-                      className="border-b border-border/20 hover:bg-accent/20 cursor-pointer"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => navigate('/add-particulars', { state: { editData: item } })}
-                    >
-                      <td className="py-4 font-medium">{item.title}</td>
-                      <td className="py-4">{item.category}</td>
-                      <td className="py-4 text-right">
-                        {formatCurrency(item.cash)}
-                      </td>
-                      <td className="py-4 text-right">
-                        {formatCurrency(item.investment)}
-                      </td>
-                      <td className="py-4 text-right font-medium">
-                        {formatCurrency(item.currentValue)}
-                      </td>
-                      <td
-                        className={`py-4 text-right font-bold ${
-                          isProfit ? 'text-success' : 'text-destructive'
-                        }`}
+                    return (
+                      <motion.tr
+                        key={item.id}
+                        className="border-b border-border/20 hover:bg-accent/20 cursor-pointer"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => navigate('/add-particulars', { state: { editData: item } })}
                       >
-                        {isProfit ? '+' : ''}
-                        {formatCurrency(gainLoss)}
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="py-4 font-medium w-1/6">{item.title}</td>
+                        <td className="py-4 w-1/6">{item.category}</td>
+                        <td className="py-4 text-right w-1/6">
+                          {formatCurrency(item.cash)}
+                        </td>
+                        <td className="py-4 text-right w-1/6">
+                          {formatCurrency(item.investment)}
+                        </td>
+                        <td className="py-4 text-right font-medium w-1/6">
+                          {formatCurrency(item.currentValue)}
+                        </td>
+                        <td
+                          className={`py-4 text-right font-bold w-1/6 ${
+                            isProfit ? 'text-success' : 'text-destructive'
+                          }`}
+                        >
+                          {isProfit ? '+' : ''}
+                          {formatCurrency(gainLoss)}
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Fixed Footer with Totals */}
+            <div className="border-t border-border/50 bg-accent/10">
+              <table className="w-full">
+                <thead className="sr-only">
+                  <tr>
+                    <th>Summary</th>
+                    <th>Category</th>
+                    <th>Cash at Bank</th>
+                    <th>Cash Invested</th>
+                    <th>Current Value</th>
+                    <th>Gain/Loss</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="font-bold">
+                    <td className="py-4 font-bold w-1/6">Total</td>
+                    <td className="py-4 w-1/6">-</td>
+                    <td className="py-4 text-right w-1/6">
+                      {formatCurrency(titleData.reduce((sum, item) => sum + item.cash, 0))}
+                    </td>
+                    <td className="py-4 text-right w-1/6">
+                      {formatCurrency(titleData.reduce((sum, item) => sum + item.investment, 0))}
+                    </td>
+                    <td className="py-4 text-right w-1/6">
+                      {formatCurrency(titleData.reduce((sum, item) => sum + item.currentValue, 0))}
+                    </td>
+                    <td className="py-4 text-right w-1/6">
+                      {(() => {
+                        const totalGainLoss = titleData.reduce((sum, item) => {
+                          const gainLoss = item.cash == 0 ? item.currentValue - item.investment : item.cash;
+                          return sum + gainLoss;
+                        }, 0);
+                        const isProfit = totalGainLoss >= 0;
+                        return (
+                          <span className={isProfit ? 'text-success' : 'text-destructive'}>
+                            {isProfit ? '+' : ''}{formatCurrency(totalGainLoss)}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </GlassCard>
       </motion.div>
@@ -430,6 +500,9 @@ export default function Statistics() {
                 <tr className="border-b border-border/50">
                   <th className="text-left py-3 font-medium text-muted-foreground">
                     Category
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Liquid Balance
                   </th>
                   <th className="text-right py-3 font-medium text-muted-foreground">
                     Invested
@@ -459,6 +532,9 @@ export default function Statistics() {
                       transition={{ delay: index * 0.1 }}
                     >
                       <td className="py-4 font-medium">{item.category}</td>
+                      <td className="py-4 text-right">
+                        {formatCurrency(item.liquid)}
+                      </td>
                       <td className="py-4 text-right">
                         {formatCurrency(item.invested)}
                       </td>
