@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, PieChart, Calendar, Download } from 'lucide-react';
+import { PieChart, Calendar, Download, FileText } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +26,6 @@ import {
 import { useState, useEffect } from 'react';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
-import { FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -86,7 +85,7 @@ export default function Statistics() {
           string,
           { liquid: number;invested: number; current: number; count: number }
         > = {};
-        console.log(filteredData)
+
         for(let item of filteredData) {
           const category = item.category;
           if (!performanceByCategory[category]) {
@@ -112,7 +111,6 @@ export default function Statistics() {
             performanceByCategory[category].count += 1;
           }
         };
-
 
 
         const newPerformanceData = Object.entries(performanceByCategory).map(
@@ -520,7 +518,10 @@ export default function Statistics() {
               </thead>
               <tbody>
                 {performanceData.map((item, index) => {
-                  const gainLoss = item.current - item.invested;
+                  let gainLoss = item.liquid ? item.liquid : item.current - item.invested;
+                  if(item.category == 'Recurring Deposit' ||  item.category == 'Provident Fund'){
+                    gainLoss = item.invested;
+                  }
                   const isProfit = gainLoss >= 0;
 
                   return (
@@ -596,7 +597,7 @@ export default function Statistics() {
                     dataKey="value"
                   >
                     {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index+1}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip formatter={value => formatCurrency(Number(value))} />
