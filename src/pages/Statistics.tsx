@@ -90,54 +90,64 @@ export default function Statistics() {
         );
         setCategoryData(newCategoryData);
 
-        // Process performance data by category
-        const performanceByCategory: Record<
-          string,
-          { liquid: number;invested: number; current: number; count: number }
-        > = {};
-
-        for(let item of filteredData) {
+        // Process performance data by category - keep only latest entry per category
+        const categoryPerfMap = new Map<string, any>();
+        
+        for (const item of filteredData) {
           const category = item.category;
-          if (!performanceByCategory[category]) {
-            performanceByCategory[category] = {
-              liquid:0,
-              invested: 0,
-              current: 0,
-              count: 0,
-            };
-          }
-          if(category == 'Cash in Hand' || category == 'Bank Account'){
-            performanceByCategory[category].liquid += Number(item.cash);
-          }
-          else {
-            if(category == 'Recurring Deposit' ||  category == 'Provident Fund'){
-              performanceByCategory[category].invested += Number(item.amount);
-              performanceByCategory[category].current += Number(item.amount);
+          const itemDate = new Date(item.date_added || item.created_at);
+          
+          let liquid = 0;
+          let invested = 0;
+          let current = 0;
+          
+          if (category === 'Cash in Hand' || category === 'Bank Account') {
+            liquid = Number(item.cash || 0);
+          } else {
+            if (category === 'Recurring Deposit' || category === 'Provident Fund') {
+              invested = Number(item.amount || 0);
+              current = Number(item.amount || 0);
             } else {
-              performanceByCategory[category].invested += Number(item.investment);
-              performanceByCategory[category].current += Number(item.current_value);
+              invested = Number(item.investment || 0);
+              current = Number(item.current_value || 0);
             }
-            
-            performanceByCategory[category].count += 1;
           }
-        };
-
-
-        const newPerformanceData = Object.entries(performanceByCategory).map(
-          ([category, data]) => {
-            const returnPercent =
-              data.invested > 0
-                ? ((data.current - data.invested) / data.invested) * 100
-                : 0;
-            return {
-              category,
-              liquid: data.liquid,
-              invested: data.invested,
-              current: data.current,
-              return: returnPercent,
-            };
-          },
-        );
+          
+          if (!categoryPerfMap.has(category)) {
+            categoryPerfMap.set(category, {
+              liquid,
+              invested,
+              current,
+              date: itemDate,
+            });
+          } else {
+            // Keep the latest entry
+            const existing = categoryPerfMap.get(category);
+            if (itemDate > existing.date) {
+              categoryPerfMap.set(category, {
+                liquid,
+                invested,
+                current,
+                date: itemDate,
+              });
+            }
+          }
+        }
+        
+        const newPerformanceData = Array.from(categoryPerfMap.entries()).map(([category, data]) => {
+          const returnPercent = data.invested > 0 
+            ? ((data.current - data.invested) / data.invested) * 100 
+            : 0;
+          
+          return {
+            category,
+            liquid: data.liquid,
+            invested: data.invested,
+            current: data.current,
+            return: returnPercent,
+          };
+        });
+        
         setPerformanceData(newPerformanceData);
 
         // Process individual records for title-based table
