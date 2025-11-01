@@ -92,10 +92,17 @@ async function getProfile(userId: string) {
     .from('profiles')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!data) {
+    return new Response(JSON.stringify({ error: 'Profile not found' }), {
       status: 404,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -141,7 +148,7 @@ async function updateProfile(req: Request, userId: string) {
       .select('user_id')
       .eq('username', updates.username)
       .neq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (existingUser) {
       return new Response(JSON.stringify({ error: 'Username already taken' }), {
@@ -156,7 +163,7 @@ async function updateProfile(req: Request, userId: string) {
     .update(updates)
     .eq('user_id', userId)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
