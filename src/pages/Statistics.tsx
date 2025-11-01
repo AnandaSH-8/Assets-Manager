@@ -45,8 +45,9 @@ export default function Statistics() {
   const [performanceData, setPerformanceData] = useState<any[]>([]);
   const [titleData, setTitleData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('6months');
+  const [dateRange, setDateRange] = useState('1month');
   const [allData, setAllData] = useState<any[]>([]);
+  const [latestMonth, setLatestMonth] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,6 +66,15 @@ export default function Statistics() {
         const stats = statsResponse.data;
         const fetchedData = allDataResponse.data;
         setAllData(fetchedData);
+        
+        // Get latest month from data
+        if (fetchedData.length > 0) {
+          const sortedData = [...fetchedData].sort((a, b) => 
+            new Date(b.date_added || b.created_at).getTime() - new Date(a.date_added || a.created_at).getTime()
+          );
+          const latest = sortedData[0];
+          setLatestMonth(`${latest.month} ${latest.year}`);
+        }
         
         // Filter data by date range
         const filteredData = filterDataByRange(fetchedData, dateRange);
@@ -131,16 +141,45 @@ export default function Statistics() {
         setPerformanceData(newPerformanceData);
 
         // Process individual records for title-based table
-        const newTitleData = filteredData.map((item: any) => ({
-          id: item.id,
-          title: item.description || 'Untitled',
-          category: item.category,
-          cash: Number(item.cash || 0),
-          investment: Number(item.investment || 0),
-          currentValue: Number(item.current_value || 0),
-          month: item.month,
-          year: item.year,
-        }));
+        // Group by title and keep only the latest entry for each title
+        const titleMap = new Map<string, any>();
+        
+        for (const item of filteredData) {
+          const title = item.description || 'Untitled';
+          const itemDate = new Date(item.date_added || item.created_at);
+          
+          if (!titleMap.has(title)) {
+            titleMap.set(title, {
+              id: item.id,
+              title,
+              category: item.category,
+              cash: Number(item.cash || 0),
+              investment: Number(item.investment || 0),
+              currentValue: Number(item.current_value || 0),
+              month: item.month,
+              year: item.year,
+              date: itemDate,
+            });
+          } else {
+            // Keep the latest entry
+            const existing = titleMap.get(title);
+            if (itemDate > existing.date) {
+              titleMap.set(title, {
+                id: item.id,
+                title,
+                category: item.category,
+                cash: Number(item.cash || 0),
+                investment: Number(item.investment || 0),
+                currentValue: Number(item.current_value || 0),
+                month: item.month,
+                year: item.year,
+                date: itemDate,
+              });
+            }
+          }
+        }
+        
+        const newTitleData = Array.from(titleMap.values());
         setTitleData(newTitleData);
       } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -314,6 +353,11 @@ export default function Statistics() {
           </h1>
           <p className="text-muted-foreground text-lg">
             Detailed insights into your financial portfolio performance
+            {latestMonth && (
+              <span className="block text-sm mt-1 text-primary font-semibold">
+                Latest data: {latestMonth}
+              </span>
+            )}
           </p>
         </div>
 
