@@ -38,8 +38,12 @@ npm run dev
 ### Environment Setup
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Set up your environment variables
-3. Configure your database schema
+2. Copy `.env.example` to `.env` and fill in your Supabase credentials:
+   ```bash
+   cp .env.example .env
+   ```
+3. Update the `.env` file with your Supabase URL and anon key
+4. Configure your database schema
 
 ## 🛠️ Tech Stack
 

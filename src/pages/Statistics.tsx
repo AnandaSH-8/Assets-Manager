@@ -68,12 +68,14 @@ export default function Statistics() {
         setAllData(fetchedData);
         
         // Get latest month from data
+        let latestMonth = '';
         if (fetchedData.length > 0) {
           const sortedData = [...fetchedData].sort((a, b) => 
             new Date(b.date_added || b.created_at).getTime() - new Date(a.date_added || a.created_at).getTime()
           );
           const latest = sortedData[0];
-          setLatestMonth(`${latest.month} ${latest.year}`);
+          latestMonth = `${latest.month} ${latest.year}`;
+          setLatestMonth(latestMonth);
         }
         
         // Filter data by date range
@@ -82,7 +84,8 @@ export default function Statistics() {
         // Process category data for pie chart
         const categoryBreakdown = stats.category_breakdown || {};
         const newCategoryData = Object.entries(categoryBreakdown).map(
-          ([name, value], index) => ({
+          ([name, value], index) => (
+            {
             name,
             value: Number(value),
             color: CHART_COLORS[index % CHART_COLORS.length],
@@ -91,106 +94,88 @@ export default function Statistics() {
         setCategoryData(newCategoryData);
 
         // Process performance data by category - keep only latest entry per category
-        const categoryPerfMap = new Map<string, any>();
-        
-        for (const item of filteredData) {
+        const categoryPerfMap = []
+
+         // Process performance data by category
+        const performanceByCategory: Record<
+          string,
+          { liquid: number;invested: number; current: number; count: number }
+        > = {};
+
+        for(let item of filteredData) {
+
+          const currentMonth = `${item.month} ${item.year}`;
+
+          if (currentMonth !== latestMonth) continue;
+
           const category = item.category;
-          const itemDate = new Date(item.date_added || item.created_at);
-          
-          let liquid = 0;
-          let invested = 0;
-          let current = 0;
-          
-          if (category === 'Cash in Hand' || category === 'Bank Account') {
-            liquid = Number(item.cash || 0);
-          } else {
-            if (category === 'Recurring Deposit' || category === 'Provident Fund') {
-              invested = Number(item.amount || 0);
-              current = Number(item.amount || 0);
+         
+          if (!performanceByCategory[category]) {
+            performanceByCategory[category] = {
+              liquid:0,
+              invested: 0,
+              current: 0,
+              count: 0,
+            };
+          }
+          if(category == 'Cash in Hand' || category == 'Bank Account'){
+            performanceByCategory[category].liquid += Number(item.cash);
+          }
+          else {
+            if(category == 'Recurring Deposit' ||  category == 'Provident Fund'){
+              performanceByCategory[category].invested += Number(item.amount);
+              performanceByCategory[category].current += Number(item.amount);
             } else {
-              invested = Number(item.investment || 0);
-              current = Number(item.current_value || 0);
+              performanceByCategory[category].invested += Number(item.investment);
+              performanceByCategory[category].current += Number(item.current_value);
             }
+            
+            performanceByCategory[category].count += 1;
           }
-          
-          if (!categoryPerfMap.has(category)) {
-            categoryPerfMap.set(category, {
-              liquid,
-              invested,
-              current,
-              date: itemDate,
-            });
-          } else {
-            // Keep the latest entry
-            const existing = categoryPerfMap.get(category);
-            if (itemDate > existing.date) {
-              categoryPerfMap.set(category, {
-                liquid,
-                invested,
-                current,
-                date: itemDate,
-              });
-            }
-          }
-        }
-        
-        const newPerformanceData = Array.from(categoryPerfMap.entries()).map(([category, data]) => {
-          const returnPercent = data.invested > 0 
-            ? ((data.current - data.invested) / data.invested) * 100 
-            : 0;
-          
-          return {
-            category,
-            liquid: data.liquid,
-            invested: data.invested,
-            current: data.current,
-            return: returnPercent,
-          };
-        });
-        
+        };
+
+
+        const newPerformanceData = Object.entries(performanceByCategory).map(
+          ([category, data]) => {
+            const returnPercent =
+              data.invested > 0
+                ? ((data.current - data.invested) / data.invested) * 100
+                : 0;
+            return {
+              category,
+              liquid: data.liquid,
+              invested: data.invested,
+              current: data.current,
+              return: returnPercent,
+            };
+          },
+        );
         setPerformanceData(newPerformanceData);
 
         // Process individual records for title-based table
         // Group by title and keep only the latest entry for each title
-        const titleMap = new Map<string, any>();
-        
+        const lastesMonthData = [];
+
         for (const item of filteredData) {
-          const title = item.description || 'Untitled';
+          const currentMonth = `${item.month} ${item.year}`;
+
+          if (currentMonth !== latestMonth) continue;
           const itemDate = new Date(item.date_added || item.created_at);
-          
-          if (!titleMap.has(title)) {
-            titleMap.set(title, {
-              id: item.id,
-              title,
-              category: item.category,
-              cash: Number(item.cash || 0),
-              investment: Number(item.investment || 0),
-              currentValue: Number(item.current_value || 0),
-              month: item.month,
-              year: item.year,
-              date: itemDate,
-            });
-          } else {
-            // Keep the latest entry
-            const existing = titleMap.get(title);
-            if (itemDate > existing.date) {
-              titleMap.set(title, {
-                id: item.id,
-                title,
-                category: item.category,
-                cash: Number(item.cash || 0),
-                investment: Number(item.investment || 0),
-                currentValue: Number(item.current_value || 0),
-                month: item.month,
-                year: item.year,
-                date: itemDate,
-              });
-            }
-          }
+
+         lastesMonthData.push({
+            id: item.id,
+            title: item.description,
+            category: item.category,
+            cash: Number(item.cash || 0),
+            investment: Number(item.investment || 0),
+            currentValue: Number(item.current_value || 0),
+            month: item.month,
+            year: item.year,
+            date: itemDate,
+          });
         }
         
-        const newTitleData = Array.from(titleMap.values());
-        setTitleData(newTitleData);
+        setTitleData([...lastesMonthData]);
       } catch (error) {
         console.error('Error fetching statistics:', error);
       } finally {
@@ -423,22 +408,22 @@ export default function Statistics() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Title
                     </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Category
                     </th>
-                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Cash at Bank
                     </th>
-                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Cash Invested
                     </th>
-                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Current Value
                     </th>
-                    <th className="text-right py-3 font-medium text-muted-foreground w-1/6">
+                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
                       Gain/Loss
                     </th>
                   </tr>
@@ -453,6 +438,9 @@ export default function Statistics() {
                   {titleData.map((item, index) => {
                     const gainLoss = item.cash == 0 ? item.currentValue - item.investment : item.cash;
                     const isProfit = gainLoss >= 0;
+
+                    const profitLossColor = isProfit ? 'text-success' : 'text-destructive';
+                    const gainLossColor = item.cash == 0 ? profitLossColor : 'text-muted-foreground'; ;
 
                     return (
                       <motion.tr
@@ -471,14 +459,12 @@ export default function Statistics() {
                         <td className="py-4 text-right w-1/6">
                           {formatCurrency(item.investment)}
                         </td>
-                        <td className="py-4 text-right font-medium w-1/6">
+                        <td className="py-4 text-right font-medium w-1/6 text-">
                           {formatCurrency(item.currentValue)}
                         </td>
                         <td
-                          className={`py-4 text-right font-bold w-1/6 ${
-                            isProfit ? 'text-success' : 'text-destructive'
-                          }`}
-                        >
+                          className={`py-4 text-right font-bold w-1/6 ${gainLossColor}`}
+                        > 
                           {isProfit ? '+' : ''}
                           {formatCurrency(gainLoss)}
                         </td>
@@ -550,22 +536,22 @@ export default function Statistics() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/50">
-                  <th className="text-left py-3 font-medium text-muted-foreground">
+                  <th className="text-left py-3 font-medium text-lg text-muted-foreground">
                     Category
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
+                  <th className="text-right py-3 font-medium text-lg text-muted-foreground">
                     Liquid Balance
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
+                  <th className="text-right py-3 font-medium text-lg text-muted-foreground">
                     Invested
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
+                  <th className="text-right py-3 font-medium text-lg text-muted-foreground">
                     Current Value
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
+                  <th className="text-right py-3 font-medium text-lg text-muted-foreground">
                     Return %
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
+                  <th className="text-right py-3 font-medium text-lg text-muted-foreground">
                     Gain/Loss
                   </th>
                 </tr>
