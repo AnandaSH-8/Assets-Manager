@@ -17,7 +17,7 @@ export default function EmptyDashboard() {
         className="text-center"
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Welcome to AssetsManager
+          Welcome to Assets Manager
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
           Start building your financial portfolio by adding your first asset
@@ -92,7 +92,7 @@ export default function EmptyDashboard() {
 
         <GlassCard className="p-6 text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-success/10 flex items-center justify-center">
-            <Wallet className="w-6 w-6 text-success" />
+            <Wallet className="w-6 text-success" />
           </div>
           <h4 className="font-semibold mb-2">Portfolio Management</h4>
           <p className="text-sm text-muted-foreground">
@@ -108,29 +108,6 @@ export default function EmptyDashboard() {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="max-w-3xl mx-auto"
       >
-        {/* <GlassCard className="p-8">
-          <h3 className="text-xl font-semibold mb-6 text-center">
-            Powered by Modern Web Technologies
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-4 rounded-lg bg-accent/20">
-              <div className="font-semibold text-primary">React</div>
-              <div className="text-sm text-muted-foreground">Frontend Framework</div>
-            </div>
-            <div className="p-4 rounded-lg bg-accent/20">
-              <div className="font-semibold text-primary">TypeScript</div>
-              <div className="text-sm text-muted-foreground">Type Safety</div>
-            </div>
-            <div className="p-4 rounded-lg bg-accent/20">
-              <div className="font-semibold text-primary">Supabase</div>
-              <div className="text-sm text-muted-foreground">Backend & Auth</div>
-            </div>
-            <div className="p-4 rounded-lg bg-accent/20">
-              <div className="font-semibold text-primary">Tailwind CSS</div>
-              <div className="text-sm text-muted-foreground">Styling</div>
-            </div>
-          </div>
-        </GlassCard> */}
       </motion.div>
     </div>
   );

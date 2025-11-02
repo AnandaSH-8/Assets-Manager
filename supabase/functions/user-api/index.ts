@@ -46,24 +46,31 @@ Deno.serve(async req => {
       });
     }
 
-    // Set user context for RLS
-    await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: '',
-    });
+    // Create user-scoped Supabase client for RLS
+    const userSupabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
+    );
 
     switch (action) {
       case 'profile':
         if (req.method === 'GET') {
-          return await getProfile(user.id);
+          return await getProfile(userSupabase, user.id);
         } else if (req.method === 'PUT') {
-          return await updateProfile(req, user.id);
+          return await updateProfile(req, userSupabase, user.id);
         }
         break;
 
       case 'delete-account':
         if (req.method === 'DELETE') {
-          return await deleteAccount(user.id);
+          return await deleteAccount(userSupabase, user.id);
         }
         break;
 
@@ -87,15 +94,22 @@ Deno.serve(async req => {
   }
 });
 
-async function getProfile(userId: string) {
-  const { data, error } = await supabase
+async function getProfile(userSupabase: any, userId: string) {
+  const { data, error } = await userSupabase
     .from('profiles')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!data) {
+    return new Response(JSON.stringify({ error: 'Profile not found' }), {
       status: 404,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -107,7 +121,7 @@ async function getProfile(userId: string) {
   });
 }
 
-async function updateProfile(req: Request, userId: string) {
+async function updateProfile(req: Request, userSupabase: any, userId: string) {
   const updates: ProfileUpdateRequest = await req.json();
 
   // Validate input
@@ -136,12 +150,12 @@ async function updateProfile(req: Request, userId: string) {
 
   // Check if username is already taken (if provided)
   if (updates.username) {
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await userSupabase
       .from('profiles')
       .select('user_id')
       .eq('username', updates.username)
       .neq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (existingUser) {
       return new Response(JSON.stringify({ error: 'Username already taken' }), {
@@ -151,12 +165,12 @@ async function updateProfile(req: Request, userId: string) {
     }
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await userSupabase
     .from('profiles')
     .update(updates)
     .eq('user_id', userId)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
@@ -177,9 +191,9 @@ async function updateProfile(req: Request, userId: string) {
   );
 }
 
-async function deleteAccount(userId: string) {
+async function deleteAccount(userSupabase: any, userId: string) {
   // First delete the user's profile (cascades should handle the rest)
-  const { error: profileError } = await supabase
+  const { error: profileError } = await userSupabase
     .from('profiles')
     .delete()
     .eq('user_id', userId);
@@ -189,7 +203,7 @@ async function deleteAccount(userId: string) {
   }
 
   // Delete all financial particulars
-  const { error: financialError } = await supabase
+  const { error: financialError } = await userSupabase
     .from('financial_particulars')
     .delete()
     .eq('user_id', userId);

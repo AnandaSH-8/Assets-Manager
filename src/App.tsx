@@ -59,7 +59,7 @@ const AppContent = () => {
                       <div className="flex items-center">
                         <SidebarTrigger className="mr-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" />
                         <h1 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-                          AssetsManager
+                          Assets Manager
                         </h1>
                       </div>
                     </header>

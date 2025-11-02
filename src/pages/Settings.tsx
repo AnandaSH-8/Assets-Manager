@@ -50,11 +50,16 @@ export default function Settings() {
 
   const loadProfile = async () => {
     try {
-      const profile = await userAPI.getProfile();
-      setName(profile.name || '');
-      setUsername(profile.username || '');
+      const response = await userAPI.getProfile();
+      setName(response.data.name || '');
+      setUsername(response.data.username || '');
     } catch (error) {
       console.error('Error loading profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load profile data',
+        variant: 'destructive',
+      });
     }
   };
 

@@ -315,7 +315,7 @@ async function deleteFinancial(supabase: any, id: string, userId: string) {
     },
   );
 }
-async function getFinancialStats(supabase, userId) {
+async function getFinancialStats(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('category, amount, cash, investment')
@@ -335,13 +335,13 @@ async function getFinancialStats(supabase, userId) {
     );
   }
   // Calculate statistics
-  const totalAmount = data.reduce((sum, item) => sum + Number(item.amount), 0);
-  const totalCash = data.reduce((sum, item) => sum + Number(item.cash || 0), 0);
+  const totalAmount = data.reduce((sum: number, item: any) => sum + Number(item.amount), 0);
+  const totalCash = data.reduce((sum: number, item: any) => sum + Number(item.cash || 0), 0);
   const totalInvestment = data.reduce(
-    (sum, item) => sum + Number(item.investment || 0),
+    (sum: number, item: any) => sum + Number(item.investment || 0),
     0,
   );
-  const categoryStats = data.reduce((acc, item) => {
+  const categoryStats = data.reduce((acc: any, item: any) => {
     acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
     return acc;
   }, {});
@@ -399,7 +399,7 @@ async function clearAllFinancials(supabase: any, userId: string) {
     },
   );
 }
-async function getUniqueTitles(supabase, userId) {
+async function getUniqueTitles(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('financial_particulars')
     .select('description')
@@ -422,7 +422,7 @@ async function getUniqueTitles(supabase, userId) {
   }
   // Extract unique non-empty titles
   const uniqueTitles = [
-    ...new Set(data.map(item => item.description).filter(Boolean)),
+    ...new Set(data.map((item: any) => item.description).filter(Boolean)),
   ];
   return new Response(
     JSON.stringify({

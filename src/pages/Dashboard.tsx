@@ -11,6 +11,14 @@ import {
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
   BarChart,
   Bar,
   XAxis,
@@ -38,6 +46,17 @@ interface SummaryData {
   investmentsGrowthPercent: number;
   monthlyGrowthPercent: number;
   totalGrowthPercent: number;
+  // Additional breakdown data for dialogs
+  previousMonthCash?: number;
+  currentMonthCash?: number;
+  previousMonthInvestment?: number;
+  currentMonthInvestment?: number;
+  previousMonthTotal?: number;
+  currentMonthTotal?: number;
+  firstMonthTotal?: number;
+  previousMonthName?: string;
+  currentMonthName?: string;
+  firstMonthName?: string;
 }
 
 interface ChartDataItem {
@@ -271,6 +290,17 @@ export default function Dashboard() {
           investmentsGrowthPercent: Number(investmentsGrowthPercent.toFixed(2)),
           monthlyGrowthPercent: Number(monthlyGrowthPercent.toFixed(2)),
           totalGrowthPercent: Number(totalGrowthPercent.toFixed(2)),
+          // Additional breakdown data
+          previousMonthCash,
+          currentMonthCash,
+          previousMonthInvestment,
+          currentMonthInvestment,
+          previousMonthTotal: previousMonthCash + previousMonthInvestment,
+          currentMonthTotal: currentMonthCash + currentMonthInvestment,
+          firstMonthTotal,
+          previousMonthName: months.length > 1 ? months[months.length - 2] : undefined,
+          currentMonthName: months.length > 0 ? months[months.length - 1] : undefined,
+          firstMonthName: months.length > 0 ? months[0] : undefined,
         });
 
         setHasData(allData.length > 0);
@@ -306,7 +336,7 @@ export default function Dashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Welcome to AssetsManager
+          Welcome to Assets Manager
         </h1>
         <p className="text-muted-foreground text-lg">
           Track, manage, and grow your financial portfolio with ease
@@ -320,141 +350,348 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Liquid Assets
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalLiquidAssets)}
-              </p>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Liquid Assets
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalLiquidAssets)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.liquidAssetsGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.liquidAssetsGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.liquidAssetsGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
+                </div>
+              </GlassCard>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Wallet className="h-6 w-6 text-primary" />
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Liquid Assets Breakdown</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthCash || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthCash || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm font-mono">
+                  ({formatCurrency(summaryData.currentMonthCash || 0)} - {formatCurrency(summaryData.previousMonthCash || 0)}) / {formatCurrency(summaryData.previousMonthCash || 0)} × 100 = {summaryData.liquidAssetsGrowthPercent}%
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.liquidAssetsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.liquidAssetsGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.liquidAssetsGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+            <ScrollArea className="max-h-[300px] pr-4">
+              <div className="space-y-3">
+                {financialData
+                  .filter((item: any) => Number(item.cash || 0) > 0)
+                  .map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.category} • {item.month} {item.year}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-primary">
+                        {formatCurrency(Number(item.cash || 0))}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Investments
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalInvestments)}
-              </p>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Investments
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalInvestments)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
+                    <PiggyBank className="h-6 w-6 text-chart-3" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.investmentsGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.investmentsGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.investmentsGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
+                </div>
+              </GlassCard>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
-              <PiggyBank className="h-6 w-6 text-chart-3" />
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Investments Breakdown</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthInvestment || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthInvestment || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-chart-3/10">
+                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm font-mono">
+                  ({formatCurrency(summaryData.currentMonthInvestment || 0)} - {formatCurrency(summaryData.previousMonthInvestment || 0)}) / {formatCurrency(summaryData.previousMonthInvestment || 0)} × 100 = {summaryData.investmentsGrowthPercent}%
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.investmentsGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.investmentsGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.investmentsGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+            <ScrollArea className="max-h-[300px] pr-4">
+              <div className="space-y-3">
+                {financialData
+                  .filter((item: any) => Number(item.investment || 0) > 0)
+                  .map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.category} • {item.month} {item.year}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-chart-3">
+                        {formatCurrency(Number(item.investment || 0))}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Monthly Growth
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {summaryData.monthlyGrowth}%
-              </p>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Monthly Growth
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {summaryData.monthlyGrowth}%
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-success" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.monthlyGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.monthlyGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.monthlyGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
+                </div>
+              </GlassCard>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-success" />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Monthly Growth Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthTotal || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthTotal || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-success/10">
+                <p className="text-sm text-muted-foreground mb-2">Growth Calculation</p>
+                <p className="text-sm font-mono mb-3">
+                  ({formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.previousMonthTotal || 0)}) / {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 = {summaryData.monthlyGrowth}%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  This represents the percentage change in total assets from {summaryData.previousMonthName} to {summaryData.currentMonthName}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.monthlyGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.monthlyGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.monthlyGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+          </DialogContent>
+        </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Growth
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalGrowth)}
-              </p>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Growth
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalGrowth)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
+                    <IndianRupee className="h-6 w-6 text-chart-4" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.totalGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.totalGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.totalGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">total growth</span>
+                </div>
+              </GlassCard>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
-              <IndianRupee className="h-6 w-6 text-chart-4" />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Total Growth Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.firstMonthName || 'First Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.firstMonthTotal || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthTotal || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-chart-4/10">
+                <p className="text-sm text-muted-foreground mb-2">Total Growth Amount</p>
+                <p className="text-2xl font-bold mb-3">
+                  {formatCurrency(summaryData.totalGrowth)}
+                </p>
+                <p className="text-sm font-mono mb-3">
+                  {formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.firstMonthTotal || 0)} = {formatCurrency(summaryData.totalGrowth)}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-success/10">
+                <p className="text-sm text-muted-foreground mb-2">Growth Percentage Calculation</p>
+                <p className="text-sm font-mono mb-3">
+                  {formatCurrency(summaryData.totalGrowth)} / {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 = {summaryData.totalGrowthPercent}%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  This represents the overall percentage increase from {summaryData.firstMonthName} to {summaryData.currentMonthName}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.totalGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.totalGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.totalGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">total growth</span>
-          </div>
-        </GlassCard>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Quick Actions */}
