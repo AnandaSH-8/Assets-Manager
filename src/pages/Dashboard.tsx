@@ -46,6 +46,17 @@ interface SummaryData {
   investmentsGrowthPercent: number;
   monthlyGrowthPercent: number;
   totalGrowthPercent: number;
+  // Additional breakdown data for dialogs
+  previousMonthCash?: number;
+  currentMonthCash?: number;
+  previousMonthInvestment?: number;
+  currentMonthInvestment?: number;
+  previousMonthTotal?: number;
+  currentMonthTotal?: number;
+  firstMonthTotal?: number;
+  previousMonthName?: string;
+  currentMonthName?: string;
+  firstMonthName?: string;
 }
 
 interface ChartDataItem {
@@ -279,6 +290,17 @@ export default function Dashboard() {
           investmentsGrowthPercent: Number(investmentsGrowthPercent.toFixed(2)),
           monthlyGrowthPercent: Number(monthlyGrowthPercent.toFixed(2)),
           totalGrowthPercent: Number(totalGrowthPercent.toFixed(2)),
+          // Additional breakdown data
+          previousMonthCash,
+          currentMonthCash,
+          previousMonthInvestment,
+          currentMonthInvestment,
+          previousMonthTotal: previousMonthCash + previousMonthInvestment,
+          currentMonthTotal: currentMonthCash + currentMonthInvestment,
+          firstMonthTotal,
+          previousMonthName: months.length > 1 ? months[months.length - 2] : undefined,
+          currentMonthName: months.length > 0 ? months[months.length - 1] : undefined,
+          firstMonthName: months.length > 0 ? months[0] : undefined,
         });
 
         setHasData(allData.length > 0);
@@ -370,7 +392,33 @@ export default function Dashboard() {
             <DialogHeader>
               <DialogTitle>Liquid Assets Breakdown</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="max-h-[500px] pr-4">
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthCash || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthCash || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm font-mono">
+                  ({formatCurrency(summaryData.currentMonthCash || 0)} - {formatCurrency(summaryData.previousMonthCash || 0)}) / {formatCurrency(summaryData.previousMonthCash || 0)} × 100 = {summaryData.liquidAssetsGrowthPercent}%
+                </p>
+              </div>
+            </div>
+            <ScrollArea className="max-h-[300px] pr-4">
               <div className="space-y-3">
                 {financialData
                   .filter((item: any) => Number(item.cash || 0) > 0)
@@ -437,7 +485,33 @@ export default function Dashboard() {
             <DialogHeader>
               <DialogTitle>Investments Breakdown</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="max-h-[500px] pr-4">
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthInvestment || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'}
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthInvestment || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-chart-3/10">
+                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm font-mono">
+                  ({formatCurrency(summaryData.currentMonthInvestment || 0)} - {formatCurrency(summaryData.previousMonthInvestment || 0)}) / {formatCurrency(summaryData.previousMonthInvestment || 0)} × 100 = {summaryData.investmentsGrowthPercent}%
+                </p>
+              </div>
+            </div>
+            <ScrollArea className="max-h-[300px] pr-4">
               <div className="space-y-3">
                 {financialData
                   .filter((item: any) => Number(item.investment || 0) > 0)
@@ -505,28 +579,33 @@ export default function Dashboard() {
               <DialogTitle>Monthly Growth Details</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-accent/30">
-                <p className="text-sm text-muted-foreground mb-2">Current Month Growth Rate</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {summaryData.monthlyGrowth}%
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-accent/30">
-                <p className="text-sm text-muted-foreground mb-2">Change from Previous Month</p>
-                <div className="flex items-center gap-2">
-                  {summaryData.monthlyGrowthPercent >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-success" />
-                  ) : (
-                    <TrendingDown className="h-5 w-5 text-destructive" />
-                  )}
-                  <p className={`text-2xl font-bold ${summaryData.monthlyGrowthPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}{summaryData.monthlyGrowthPercent}%
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.previousMonthName || 'Previous Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.previousMonthTotal || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthTotal || 0)}
                   </p>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground text-center">
-                Monthly growth represents the percentage change in total assets compared to the previous month
-              </p>
+              <div className="p-4 rounded-lg bg-success/10">
+                <p className="text-sm text-muted-foreground mb-2">Growth Calculation</p>
+                <p className="text-sm font-mono mb-3">
+                  ({formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.previousMonthTotal || 0)}) / {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 = {summaryData.monthlyGrowth}%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  This represents the percentage change in total assets from {summaryData.previousMonthName} to {summaryData.currentMonthName}
+                </p>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -574,28 +653,42 @@ export default function Dashboard() {
               <DialogTitle>Total Growth Details</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-accent/30">
-                <p className="text-sm text-muted-foreground mb-2">Total Growth Amount</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {formatCurrency(summaryData.totalGrowth)}
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-accent/30">
-                <p className="text-sm text-muted-foreground mb-2">Overall Growth Percentage</p>
-                <div className="flex items-center gap-2">
-                  {summaryData.totalGrowthPercent >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-success" />
-                  ) : (
-                    <TrendingDown className="h-5 w-5 text-destructive" />
-                  )}
-                  <p className={`text-2xl font-bold ${summaryData.totalGrowthPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {summaryData.totalGrowthPercent >= 0 ? '+' : ''}{summaryData.totalGrowthPercent}%
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.firstMonthName || 'First Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.firstMonthTotal || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent/30">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {summaryData.currentMonthName || 'Current Month'} Total
+                  </p>
+                  <p className="text-lg font-bold">
+                    {formatCurrency(summaryData.currentMonthTotal || 0)}
                   </p>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground text-center">
-                Total growth represents the cumulative increase in your assets from the first recorded month to the current month
-              </p>
+              <div className="p-4 rounded-lg bg-chart-4/10">
+                <p className="text-sm text-muted-foreground mb-2">Total Growth Amount</p>
+                <p className="text-2xl font-bold mb-3">
+                  {formatCurrency(summaryData.totalGrowth)}
+                </p>
+                <p className="text-sm font-mono mb-3">
+                  {formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.firstMonthTotal || 0)} = {formatCurrency(summaryData.totalGrowth)}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-success/10">
+                <p className="text-sm text-muted-foreground mb-2">Growth Percentage Calculation</p>
+                <p className="text-sm font-mono mb-3">
+                  {formatCurrency(summaryData.totalGrowth)} / {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 = {summaryData.totalGrowthPercent}%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  This represents the overall percentage increase from {summaryData.firstMonthName} to {summaryData.currentMonthName}
+                </p>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
