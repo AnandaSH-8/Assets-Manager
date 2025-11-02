@@ -330,39 +330,41 @@ export default function Dashboard() {
       >
         <Dialog>
           <DialogTrigger asChild>
-            <GlassCard hover className="p-6 cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Liquid Assets
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {formatCurrency(summaryData.totalLiquidAssets)}
-                  </p>
+            <div>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Liquid Assets
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalLiquidAssets)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-primary" />
+                  </div>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-primary" />
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.liquidAssetsGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.liquidAssetsGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.liquidAssetsGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
                 </div>
-              </div>
-              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-                {summaryData.liquidAssetsGrowthPercent >= 0 ? (
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-                )}
-                <span
-                  className={
-                    summaryData.liquidAssetsGrowthPercent >= 0
-                      ? 'text-success font-medium'
-                      : 'text-destructive font-medium'
-                  }
-                >
-                  {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
-                  {summaryData.liquidAssetsGrowthPercent}%
-                </span>
-                <span className="text-muted-foreground">from last month</span>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -395,39 +397,41 @@ export default function Dashboard() {
 
         <Dialog>
           <DialogTrigger asChild>
-            <GlassCard hover className="p-6 cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Investments
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {formatCurrency(summaryData.totalInvestments)}
-                  </p>
+            <div>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Investments
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalInvestments)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
+                    <PiggyBank className="h-6 w-6 text-chart-3" />
+                  </div>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
-                  <PiggyBank className="h-6 w-6 text-chart-3" />
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.investmentsGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.investmentsGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.investmentsGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
                 </div>
-              </div>
-              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-                {summaryData.investmentsGrowthPercent >= 0 ? (
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-                )}
-                <span
-                  className={
-                    summaryData.investmentsGrowthPercent >= 0
-                      ? 'text-success font-medium'
-                      : 'text-destructive font-medium'
-                  }
-                >
-                  {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
-                  {summaryData.investmentsGrowthPercent}%
-                </span>
-                <span className="text-muted-foreground">from last month</span>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -460,39 +464,41 @@ export default function Dashboard() {
 
         <Dialog>
           <DialogTrigger asChild>
-            <GlassCard hover className="p-6 cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Monthly Growth
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {summaryData.monthlyGrowth}%
-                  </p>
+            <div>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Monthly Growth
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {summaryData.monthlyGrowth}%
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-success" />
+                  </div>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-success" />
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.monthlyGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.monthlyGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.monthlyGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">from last month</span>
                 </div>
-              </div>
-              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-                {summaryData.monthlyGrowthPercent >= 0 ? (
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-                )}
-                <span
-                  className={
-                    summaryData.monthlyGrowthPercent >= 0
-                      ? 'text-success font-medium'
-                      : 'text-destructive font-medium'
-                  }
-                >
-                  {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
-                  {summaryData.monthlyGrowthPercent}%
-                </span>
-                <span className="text-muted-foreground">from last month</span>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -527,39 +533,41 @@ export default function Dashboard() {
 
         <Dialog>
           <DialogTrigger asChild>
-            <GlassCard hover className="p-6 cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Growth
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {formatCurrency(summaryData.totalGrowth)}
-                  </p>
+            <div>
+              <GlassCard hover className="p-6 cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Growth
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(summaryData.totalGrowth)}
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
+                    <IndianRupee className="h-6 w-6 text-chart-4" />
+                  </div>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
-                  <IndianRupee className="h-6 w-6 text-chart-4" />
+                <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                  {summaryData.totalGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      summaryData.totalGrowthPercent >= 0
+                        ? 'text-success font-medium'
+                        : 'text-destructive font-medium'
+                    }
+                  >
+                    {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
+                    {summaryData.totalGrowthPercent}%
+                  </span>
+                  <span className="text-muted-foreground">total growth</span>
                 </div>
-              </div>
-              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-                {summaryData.totalGrowthPercent >= 0 ? (
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-                )}
-                <span
-                  className={
-                    summaryData.totalGrowthPercent >= 0
-                      ? 'text-success font-medium'
-                      : 'text-destructive font-medium'
-                  }
-                >
-                  {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
-                  {summaryData.totalGrowthPercent}%
-                </span>
-                <span className="text-muted-foreground">total growth</span>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
