@@ -458,73 +458,139 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Monthly Growth
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {summaryData.monthlyGrowth}%
+        <Dialog>
+          <DialogTrigger asChild>
+            <GlassCard hover className="p-6 cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Monthly Growth
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {summaryData.monthlyGrowth}%
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-success" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                {summaryData.monthlyGrowthPercent >= 0 ? (
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                )}
+                <span
+                  className={
+                    summaryData.monthlyGrowthPercent >= 0
+                      ? 'text-success font-medium'
+                      : 'text-destructive font-medium'
+                  }
+                >
+                  {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
+                  {summaryData.monthlyGrowthPercent}%
+                </span>
+                <span className="text-muted-foreground">from last month</span>
+              </div>
+            </GlassCard>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Monthly Growth Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-accent/30">
+                <p className="text-sm text-muted-foreground mb-2">Current Month Growth Rate</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {summaryData.monthlyGrowth}%
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-accent/30">
+                <p className="text-sm text-muted-foreground mb-2">Change from Previous Month</p>
+                <div className="flex items-center gap-2">
+                  {summaryData.monthlyGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-5 w-5 text-success" />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-destructive" />
+                  )}
+                  <p className={`text-2xl font-bold ${summaryData.monthlyGrowthPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}{summaryData.monthlyGrowthPercent}%
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                Monthly growth represents the percentage change in total assets compared to the previous month
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-success" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.monthlyGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.monthlyGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.monthlyGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">from last month</span>
-          </div>
-        </GlassCard>
+          </DialogContent>
+        </Dialog>
 
-        <GlassCard hover className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Growth
-              </p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(summaryData.totalGrowth)}
+        <Dialog>
+          <DialogTrigger asChild>
+            <GlassCard hover className="p-6 cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Growth
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(summaryData.totalGrowth)}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
+                  <IndianRupee className="h-6 w-6 text-chart-4" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
+                {summaryData.totalGrowthPercent >= 0 ? (
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
+                )}
+                <span
+                  className={
+                    summaryData.totalGrowthPercent >= 0
+                      ? 'text-success font-medium'
+                      : 'text-destructive font-medium'
+                  }
+                >
+                  {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
+                  {summaryData.totalGrowthPercent}%
+                </span>
+                <span className="text-muted-foreground">total growth</span>
+              </div>
+            </GlassCard>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Total Growth Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-accent/30">
+                <p className="text-sm text-muted-foreground mb-2">Total Growth Amount</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {formatCurrency(summaryData.totalGrowth)}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-accent/30">
+                <p className="text-sm text-muted-foreground mb-2">Overall Growth Percentage</p>
+                <div className="flex items-center gap-2">
+                  {summaryData.totalGrowthPercent >= 0 ? (
+                    <TrendingUp className="h-5 w-5 text-success" />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-destructive" />
+                  )}
+                  <p className={`text-2xl font-bold ${summaryData.totalGrowthPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {summaryData.totalGrowthPercent >= 0 ? '+' : ''}{summaryData.totalGrowthPercent}%
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                Total growth represents the cumulative increase in your assets from the first recorded month to the current month
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
-              <IndianRupee className="h-6 w-6 text-chart-4" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs sm:text-sm flex-wrap">
-            {summaryData.totalGrowthPercent >= 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
-            ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
-            )}
-            <span
-              className={
-                summaryData.totalGrowthPercent >= 0
-                  ? 'text-success font-medium'
-                  : 'text-destructive font-medium'
-              }
-            >
-              {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
-              {summaryData.totalGrowthPercent}%
-            </span>
-            <span className="text-muted-foreground">total growth</span>
-          </div>
-        </GlassCard>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Quick Actions */}
