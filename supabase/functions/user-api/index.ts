@@ -56,7 +56,7 @@ Deno.serve(async req => {
             Authorization: authHeader,
           },
         },
-      }
+      },
     );
 
     switch (action) {

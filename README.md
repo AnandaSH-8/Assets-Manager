@@ -16,6 +16,7 @@ A modern, secure financial portfolio management application built with React and
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Supabase account (for backend)
 
@@ -48,6 +49,7 @@ npm run dev
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and context
 - **TypeScript** - Type-safe development
 - **Vite** - Fast build tool and dev server
@@ -58,12 +60,14 @@ npm run dev
 - **React Router** - Client-side routing
 
 ### Backend
+
 - **Supabase** - PostgreSQL database with real-time features
 - **Supabase Auth** - User authentication and authorization
 - **Edge Functions** - Serverless API endpoints
 - **Row Level Security** - Database-level security
 
 ### Development Tools
+
 - **ESLint** - Code linting and quality
 - **Prettier** - Code formatting
 - **TypeScript** - Static type checking

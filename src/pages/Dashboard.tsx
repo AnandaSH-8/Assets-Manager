@@ -298,8 +298,10 @@ export default function Dashboard() {
           previousMonthTotal: previousMonthCash + previousMonthInvestment,
           currentMonthTotal: currentMonthCash + currentMonthInvestment,
           firstMonthTotal,
-          previousMonthName: months.length > 1 ? months[months.length - 2] : undefined,
-          currentMonthName: months.length > 0 ? months[months.length - 1] : undefined,
+          previousMonthName:
+            months.length > 1 ? months[months.length - 2] : undefined,
+          currentMonthName:
+            months.length > 0 ? months[months.length - 1] : undefined,
           firstMonthName: months.length > 0 ? months[0] : undefined,
         });
 
@@ -412,9 +414,14 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-primary/10">
-                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Calculation
+                </p>
                 <p className="text-sm font-mono">
-                  ({formatCurrency(summaryData.currentMonthCash || 0)} - {formatCurrency(summaryData.previousMonthCash || 0)}) / {formatCurrency(summaryData.previousMonthCash || 0)} × 100 = {summaryData.liquidAssetsGrowthPercent}%
+                  ({formatCurrency(summaryData.currentMonthCash || 0)} -{' '}
+                  {formatCurrency(summaryData.previousMonthCash || 0)}) /{' '}
+                  {formatCurrency(summaryData.previousMonthCash || 0)} × 100 ={' '}
+                  {summaryData.liquidAssetsGrowthPercent}%
                 </p>
               </div>
             </div>
@@ -505,9 +512,14 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-chart-3/10">
-                <p className="text-sm text-muted-foreground mb-2">Calculation</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Calculation
+                </p>
                 <p className="text-sm font-mono">
-                  ({formatCurrency(summaryData.currentMonthInvestment || 0)} - {formatCurrency(summaryData.previousMonthInvestment || 0)}) / {formatCurrency(summaryData.previousMonthInvestment || 0)} × 100 = {summaryData.investmentsGrowthPercent}%
+                  ({formatCurrency(summaryData.currentMonthInvestment || 0)} -{' '}
+                  {formatCurrency(summaryData.previousMonthInvestment || 0)}) /{' '}
+                  {formatCurrency(summaryData.previousMonthInvestment || 0)} ×
+                  100 = {summaryData.investmentsGrowthPercent}%
                 </p>
               </div>
             </div>
@@ -598,12 +610,19 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="p-4 rounded-lg bg-success/10">
-                <p className="text-sm text-muted-foreground mb-2">Growth Calculation</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Growth Calculation
+                </p>
                 <p className="text-sm font-mono mb-3">
-                  ({formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.previousMonthTotal || 0)}) / {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 = {summaryData.monthlyGrowth}%
+                  ({formatCurrency(summaryData.currentMonthTotal || 0)} -{' '}
+                  {formatCurrency(summaryData.previousMonthTotal || 0)}) /{' '}
+                  {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 ={' '}
+                  {summaryData.monthlyGrowth}%
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  This represents the percentage change in total assets from {summaryData.previousMonthName} to {summaryData.currentMonthName}
+                  This represents the percentage change in total assets from{' '}
+                  {summaryData.previousMonthName} to{' '}
+                  {summaryData.currentMonthName}
                 </p>
               </div>
             </div>
@@ -672,21 +691,30 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="p-4 rounded-lg bg-chart-4/10">
-                <p className="text-sm text-muted-foreground mb-2">Total Growth Amount</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Total Growth Amount
+                </p>
                 <p className="text-2xl font-bold mb-3">
                   {formatCurrency(summaryData.totalGrowth)}
                 </p>
                 <p className="text-sm font-mono mb-3">
-                  {formatCurrency(summaryData.currentMonthTotal || 0)} - {formatCurrency(summaryData.firstMonthTotal || 0)} = {formatCurrency(summaryData.totalGrowth)}
+                  {formatCurrency(summaryData.currentMonthTotal || 0)} -{' '}
+                  {formatCurrency(summaryData.firstMonthTotal || 0)} ={' '}
+                  {formatCurrency(summaryData.totalGrowth)}
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-success/10">
-                <p className="text-sm text-muted-foreground mb-2">Growth Percentage Calculation</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Growth Percentage Calculation
+                </p>
                 <p className="text-sm font-mono mb-3">
-                  {formatCurrency(summaryData.totalGrowth)} / {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 = {summaryData.totalGrowthPercent}%
+                  {formatCurrency(summaryData.totalGrowth)} /{' '}
+                  {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 ={' '}
+                  {summaryData.totalGrowthPercent}%
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  This represents the overall percentage increase from {summaryData.firstMonthName} to {summaryData.currentMonthName}
+                  This represents the overall percentage increase from{' '}
+                  {summaryData.firstMonthName} to {summaryData.currentMonthName}
                 </p>
               </div>
             </div>

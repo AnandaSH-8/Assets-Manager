@@ -1,5 +1,13 @@
 import { motion } from 'framer-motion';
-import { Trash2, AlertTriangle, UserX, User, Mail, Lock, Save } from 'lucide-react';
+import {
+  Trash2,
+  AlertTriangle,
+  UserX,
+  User,
+  Mail,
+  Lock,
+  Save,
+} from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,18 +36,18 @@ export default function Settings() {
   const { user } = useAuth();
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Profile state
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  
+
   // Password state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   // Email state
   const [newEmail, setNewEmail] = useState('');
   const [isChangingEmail, setIsChangingEmail] = useState(false);
@@ -74,7 +82,8 @@ export default function Settings() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update profile',
+        description:
+          error instanceof Error ? error.message : 'Failed to update profile',
         variant: 'destructive',
       });
     } finally {
@@ -104,7 +113,7 @@ export default function Settings() {
     setIsChangingPassword(true);
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword
+        password: newPassword,
       });
 
       if (error) throw error;
@@ -119,7 +128,8 @@ export default function Settings() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to change password',
+        description:
+          error instanceof Error ? error.message : 'Failed to change password',
         variant: 'destructive',
       });
     } finally {
@@ -140,7 +150,7 @@ export default function Settings() {
     setIsChangingEmail(true);
     try {
       const { error } = await supabase.auth.updateUser({
-        email: newEmail
+        email: newEmail,
       });
 
       if (error) throw error;
@@ -153,7 +163,8 @@ export default function Settings() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to change email',
+        description:
+          error instanceof Error ? error.message : 'Failed to change email',
         variant: 'destructive',
       });
     } finally {
@@ -237,7 +248,7 @@ export default function Settings() {
               <Input
                 id="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 placeholder="Enter your name"
               />
             </div>
@@ -246,12 +257,12 @@ export default function Settings() {
               <Input
                 id="username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 placeholder="Enter your username"
               />
             </div>
-            <Button 
-              onClick={handleUpdateProfile} 
+            <Button
+              onClick={handleUpdateProfile}
               disabled={isUpdatingProfile}
               className="w-full sm:w-auto"
             >
@@ -280,7 +291,7 @@ export default function Settings() {
                 id="new-password"
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={e => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
               />
             </div>
@@ -290,12 +301,12 @@ export default function Settings() {
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
               />
             </div>
-            <Button 
-              onClick={handleChangePassword} 
+            <Button
+              onClick={handleChangePassword}
               disabled={isChangingPassword || !newPassword || !confirmPassword}
               className="w-full sm:w-auto"
             >
@@ -334,12 +345,12 @@ export default function Settings() {
                 id="new-email"
                 type="email"
                 value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
+                onChange={e => setNewEmail(e.target.value)}
                 placeholder="Enter new email"
               />
             </div>
-            <Button 
-              onClick={handleChangeEmail} 
+            <Button
+              onClick={handleChangeEmail}
               disabled={isChangingEmail || !newEmail}
               className="w-full sm:w-auto"
             >

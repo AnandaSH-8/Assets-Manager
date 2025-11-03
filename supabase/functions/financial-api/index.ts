@@ -185,8 +185,16 @@ async function getFinancial(supabase: any, id: string, userId: string) {
   );
 }
 async function createFinancial(req: Request, supabase: any, userId: string) {
-  const { category, description, amount, cash, investment, current_value, month, year } =
-    await req.json();
+  const {
+    category,
+    description,
+    amount,
+    cash,
+    investment,
+    current_value,
+    month,
+    year,
+  } = await req.json();
   if (!category || !amount) {
     return new Response(
       JSON.stringify({
@@ -245,7 +253,12 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
     },
   );
 }
-async function updateFinancial(req: Request, supabase: any, id: string, userId: string) {
+async function updateFinancial(
+  req: Request,
+  supabase: any,
+  id: string,
+  userId: string,
+) {
   const updates = await req.json();
   const { data, error } = await supabase
     .from('financial_particulars')
@@ -335,8 +348,14 @@ async function getFinancialStats(supabase: any, userId: string) {
     );
   }
   // Calculate statistics
-  const totalAmount = data.reduce((sum: number, item: any) => sum + Number(item.amount), 0);
-  const totalCash = data.reduce((sum: number, item: any) => sum + Number(item.cash || 0), 0);
+  const totalAmount = data.reduce(
+    (sum: number, item: any) => sum + Number(item.amount),
+    0,
+  );
+  const totalCash = data.reduce(
+    (sum: number, item: any) => sum + Number(item.cash || 0),
+    0,
+  );
   const totalInvestment = data.reduce(
     (sum: number, item: any) => sum + Number(item.investment || 0),
     0,

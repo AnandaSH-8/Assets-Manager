@@ -1,34 +1,34 @@
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { PieChart, Calendar, Download, FileText } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { PieChart, Calendar, Download, FileText } from 'lucide-react'
+import { GlassCard } from '@/components/ui/glass-card'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 import {
   PieChart as RechartsPieChart,
   Pie,
   Cell,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { useState, useEffect } from 'react';
-import { financialAPI } from '@/services/api';
-import { useAuth } from '@/hooks/useAuth';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+} from 'recharts'
+import { useState, useEffect } from 'react'
+import { financialAPI } from '@/services/api'
+import { useAuth } from '@/hooks/useAuth'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -36,146 +36,153 @@ const CHART_COLORS = [
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
   'hsl(var(--chart-5))',
-];
+]
 
 export default function Statistics() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [categoryData, setCategoryData] = useState<any[]>([]);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [titleData, setTitleData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('1month');
-  const [allData, setAllData] = useState<any[]>([]);
-  const [latestMonth, setLatestMonth] = useState<string>('');
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [categoryData, setCategoryData] = useState<any[]>([])
+  const [performanceData, setPerformanceData] = useState<any[]>([])
+  const [titleData, setTitleData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [dateRange, setDateRange] = useState('1month')
+  const [allData, setAllData] = useState<any[]>([])
+  const [latestMonth, setLatestMonth] = useState<string>('')
 
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
-        setIsLoading(false);
-        return;
+        setIsLoading(false)
+        return
       }
 
       try {
-        setIsLoading(true);
+        setIsLoading(true)
         const [statsResponse, allDataResponse] = await Promise.all([
           financialAPI.getStats(),
           financialAPI.getAll(),
-        ]);
+        ])
 
-        const stats = statsResponse.data;
-        const fetchedData = allDataResponse.data;
-        setAllData(fetchedData);
-        
+        // const stats = statsResponse.data
+        const fetchedData = allDataResponse.data
+        setAllData(fetchedData)
+
         // Get latest month from data
-        let latestMonth = '';
+        let latestMonth = ''
         if (fetchedData.length > 0) {
-          const sortedData = [...fetchedData].sort((a, b) => 
-            new Date(b.date_added || b.created_at).getTime() - new Date(a.date_added || a.created_at).getTime()
-          );
-          const latest = sortedData[0];
-          latestMonth = `${latest.month} ${latest.year}`;
-          setLatestMonth(latestMonth);
+          const sortedData = [...fetchedData].sort(
+            (a, b) =>
+              new Date(b.date_added || b.created_at).getTime() -
+              new Date(a.date_added || a.created_at).getTime(),
+          )
+          const latest = sortedData[0]
+          latestMonth = `${latest.month} ${latest.year}`
+          setLatestMonth(latestMonth)
         }
-        
+
         // Filter data by date range
-        const filteredData = filterDataByRange(fetchedData, dateRange);
+        const filteredData = filterDataByRange(fetchedData, dateRange)
 
         // Process category data for pie chart - only latest month
-        const categoryTotals: Record<string, number> = {};
-        
+        const categoryTotals: Record<string, number> = {}
+
         for (const item of filteredData) {
-          const currentMonth = `${item.month} ${item.year}`;
-          if (currentMonth !== latestMonth) continue;
-          
-          const category = item.category;
-          const amount = Number(item.amount || 0);
-          
+          const currentMonth = `${item.month} ${item.year}`
+          if (currentMonth !== latestMonth) continue
+
+          const category = item.category
+          const amount = Number(item.amount || 0)
+
           if (!categoryTotals[category]) {
-            categoryTotals[category] = 0;
+            categoryTotals[category] = 0
           }
-          categoryTotals[category] += amount;
+          categoryTotals[category] += amount
         }
-        
-        const newCategoryData = Object.entries(categoryTotals).map(
-          ([name, value], index) => ({
+
+        const newCategoryData = Object.entries(categoryTotals)
+          .map(([name, value], index) => ({
             name,
             value: Number(value),
             color: CHART_COLORS[index % CHART_COLORS.length],
-          }),
-        );
-        setCategoryData(newCategoryData);
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+
+        setCategoryData(newCategoryData)
 
         // Process performance data by category - keep only latest entry per category
         const categoryPerfMap = []
 
-         // Process performance data by category
+        // Process performance data by category
         const performanceByCategory: Record<
           string,
-          { liquid: number;invested: number; current: number; count: number }
-        > = {};
+          { liquid: number; invested: number; current: number; count: number }
+        > = {}
 
-        for(let item of filteredData) {
+        for (let item of filteredData) {
+          const currentMonth = `${item.month} ${item.year}`
 
-          const currentMonth = `${item.month} ${item.year}`;
+          if (currentMonth !== latestMonth) continue
 
-          if (currentMonth !== latestMonth) continue;
+          const category = item.category
 
-          const category = item.category;
-         
           if (!performanceByCategory[category]) {
             performanceByCategory[category] = {
-              liquid:0,
+              liquid: 0,
               invested: 0,
               current: 0,
               count: 0,
-            };
-          }
-          if(category == 'Cash in Hand' || category == 'Bank Account'){
-            performanceByCategory[category].liquid += Number(item.cash);
-          }
-          else {
-            if(category == 'Recurring Deposit' ||  category == 'Provident Fund'){
-              performanceByCategory[category].invested += Number(item.amount);
-              performanceByCategory[category].current += Number(item.amount);
-            } else {
-              performanceByCategory[category].invested += Number(item.investment);
-              performanceByCategory[category].current += Number(item.current_value);
             }
-            
-            performanceByCategory[category].count += 1;
           }
-        };
+          if (category == 'Cash in Hand' || category == 'Bank Account') {
+            performanceByCategory[category].liquid += Number(item.cash)
+          } else {
+            if (
+              category == 'Recurring Deposit' ||
+              category == 'Provident Fund'
+            ) {
+              performanceByCategory[category].invested += Number(item.amount)
+              performanceByCategory[category].current += Number(item.amount)
+            } else {
+              performanceByCategory[category].invested += Number(
+                item.investment,
+              )
+              performanceByCategory[category].current += Number(
+                item.current_value,
+              )
+            }
 
+            performanceByCategory[category].count += 1
+          }
+        }
 
         const newPerformanceData = Object.entries(performanceByCategory).map(
           ([category, data]) => {
             const returnPercent =
               data.invested > 0
                 ? ((data.current - data.invested) / data.invested) * 100
-                : 0;
+                : 0
             return {
               category,
               liquid: data.liquid,
               invested: data.invested,
               current: data.current,
               return: returnPercent,
-            };
+            }
           },
-        );
-        setPerformanceData(newPerformanceData);
+        )
+        setPerformanceData(newPerformanceData)
 
         // Process individual records for title-based table
         // Group by title and keep only the latest entry for each title
-        const lastesMonthData = [];
+        const lastesMonthData = []
 
         for (const item of filteredData) {
-          const currentMonth = `${item.month} ${item.year}`;
+          const currentMonth = `${item.month} ${item.year}`
 
-          if (currentMonth !== latestMonth) continue;
-          const itemDate = new Date(item.date_added || item.created_at);
+          if (currentMonth !== latestMonth) continue
+          const itemDate = new Date(item.date_added || item.created_at)
 
-         lastesMonthData.push({
+          lastesMonthData.push({
             id: item.id,
             title: item.description,
             category: item.category,
@@ -185,52 +192,59 @@ export default function Statistics() {
             month: item.month,
             year: item.year,
             date: itemDate,
-          });
+          })
         }
-        
-        setTitleData([...lastesMonthData]);
-      } catch (error) {
-        console.error('Error fetching statistics:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        // sort by title
+        lastesMonthData.sort((a, b) => {
+          const titleCompare = a.title.localeCompare(b.title)
+          return titleCompare == 0
+            ? a.category.localeCompare(b.category)
+            : titleCompare
+        })
 
-    fetchData();
-  }, [user, dateRange]);
+        setTitleData([...lastesMonthData])
+      } catch (error) {
+        console.error('Error fetching statistics:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user, dateRange])
 
   const filterDataByRange = (data: any[], range: string) => {
-    const now = new Date();
-    const cutoffDate = new Date();
+    const now = new Date()
+    const cutoffDate = new Date()
 
     switch (range) {
       case '1month':
-        cutoffDate.setMonth(now.getMonth() - 1);
-        break;
+        cutoffDate.setMonth(now.getMonth() - 1)
+        break
       case '3months':
-        cutoffDate.setMonth(now.getMonth() - 3);
-        break;
+        cutoffDate.setMonth(now.getMonth() - 3)
+        break
       case '6months':
-        cutoffDate.setMonth(now.getMonth() - 6);
-        break;
+        cutoffDate.setMonth(now.getMonth() - 6)
+        break
       case '1year':
-        cutoffDate.setFullYear(now.getFullYear() - 1);
-        break;
+        cutoffDate.setFullYear(now.getFullYear() - 1)
+        break
       default:
-        return data;
+        return data
     }
 
     return data.filter((item: any) => {
-      const itemDate = new Date(item.date_added || item.created_at);
-      return itemDate >= cutoffDate;
-    });
-  };
+      const itemDate = new Date(item.date_added || item.created_at)
+      return itemDate >= cutoffDate
+    })
+  }
 
   const exportToExcel = () => {
     // Prepare title data
-    const titleSheet = titleData.map((item) => {
-      const totalInvested = item.cash + item.investment;
-      const gainLoss = item.currentValue - totalInvested;
+    const titleSheet = titleData.map(item => {
+      const totalInvested = item.cash + item.investment
+      const gainLoss = item.currentValue - totalInvested
       return {
         Title: item.title,
         Category: item.category,
@@ -238,44 +252,47 @@ export default function Statistics() {
         'Cash Invested': item.investment,
         'Current Value': item.currentValue,
         'Gain/Loss': gainLoss,
-      };
-    });
+      }
+    })
 
     // Prepare category performance data
-    const performanceSheet = performanceData.map((item) => ({
+    const performanceSheet = performanceData.map(item => ({
       Category: item.category,
       Liquid: item.liquid,
       Invested: item.invested,
       'Current Value': item.current,
       'Return %': item.return.toFixed(2),
       'Gain/Loss': item.current - item.invested,
-    }));
+    }))
 
     // Create workbook
-    const wb = XLSX.utils.book_new();
-    const ws1 = XLSX.utils.json_to_sheet(titleSheet);
-    const ws2 = XLSX.utils.json_to_sheet(performanceSheet);
+    const wb = XLSX.utils.book_new()
+    const ws1 = XLSX.utils.json_to_sheet(titleSheet)
+    const ws2 = XLSX.utils.json_to_sheet(performanceSheet)
 
-    XLSX.utils.book_append_sheet(wb, ws1, 'Assets by Title');
-    XLSX.utils.book_append_sheet(wb, ws2, 'Category Performance');
+    XLSX.utils.book_append_sheet(wb, ws1, 'Assets by Title')
+    XLSX.utils.book_append_sheet(wb, ws2, 'Category Performance')
 
     // Save file
-    XLSX.writeFile(wb, `Portfolio_Statistics_${new Date().toLocaleDateString()}.xlsx`);
-  };
+    XLSX.writeFile(
+      wb,
+      `Portfolio_Statistics_${new Date().toLocaleDateString()}.xlsx`,
+    )
+  }
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF()
 
     // Add title
-    doc.setFontSize(18);
-    doc.text('Portfolio Statistics', 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+    doc.setFontSize(18)
+    doc.text('Portfolio Statistics', 14, 20)
+    doc.setFontSize(10)
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28)
 
     // Assets by Title table
-    const titleTableData = titleData.map((item) => {
-      const totalInvested = item.cash + item.investment;
-      const gainLoss = item.currentValue - totalInvested;
+    const titleTableData = titleData.map(item => {
+      const totalInvested = item.cash + item.investment
+      const gainLoss = item.currentValue - totalInvested
       return [
         item.title,
         item.category,
@@ -283,54 +300,65 @@ export default function Statistics() {
         formatCurrency(item.investment),
         formatCurrency(item.currentValue),
         formatCurrency(gainLoss),
-      ];
-    });
+      ]
+    })
 
     autoTable(doc, {
-      head: [['Title', 'Category', 'Cash at Bank', 'Cash Invested', 'Current Value', 'Gain/Loss']],
+      head: [
+        [
+          'Title',
+          'Category',
+          'Cash at Bank',
+          'Cash Invested',
+          'Current Value',
+          'Gain/Loss',
+        ],
+      ],
       body: titleTableData,
       startY: 35,
       theme: 'grid',
       headStyles: { fillColor: [79, 70, 229] },
-    });
+    })
 
     // Category Performance table
-    const performanceTableData = performanceData.map((item) => [
+    const performanceTableData = performanceData.map(item => [
       item.liquid,
       item.category,
       formatCurrency(item.invested),
       formatCurrency(item.current),
       `${item.return.toFixed(2)}%`,
       formatCurrency(item.current - item.invested),
-    ]);
+    ])
 
     autoTable(doc, {
-      head: [['Category', 'Invested', 'Current Value', 'Return %', 'Gain/Loss']],
+      head: [
+        ['Category', 'Invested', 'Current Value', 'Return %', 'Gain/Loss'],
+      ],
       body: performanceTableData,
       startY: (doc as any).lastAutoTable.finalY + 10,
       theme: 'grid',
       headStyles: { fillColor: [79, 70, 229] },
-    });
+    })
 
     // Save file
-    doc.save(`Portfolio_Statistics_${new Date().toLocaleDateString()}.pdf`);
-  };
-  
+    doc.save(`Portfolio_Statistics_${new Date().toLocaleDateString()}.pdf`)
+  }
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(value);
-  };
+    }).format(value)
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
       </div>
-    );
+    )
   }
 
   if (categoryData.length === 0) {
@@ -343,7 +371,7 @@ export default function Statistics() {
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -403,7 +431,6 @@ export default function Statistics() {
           </DropdownMenu>
         </div>
       </motion.div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -443,17 +470,22 @@ export default function Statistics() {
                 </thead>
               </table>
             </div>
-            
             {/* Scrollable Body */}
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-track]:bg-transparent">
               <table className="w-full">
                 <tbody>
                   {titleData.map((item, index) => {
-                    const gainLoss = item.cash == 0 ? item.currentValue - item.investment : item.cash;
-                    const isProfit = gainLoss >= 0;
+                    const gainLoss =
+                      item.cash == 0
+                        ? item.currentValue - item.investment
+                        : item.cash
+                    const isProfit = gainLoss >= 0
 
-                    const profitLossColor = isProfit ? 'text-success' : 'text-destructive';
-                    const gainLossColor = item.cash == 0 ? profitLossColor : 'text-muted-foreground'; ;
+                    const profitLossColor = isProfit
+                      ? 'text-success'
+                      : 'text-destructive'
+                    const gainLossColor =
+                      item.cash == 0 ? profitLossColor : 'text-muted-foreground'
 
                     return (
                       <motion.tr
@@ -462,7 +494,11 @@ export default function Statistics() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        onClick={() => navigate('/add-particulars', { state: { editData: item } })}
+                        onClick={() =>
+                          navigate('/add-particulars', {
+                            state: { editData: item },
+                          })
+                        }
                       >
                         <td className="py-4 font-medium w-1/6">{item.title}</td>
                         <td className="py-4 w-1/6">{item.category}</td>
@@ -477,17 +513,16 @@ export default function Statistics() {
                         </td>
                         <td
                           className={`py-4 text-right font-bold w-1/6 ${gainLossColor}`}
-                        > 
+                        >
                           {isProfit ? '+' : ''}
                           {formatCurrency(gainLoss)}
                         </td>
                       </motion.tr>
-                    );
+                    )
                   })}
                 </tbody>
               </table>
             </div>
-            
             {/* Fixed Footer with Totals */}
             <div className="border-t border-border/50 bg-accent/10">
               <table className="w-full">
@@ -506,26 +541,46 @@ export default function Statistics() {
                     <td className="py-4 font-bold w-1/6">Total</td>
                     <td className="py-4 w-1/6">-</td>
                     <td className="py-4 text-right w-1/6">
-                      {formatCurrency(titleData.reduce((sum, item) => sum + item.cash, 0))}
+                      {formatCurrency(
+                        titleData.reduce((sum, item) => sum + item.cash, 0),
+                      )}
                     </td>
                     <td className="py-4 text-right w-1/6">
-                      {formatCurrency(titleData.reduce((sum, item) => sum + item.investment, 0))}
+                      {formatCurrency(
+                        titleData.reduce(
+                          (sum, item) => sum + item.investment,
+                          0,
+                        ),
+                      )}
                     </td>
                     <td className="py-4 text-right w-1/6">
-                      {formatCurrency(titleData.reduce((sum, item) => sum + item.currentValue, 0))}
+                      {formatCurrency(
+                        titleData.reduce(
+                          (sum, item) => sum + item.currentValue,
+                          0,
+                        ),
+                      )}
                     </td>
                     <td className="py-4 text-right w-1/6">
                       {(() => {
                         const totalGainLoss = titleData.reduce((sum, item) => {
-                          const gainLoss = item.cash == 0 ? item.currentValue - item.investment : item.cash;
-                          return sum + gainLoss;
-                        }, 0);
-                        const isProfit = totalGainLoss >= 0;
+                          const gainLoss =
+                            item.cash == 0
+                              ? item.currentValue - item.investment
+                              : item.cash
+                          return sum + gainLoss
+                        }, 0)
+                        const isProfit = totalGainLoss >= 0
                         return (
-                          <span className={isProfit ? 'text-success' : 'text-destructive'}>
-                            {isProfit ? '+' : ''}{formatCurrency(totalGainLoss)}
+                          <span
+                            className={
+                              isProfit ? 'text-success' : 'text-destructive'
+                            }
+                          >
+                            {isProfit ? '+' : ''}
+                            {formatCurrency(totalGainLoss)}
                           </span>
-                        );
+                        )
                       })()}
                     </td>
                   </tr>
@@ -535,7 +590,6 @@ export default function Statistics() {
           </div>
         </GlassCard>
       </motion.div>
-
       {/* Category Performance */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -571,11 +625,16 @@ export default function Statistics() {
               </thead>
               <tbody>
                 {performanceData.map((item, index) => {
-                  let gainLoss = item.liquid ? item.liquid : item.current - item.invested;
-                  if(item.category == 'Recurring Deposit' ||  item.category == 'Provident Fund'){
-                    gainLoss = item.invested;
+                  let gainLoss = item.liquid
+                    ? item.liquid
+                    : item.current - item.invested
+                  if (
+                    item.category == 'Recurring Deposit' ||
+                    item.category == 'Provident Fund'
+                  ) {
+                    gainLoss = item.invested
                   }
-                  const isProfit = gainLoss >= 0;
+                  const isProfit = gainLoss >= 0
 
                   return (
                     <motion.tr
@@ -612,14 +671,13 @@ export default function Statistics() {
                         {formatCurrency(gainLoss)}
                       </td>
                     </motion.tr>
-                  );
+                  )
                 })}
               </tbody>
             </table>
           </div>
         </GlassCard>
       </motion.div>
-
       {/* Portfolio Distribution */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -650,7 +708,7 @@ export default function Statistics() {
                     dataKey="value"
                   >
                     {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index+1}`} fill={entry.color} />
+                      <Cell key={`cell-${index + 1}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip formatter={value => formatCurrency(Number(value))} />
@@ -696,5 +754,5 @@ export default function Statistics() {
         </GlassCard>
       </motion.div>
     </div>
-  );
+  )
 }

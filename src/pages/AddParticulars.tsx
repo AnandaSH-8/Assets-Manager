@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Save, Plus, Wallet, TrendingUp } from 'lucide-react';
+import { Save, Plus, Wallet, TrendingUp, BarChart3 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card';
 import { NeomorphInput } from '@/components/ui/neomorph-input';
 import { Button } from '@/components/ui/button';
@@ -91,77 +91,76 @@ export default function AddParticulars() {
   }, [editData]);
 
   const handleInputChange = (field: string, value: string) => {
-    const newData = { ...formData, [field]: value };
-    
+    const newData = { ...formData, [field]: value }
+
     // Handle category change - reset appropriate fields
     if (field === 'category') {
       if (cashOnlyCategories.has(value)) {
         // Switching to cash-only category
-        newData.investedCash = '0';
-        newData.currentValue = newData.actualCash || '0';
+        newData.investedCash = '0'
+        newData.currentValue = newData.actualCash || '0'
       } else {
         // Switching to investment category
-        newData.actualCash = '0';
+        newData.actualCash = '0'
       }
     }
-    
+
     // Auto-sync current value with actual cash for cash-only categories
     if (field === 'actualCash' && cashOnlyCategories.has(formData.category)) {
-      newData.currentValue = value;
-      newData.investedCash = '0';
+      newData.currentValue = value
+      newData.investedCash = '0'
     }
-    
-    setFormData(newData);
+
+    setFormData(newData)
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({ ...prev, [field]: '' }))
     }
-  };
+  }
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    const isCashOnly = cashOnlyCategories.has(formData.category);
+    const newErrors: Record<string, string> = {}
+    const isCashOnly = cashOnlyCategories.has(formData.category)
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = 'Title is required'
     }
     if (!formData.category) {
-      newErrors.category = 'Category is required';
+      newErrors.category = 'Category is required'
     }
-    
+
     // For cash-only categories, only validate actual cash
     if (isCashOnly) {
       if (!formData.actualCash || isNaN(Number(formData.actualCash))) {
-        newErrors.actualCash = 'Valid actual cash amount is required';
+        newErrors.actualCash = 'Valid actual cash amount is required'
       }
     } else {
       // For investment categories, validate invested cash and current value
       if (!formData.investedCash || isNaN(Number(formData.investedCash))) {
-        newErrors.investedCash = 'Valid invested cash amount is required';
+        newErrors.investedCash = 'Valid invested cash amount is required'
       }
       if (!formData.currentValue || isNaN(Number(formData.currentValue))) {
-        newErrors.currentValue = 'Valid current value is required';
+        newErrors.currentValue = 'Valid current value is required'
       }
     }
-    
+
     if (!formData.month) {
-      newErrors.month = 'Month is required';
+      newErrors.month = 'Month is required'
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields correctly.',
         variant: 'destructive',
-      });
-      return;
+      })
+      return
     }
 
     if (!user) {
@@ -169,21 +168,23 @@ export default function AddParticulars() {
         title: 'Authentication Required',
         description: 'Please log in to add financial particulars.',
         variant: 'destructive',
-      });
-      return;
+      })
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
-      const isCashOnly = cashOnlyCategories.has(formData.category);
-      const cashAmount = isCashOnly ? Number(formData.actualCash) : 0;
-      const investmentAmount = isCashOnly ? 0 : Number(formData.investedCash);
-      const currentValue = isCashOnly ? Number(formData.actualCash) : Number(formData.currentValue);
-      const totalAmount = cashAmount + investmentAmount;
-      
+      const isCashOnly = cashOnlyCategories.has(formData.category)
+      const cashAmount = isCashOnly ? Number(formData.actualCash) : 0
+      const investmentAmount = isCashOnly ? 0 : Number(formData.investedCash)
+      const currentValue = isCashOnly
+        ? Number(formData.actualCash)
+        : Number(formData.currentValue)
+      const totalAmount = cashAmount + investmentAmount
+
       // Calculate month_number from month name
-      const monthNumber = MONTHS.indexOf(formData.month) + 1;
+      const monthNumber = MONTHS.indexOf(formData.month) + 1
 
       if (isEditMode && editData?.id) {
         // Update existing record
@@ -196,17 +197,16 @@ export default function AddParticulars() {
           current_value: currentValue,
           month: formData.month,
           month_number: monthNumber,
-        });
+        })
 
         toast({
           title: 'Success!',
           description: 'Financial particular has been updated successfully.',
-        });
+        })
 
         // Navigate back to statistics
-        navigate('/statistics');
+        navigate('/statistics')
       } else {
-
         // Create new record
         await financialAPI.create({
           category: formData.category,
@@ -218,15 +218,15 @@ export default function AddParticulars() {
           month: formData.month,
           month_number: monthNumber,
           year: new Date().getFullYear(),
-        });
+        })
 
-        if(!savedTitles.includes(formData.title)) setSavedTitles([ ...savedTitles, formData.title]);
+        if (!savedTitles.includes(formData.title))
+          setSavedTitles([...savedTitles, formData.title])
 
         toast({
           title: 'Success!',
           description: 'Financial particular has been added successfully.',
-        });
-
+        })
 
         // Reset form
         setFormData({
@@ -236,10 +236,10 @@ export default function AddParticulars() {
           investedCash: '',
           currentValue: '',
           month: '',
-        });
+        })
       }
     } catch (error) {
-      console.error('Error saving financial particular:', error);
+      console.error('Error saving financial particular:', error)
       toast({
         title: 'Error',
         description:
@@ -247,11 +247,11 @@ export default function AddParticulars() {
             ? error.message
             : 'Failed to save financial particular.',
         variant: 'destructive',
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -259,8 +259,8 @@ export default function AddParticulars() {
       currency: 'INR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   // Categories that only show Actual Cash
   const cashOnlyCategories = new Set([
@@ -268,11 +268,10 @@ export default function AddParticulars() {
     'Cash in Hand',
     'Recurring Deposit',
     'Provident Fund',
-  ]);
-  const isCashOnlyCategory = cashOnlyCategories.has(formData.category);
+  ])
+  const isCashOnlyCategory = cashOnlyCategories.has(formData.category)
 
-  const buttonText = isEditMode ? 'Update Particular' : 'Add Particular';
-
+  const buttonText = isEditMode ? 'Update Particular' : 'Add Particular'
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -319,13 +318,13 @@ export default function AddParticulars() {
                 <Select
                   value={formData.title}
                   onValueChange={value => {
-                    console.log(value);
+                    console.log(value)
                     if (value === '__custom__') {
-                      setIsCustom(true);
-                      handleInputChange('title', '');
+                      setIsCustom(true)
+                      handleInputChange('title', '')
                     } else if (value.trim() && value !== '__custom__') {
-                      setIsCustom(false);
-                      handleInputChange('title', value);
+                      setIsCustom(false)
+                      handleInputChange('title', value)
                     }
                   }}
                 >
@@ -501,9 +500,7 @@ export default function AddParticulars() {
                   className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting
-                    ? 'Saving...'
-                    : buttonText}
+                  {isSubmitting ? 'Saving...' : buttonText}
                 </Button>
               </motion.div>
             </form>
@@ -594,10 +591,19 @@ export default function AddParticulars() {
                   </p>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+                <BarChart3 className="h-5 w-5 text-success mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Current Value</p>
+                  <p className="text-xs text-muted-foreground">
+                    Present worth including gains or losses
+                  </p>
+                </div>
+              </div>
             </div>
           </GlassCard>
         </motion.div>
       </div>
     </div>
-  );
+  )
 }
