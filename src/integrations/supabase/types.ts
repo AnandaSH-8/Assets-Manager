@@ -26,6 +26,7 @@ export type Database = {
           id: string
           investment: number
           month: string | null
+          month_number: number | null
           updated_at: string
           user_id: string
           year: number
@@ -41,6 +42,7 @@ export type Database = {
           id?: string
           investment?: number
           month?: string | null
+          month_number?: number | null
           updated_at?: string
           user_id: string
           year?: number
@@ -56,6 +58,7 @@ export type Database = {
           id?: string
           investment?: number
           month?: string | null
+          month_number?: number | null
           updated_at?: string
           user_id?: string
           year?: number

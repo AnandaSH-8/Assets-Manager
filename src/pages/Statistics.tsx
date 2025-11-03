@@ -81,11 +81,21 @@ export default function Statistics() {
         // Filter data by date range
         const filteredData = filterDataByRange(fetchedData, dateRange);
 
-        // Process category data for pie chart
-        const categoryBreakdown = stats.category_breakdown || {};
-        const newCategoryData = Object.entries(categoryBreakdown).map(
-          ([name, value], index) => (
-            {
+        // Process category data for pie chart - aggregate ALL months
+        const categoryTotals: Record<string, number> = {};
+        
+        for (const item of fetchedData) {
+          const category = item.category;
+          const amount = Number(item.amount || 0);
+          
+          if (!categoryTotals[category]) {
+            categoryTotals[category] = 0;
+          }
+          categoryTotals[category] += amount;
+        }
+        
+        const newCategoryData = Object.entries(categoryTotals).map(
+          ([name, value], index) => ({
             name,
             value: Number(value),
             color: CHART_COLORS[index % CHART_COLORS.length],

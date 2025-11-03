@@ -106,6 +106,7 @@ export const financialAPI = {
     investment?: number;
     current_value?: number;
     month?: string;
+    month_number?: number;
     year?: number;
   }) => {
     return apiCall('/financial-api/', {
@@ -125,6 +126,7 @@ export const financialAPI = {
       investment?: number;
       current_value?: number;
       month?: string;
+      month_number?: number;
     },
   ) => {
     return apiCall(`/financial-api/${id}`, {

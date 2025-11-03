@@ -181,6 +181,9 @@ export default function AddParticulars() {
       const investmentAmount = isCashOnly ? 0 : Number(formData.investedCash);
       const currentValue = isCashOnly ? Number(formData.actualCash) : Number(formData.currentValue);
       const totalAmount = cashAmount + investmentAmount;
+      
+      // Calculate month_number from month name
+      const monthNumber = MONTHS.indexOf(formData.month) + 1;
 
       if (isEditMode && editData?.id) {
         // Update existing record
@@ -192,6 +195,7 @@ export default function AddParticulars() {
           investment: investmentAmount,
           current_value: currentValue,
           month: formData.month,
+          month_number: monthNumber,
         });
 
         toast({
@@ -212,6 +216,7 @@ export default function AddParticulars() {
           investment: investmentAmount,
           current_value: currentValue,
           month: formData.month,
+          month_number: monthNumber,
           year: new Date().getFullYear(),
         });
 
