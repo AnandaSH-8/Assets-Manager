@@ -81,10 +81,13 @@ export default function Statistics() {
         // Filter data by date range
         const filteredData = filterDataByRange(fetchedData, dateRange);
 
-        // Process category data for pie chart - aggregate ALL months
+        // Process category data for pie chart - only latest month
         const categoryTotals: Record<string, number> = {};
         
-        for (const item of fetchedData) {
+        for (const item of filteredData) {
+          const currentMonth = `${item.month} ${item.year}`;
+          if (currentMonth !== latestMonth) continue;
+          
           const category = item.category;
           const amount = Number(item.amount || 0);
           
