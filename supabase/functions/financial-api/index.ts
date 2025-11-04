@@ -1,5 +1,56 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+
+// Validation schema for financial data
+const financialSchema = z.object({
+  category: z.string()
+    .trim()
+    .min(1, 'Category is required')
+    .max(50, 'Category must be less than 50 characters'),
+  description: z.string()
+    .trim()
+    .max(500, 'Description must be less than 500 characters')
+    .optional(),
+  amount: z.number()
+    .positive('Amount must be positive')
+    .max(999999999, 'Amount must be less than 1 billion'),
+  cash: z.number()
+    .min(0, 'Cash must be non-negative')
+    .max(999999999, 'Cash must be less than 1 billion')
+    .optional(),
+  investment: z.number()
+    .min(0, 'Investment must be non-negative')
+    .max(999999999, 'Investment must be less than 1 billion')
+    .optional(),
+  current_value: z.number()
+    .min(0, 'Current value must be non-negative')
+    .max(999999999, 'Current value must be less than 1 billion')
+    .optional(),
+  month: z.string()
+    .trim()
+    .max(20, 'Month must be less than 20 characters')
+    .optional(),
+  month_number: z.number()
+    .int('Month number must be an integer')
+    .min(1, 'Month number must be between 1 and 12')
+    .max(12, 'Month number must be between 1 and 12')
+    .optional(),
+  year: z.number()
+    .int('Year must be an integer')
+    .min(1900, 'Year must be 1900 or later')
+    .max(2100, 'Year must be 2100 or earlier')
+    .optional(),
+});
+
+// Partial schema for updates (all fields optional)
+const financialUpdateSchema = financialSchema.partial();
+
+// Text sanitization helper
+const sanitizeText = (text: string): string => {
+  return text.replace(/[<>"']/g, '');
+};
+
 Deno.serve(async req => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -100,7 +151,7 @@ Deno.serve(async req => {
       },
     );
   } catch (error) {
-    console.error('Financial API error:', error);
+    console.error('Financial API error:', error.message);
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
@@ -185,23 +236,96 @@ async function getFinancial(supabase: any, id: string, userId: string) {
   );
 }
 async function createFinancial(req: Request, supabase: any, userId: string) {
-  const {
-    category,
-    description,
-    amount,
-    cash,
-    investment,
-    current_value,
-    month,
-    year,
-  } = await req.json();
-  if (!category || !amount) {
+  try {
+    const body = await req.json();
+
+    // Validate input
+    const result = financialSchema.safeParse(body);
+    if (!result.success) {
+      const errors = result.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      return new Response(
+        JSON.stringify({ 
+          error: 'Validation failed', 
+          details: errors 
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    const validatedData = result.data;
+
+    // Sanitize text fields
+    const sanitizedCategory = sanitizeText(validatedData.category);
+    const sanitizedDescription = validatedData.description 
+      ? sanitizeText(validatedData.description) 
+      : undefined;
+    const sanitizedMonth = validatedData.month 
+      ? sanitizeText(validatedData.month) 
+      : undefined;
+
+    const { data, error } = await supabase
+      .from('financial_particulars')
+      .insert({
+        user_id: userId,
+        category: sanitizedCategory,
+        description: sanitizedDescription,
+        amount: validatedData.amount,
+        cash: validatedData.cash || 0,
+        investment: validatedData.investment || 0,
+        current_value: validatedData.current_value || 0,
+        month: sanitizedMonth,
+        month_number: validatedData.month_number,
+        year: validatedData.year || new Date().getFullYear(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Create financial error:', error.message);
+      return new Response(
+        JSON.stringify({
+          error: error.message,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        error: 'Category and amount are required',
+        data,
+        message: 'Financial particular created successfully',
       }),
       {
-        status: 400,
+        status: 201,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  } catch (error) {
+    console.error('Create financial error:', error.message);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to create financial particular',
+      }),
+      {
+        status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
@@ -209,49 +333,6 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       },
     );
   }
-  const { data, error } = await supabase
-    .from('financial_particulars')
-    .insert({
-      user_id: userId,
-      category,
-      description,
-      amount,
-      cash: cash || 0,
-      investment: investment || 0,
-      current_value: current_value || 0,
-      month,
-      year: year || new Date().getFullYear(),
-    })
-    .select()
-    .single();
-  if (error) {
-    console.error('Create financial error:', error);
-    return new Response(
-      JSON.stringify({
-        error: error.message,
-      }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-  }
-  return new Response(
-    JSON.stringify({
-      data,
-      message: 'Financial particular created successfully',
-    }),
-    {
-      status: 201,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-    },
-  );
 }
 async function updateFinancial(
   req: Request,
@@ -259,21 +340,89 @@ async function updateFinancial(
   id: string,
   userId: string,
 ) {
-  const updates = await req.json();
-  const { data, error } = await supabase
-    .from('financial_particulars')
-    .update(updates)
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select()
-    .single();
-  if (error) {
+  try {
+    const body = await req.json();
+
+    // Validate input (partial schema for updates)
+    const result = financialUpdateSchema.safeParse(body);
+    if (!result.success) {
+      const errors = result.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      return new Response(
+        JSON.stringify({ 
+          error: 'Validation failed', 
+          details: errors 
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    const validatedData = result.data;
+
+    // Sanitize text fields if they exist
+    const updates: any = { ...validatedData };
+    if (updates.category) {
+      updates.category = sanitizeText(updates.category);
+    }
+    if (updates.description) {
+      updates.description = sanitizeText(updates.description);
+    }
+    if (updates.month) {
+      updates.month = sanitizeText(updates.month);
+    }
+
+    const { data, error } = await supabase
+      .from('financial_particulars')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      return new Response(
+        JSON.stringify({
+          error: error.message,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        error: error.message,
+        data,
+        message: 'Financial particular updated successfully',
       }),
       {
-        status: 400,
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  } catch (error) {
+    console.error('Update financial error:', error.message);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to update financial particular',
+      }),
+      {
+        status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
@@ -281,19 +430,6 @@ async function updateFinancial(
       },
     );
   }
-  return new Response(
-    JSON.stringify({
-      data,
-      message: 'Financial particular updated successfully',
-    }),
-    {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-    },
-  );
 }
 async function deleteFinancial(supabase: any, id: string, userId: string) {
   const { error } = await supabase
@@ -391,7 +527,7 @@ async function clearAllFinancials(supabase: any, userId: string) {
     .delete()
     .eq('user_id', userId);
   if (error) {
-    console.error('Clear all financials error:', error);
+    console.error('Clear all financials error:', error.message);
     return new Response(
       JSON.stringify({
         error: error.message,
@@ -425,7 +561,7 @@ async function getUniqueTitles(supabase: any, userId: string) {
     .eq('user_id', userId)
     .not('description', 'is', null);
   if (error) {
-    console.error('Get unique titles error:', error);
+    console.error('Get unique titles error:', error.message);
     return new Response(
       JSON.stringify({
         error: error.message,
