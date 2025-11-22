@@ -151,7 +151,6 @@ Deno.serve(async req => {
       },
     );
   } catch (error) {
-    console.error('Financial API error:', error.message);
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
@@ -290,7 +289,6 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       .single();
 
     if (error) {
-      console.error('Create financial error:', error.message);
       return new Response(
         JSON.stringify({
           error: error.message,
@@ -319,7 +317,6 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
       },
     );
   } catch (error) {
-    console.error('Create financial error:', error.message);
     return new Response(
       JSON.stringify({
         error: 'Failed to create financial particular',
@@ -416,7 +413,6 @@ async function updateFinancial(
       },
     );
   } catch (error) {
-    console.error('Update financial error:', error.message);
     return new Response(
       JSON.stringify({
         error: 'Failed to update financial particular',
@@ -527,7 +523,6 @@ async function clearAllFinancials(supabase: any, userId: string) {
     .delete()
     .eq('user_id', userId);
   if (error) {
-    console.error('Clear all financials error:', error.message);
     return new Response(
       JSON.stringify({
         error: error.message,
@@ -561,7 +556,6 @@ async function getUniqueTitles(supabase: any, userId: string) {
     .eq('user_id', userId)
     .not('description', 'is', null);
   if (error) {
-    console.error('Get unique titles error:', error.message);
     return new Response(
       JSON.stringify({
         error: error.message,
