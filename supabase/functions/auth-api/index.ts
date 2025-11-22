@@ -73,7 +73,6 @@ Deno.serve(async req => {
         });
     }
   } catch (error) {
-    console.error('Auth API error:', error.message);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -138,7 +137,6 @@ async function handleSignup(req: Request) {
       },
     );
   } catch (error) {
-    console.error('Signup error:', error.message);
     return new Response(
       JSON.stringify({ error: 'Failed to process signup' }),
       {
@@ -198,7 +196,6 @@ async function handleSignin(req: Request) {
       },
     );
   } catch (error) {
-    console.error('Signin error:', error.message);
     return new Response(
       JSON.stringify({ error: 'Failed to process signin' }),
       {

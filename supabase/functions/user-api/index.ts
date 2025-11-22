@@ -86,7 +86,6 @@ Deno.serve(async req => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('User API error:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -199,7 +198,7 @@ async function deleteAccount(userSupabase: any, userId: string) {
     .eq('user_id', userId);
 
   if (profileError) {
-    console.error('Error deleting profile:', profileError);
+    // Profile deletion error handled silently
   }
 
   // Delete all financial particulars
@@ -209,7 +208,7 @@ async function deleteAccount(userSupabase: any, userId: string) {
     .eq('user_id', userId);
 
   if (financialError) {
-    console.error('Error deleting financial data:', financialError);
+    // Financial data deletion error handled silently
   }
 
   // Note: User deletion from auth.users requires admin privileges
