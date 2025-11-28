@@ -51,13 +51,15 @@ export default function AddParticulars() {
   const editData = location.state?.editData;
   const isEditMode = !!editData;
 
+  const currentMonth = MONTHS[new Date().getMonth()];
+  
   const [formData, setFormData] = useState({
     title: '',
     category: '',
     actualCash: '',
     investedCash: '',
     currentValue: '',
-    month: '',
+    month: currentMonth,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -235,7 +237,7 @@ export default function AddParticulars() {
           actualCash: '',
           investedCash: '',
           currentValue: '',
-          month: '',
+          month: currentMonth,
         })
       }
     } catch (error) {
