@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { PieChart, Calendar, Download, FileText } from 'lucide-react'
+import { PieChart, Calendar, Download, FileText, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import {
@@ -47,6 +47,8 @@ export default function Statistics() {
   const [isLoading, setIsLoading] = useState(true)
   const [dateRange, setDateRange] = useState('1month')
   const [allData, setAllData] = useState<any[]>([])
+  const [sortColumn, setSortColumn] = useState<string>('title')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [latestMonth, setLatestMonth] = useState<string>('')
 
   useEffect(() => {
@@ -353,6 +355,45 @@ export default function Statistics() {
     }).format(value)
   }
 
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+  const getSortIcon = (column: string) => {
+    if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-1 opacity-50" />
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="w-4 h-4 ml-1" /> 
+      : <ArrowDown className="w-4 h-4 ml-1" />
+  }
+
+  const sortedTitleData = [...titleData].sort((a, b) => {
+    const direction = sortDirection === 'asc' ? 1 : -1
+    
+    switch (sortColumn) {
+      case 'title':
+        return direction * a.title.localeCompare(b.title)
+      case 'category':
+        return direction * a.category.localeCompare(b.category)
+      case 'cash':
+        return direction * (a.cash - b.cash)
+      case 'investment':
+        return direction * (a.investment - b.investment)
+      case 'currentValue':
+        return direction * (a.currentValue - b.currentValue)
+      case 'gainLoss':
+        const gainLossA = a.cash === 0 ? a.currentValue - a.investment : a.cash
+        const gainLossB = b.cash === 0 ? b.currentValue - b.investment : b.cash
+        return direction * (gainLossA - gainLossB)
+      default:
+        return 0
+    }
+  })
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -448,23 +489,41 @@ export default function Statistics() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Title
+                    <th 
+                      className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('title')}
+                    >
+                      <span className="inline-flex items-center">Title{getSortIcon('title')}</span>
                     </th>
-                    <th className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Category
+                    <th 
+                      className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('category')}
+                    >
+                      <span className="inline-flex items-center">Category{getSortIcon('category')}</span>
                     </th>
-                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Cash at Bank
+                    <th 
+                      className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('cash')}
+                    >
+                      <span className="inline-flex items-center justify-end">Cash at Bank{getSortIcon('cash')}</span>
                     </th>
-                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Cash Invested
+                    <th 
+                      className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('investment')}
+                    >
+                      <span className="inline-flex items-center justify-end">Cash Invested{getSortIcon('investment')}</span>
                     </th>
-                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Current Value
+                    <th 
+                      className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('currentValue')}
+                    >
+                      <span className="inline-flex items-center justify-end">Current Value{getSortIcon('currentValue')}</span>
                     </th>
-                    <th className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6">
-                      Gain/Loss
+                    <th 
+                      className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => handleSort('gainLoss')}
+                    >
+                      <span className="inline-flex items-center justify-end">Gain/Loss{getSortIcon('gainLoss')}</span>
                     </th>
                   </tr>
                 </thead>
@@ -474,7 +533,7 @@ export default function Statistics() {
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-track]:bg-transparent">
               <table className="w-full">
                 <tbody>
-                  {titleData.map((item, index) => {
+                  {sortedTitleData.map((item, index) => {
                     const gainLoss =
                       item.cash == 0
                         ? item.currentValue - item.investment
