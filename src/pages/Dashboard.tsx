@@ -19,6 +19,14 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   BarChart,
   Bar,
   XAxis,
@@ -32,7 +40,7 @@ import {
   AreaChart,
 } from 'recharts';
 import EmptyDashboard from '@/components/EmptyDashboard';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -425,27 +433,52 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <ScrollArea className="max-h-[300px] pr-4">
-              <div className="space-y-3">
-                {financialData
-                  .filter((item: any) => Number(item.cash || 0) > 0)
-                  .map((item: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium">{item.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.category} • {item.month} {item.year}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-primary">
-                        {formatCurrency(Number(item.cash || 0))}
-                      </p>
-                    </div>
-                  ))}
-              </div>
+            <ScrollArea className="max-h-[350px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">{summaryData.currentMonthName || 'Current'}</TableHead>
+                    <TableHead className="text-right">{summaryData.previousMonthName || 'Previous'}</TableHead>
+                    <TableHead className="text-right">Diff</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    const currentMonth = summaryData.currentMonthName;
+                    const previousMonth = summaryData.previousMonthName;
+                    const grouped: Record<string, { current: number; previous: number; category: string }> = {};
+                    
+                    financialData
+                      .filter((item: any) => Number(item.cash || 0) > 0)
+                      .forEach((item: any) => {
+                        const name = item.description || item.category;
+                        if (!grouped[name]) {
+                          grouped[name] = { current: 0, previous: 0, category: item.category };
+                        }
+                        if (item.month === currentMonth) {
+                          grouped[name].current += Number(item.cash || 0);
+                        } else if (item.month === previousMonth) {
+                          grouped[name].previous += Number(item.cash || 0);
+                        }
+                      });
+                    
+                    return Object.entries(grouped).map(([name, data]) => {
+                      const diff = data.current - data.previous;
+                      return (
+                        <TableRow key={name}>
+                          <TableCell className="font-medium">{name}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(data.current)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(data.previous)}</TableCell>
+                          <TableCell className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}>
+                            {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })()}
+                </TableBody>
+              </Table>
             </ScrollArea>
           </DialogContent>
         </Dialog>
@@ -523,27 +556,52 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <ScrollArea className="max-h-[300px] pr-4">
-              <div className="space-y-3">
-                {financialData
-                  .filter((item: any) => Number(item.investment || 0) > 0)
-                  .map((item: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium">{item.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.category} • {item.month} {item.year}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-chart-3">
-                        {formatCurrency(Number(item.investment || 0))}
-                      </p>
-                    </div>
-                  ))}
-              </div>
+            <ScrollArea className="max-h-[350px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">{summaryData.currentMonthName || 'Current'}</TableHead>
+                    <TableHead className="text-right">{summaryData.previousMonthName || 'Previous'}</TableHead>
+                    <TableHead className="text-right">Diff</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    const currentMonth = summaryData.currentMonthName;
+                    const previousMonth = summaryData.previousMonthName;
+                    const grouped: Record<string, { current: number; previous: number; category: string }> = {};
+                    
+                    financialData
+                      .filter((item: any) => Number(item.investment || 0) > 0)
+                      .forEach((item: any) => {
+                        const name = item.description || item.category;
+                        if (!grouped[name]) {
+                          grouped[name] = { current: 0, previous: 0, category: item.category };
+                        }
+                        if (item.month === currentMonth) {
+                          grouped[name].current += Number(item.investment || 0);
+                        } else if (item.month === previousMonth) {
+                          grouped[name].previous += Number(item.investment || 0);
+                        }
+                      });
+                    
+                    return Object.entries(grouped).map(([name, data]) => {
+                      const diff = data.current - data.previous;
+                      return (
+                        <TableRow key={name}>
+                          <TableCell className="font-medium">{name}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(data.current)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(data.previous)}</TableCell>
+                          <TableCell className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}>
+                            {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })()}
+                </TableBody>
+              </Table>
             </ScrollArea>
           </DialogContent>
         </Dialog>
