@@ -138,20 +138,18 @@ export default function Statistics() {
           if (category == 'Cash in Hand' || category == 'Bank Account') {
             performanceByCategory[category].liquid += Number(item.cash)
           } else {
-            if (
-              category == 'Recurring Deposit' ||
-              category == 'Provident Fund'
-            ) {
-              performanceByCategory[category].invested += Number(item.amount)
-              performanceByCategory[category].current += Number(item.amount)
-            } else {
-              performanceByCategory[category].invested += Number(
-                item.investment,
-              )
-              performanceByCategory[category].current += Number(
-                item.current_value,
-              )
-            }
+            // if (
+            //   category == 'Recurring Deposit' ||
+            //   category == 'Provident Fund'
+            // ) {
+            //   performanceByCategory[category].invested += Number(item.amount)
+            //   performanceByCategory[category].current += Number(item.amount)
+            // } else {
+            performanceByCategory[category].invested += Number(item.investment)
+            performanceByCategory[category].current += Number(
+              item.current_value,
+            )
+            // }
 
             performanceByCategory[category].count += 1
           }
@@ -365,15 +363,18 @@ export default function Statistics() {
   }
 
   const getSortIcon = (column: string) => {
-    if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-1 opacity-50" />
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="w-4 h-4 ml-1" /> 
-      : <ArrowDown className="w-4 h-4 ml-1" />
+    if (sortColumn !== column)
+      return <ArrowUpDown className="w-4 h-4 ml-1 opacity-50" />
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="w-4 h-4 ml-1" />
+    ) : (
+      <ArrowDown className="w-4 h-4 ml-1" />
+    )
   }
 
   const sortedTitleData = [...titleData].sort((a, b) => {
     const direction = sortDirection === 'asc' ? 1 : -1
-    
+
     switch (sortColumn) {
       case 'title':
         return direction * a.title.localeCompare(b.title)
@@ -397,7 +398,7 @@ export default function Statistics() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
       </div>
     )
   }
@@ -489,41 +490,53 @@ export default function Statistics() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th 
+                    <th
                       className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('title')}
                     >
-                      <span className="inline-flex items-center">Title{getSortIcon('title')}</span>
+                      <span className="inline-flex items-center">
+                        Title{getSortIcon('title')}
+                      </span>
                     </th>
-                    <th 
+                    <th
                       className="text-left py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('category')}
                     >
-                      <span className="inline-flex items-center">Category{getSortIcon('category')}</span>
+                      <span className="inline-flex items-center">
+                        Category{getSortIcon('category')}
+                      </span>
                     </th>
-                    <th 
+                    <th
                       className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('cash')}
                     >
-                      <span className="inline-flex items-center justify-end">Cash at Bank{getSortIcon('cash')}</span>
+                      <span className="inline-flex items-center justify-end">
+                        Cash at Bank{getSortIcon('cash')}
+                      </span>
                     </th>
-                    <th 
+                    <th
                       className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('investment')}
                     >
-                      <span className="inline-flex items-center justify-end">Cash Invested{getSortIcon('investment')}</span>
+                      <span className="inline-flex items-center justify-end">
+                        Cash Invested{getSortIcon('investment')}
+                      </span>
                     </th>
-                    <th 
+                    <th
                       className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('currentValue')}
                     >
-                      <span className="inline-flex items-center justify-end">Current Value{getSortIcon('currentValue')}</span>
+                      <span className="inline-flex items-center justify-end">
+                        Current Value{getSortIcon('currentValue')}
+                      </span>
                     </th>
-                    <th 
+                    <th
                       className="text-right py-3 font-medium text-lg text-muted-foreground w-1/6 cursor-pointer hover:text-foreground transition-colors"
                       onClick={() => handleSort('gainLoss')}
                     >
-                      <span className="inline-flex items-center justify-end">Gain/Loss{getSortIcon('gainLoss')}</span>
+                      <span className="inline-flex items-center justify-end">
+                        Gain/Loss{getSortIcon('gainLoss')}
+                      </span>
                     </th>
                   </tr>
                 </thead>
@@ -687,12 +700,12 @@ export default function Statistics() {
                   let gainLoss = item.liquid
                     ? item.liquid
                     : item.current - item.invested
-                  if (
-                    item.category == 'Recurring Deposit' ||
-                    item.category == 'Provident Fund'
-                  ) {
-                    gainLoss = item.invested
-                  }
+                  // if (
+                  //   item.category == 'Recurring Deposit' ||
+                  //   item.category == 'Provident Fund'
+                  // ) {
+                  //   gainLoss = item.invested
+                  // }
                   const isProfit = gainLoss >= 0
 
                   return (

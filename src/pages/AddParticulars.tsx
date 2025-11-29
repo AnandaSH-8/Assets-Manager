@@ -268,8 +268,8 @@ export default function AddParticulars() {
   const cashOnlyCategories = new Set([
     'Bank Account',
     'Cash in Hand',
-    'Recurring Deposit',
-    'Provident Fund',
+    // 'Recurring Deposit',
+    // 'Provident Fund',
   ])
   const isCashOnlyCategory = cashOnlyCategories.has(formData.category)
 

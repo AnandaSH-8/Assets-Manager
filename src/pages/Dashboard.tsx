@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 import {
   TrendingUp,
   TrendingDown,
@@ -7,17 +7,17 @@ import {
   IndianRupee,
   Plus,
   BarChart3,
-} from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Button } from '@/components/ui/button';
+} from 'lucide-react'
+import { GlassCard } from '@/components/ui/glass-card'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/components/ui/table'
 import {
   BarChart,
   Bar,
@@ -38,44 +38,44 @@ import {
   Line,
   Area,
   AreaChart,
-} from 'recharts';
-import EmptyDashboard from '@/components/EmptyDashboard';
-import { useState, useEffect, useMemo } from 'react';
-import { financialAPI } from '@/services/api';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+} from 'recharts'
+import EmptyDashboard from '@/components/EmptyDashboard'
+import { useState, useEffect, useMemo } from 'react'
+import { financialAPI } from '@/services/api'
+import { useAuth } from '@/hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 interface SummaryData {
-  totalLiquidAssets: number;
-  totalInvestments: number;
-  monthlyGrowth: number;
-  totalGrowth: number;
-  liquidAssetsGrowthPercent: number;
-  investmentsGrowthPercent: number;
-  monthlyGrowthPercent: number;
-  totalGrowthPercent: number;
+  totalLiquidAssets: number
+  totalInvestments: number
+  monthlyGrowth: number
+  totalGrowth: number
+  liquidAssetsGrowthPercent: number
+  investmentsGrowthPercent: number
+  monthlyGrowthPercent: number
+  totalGrowthPercent: number
   // Additional breakdown data for dialogs
-  previousMonthCash?: number;
-  currentMonthCash?: number;
-  previousMonthInvestment?: number;
-  currentMonthInvestment?: number;
-  previousMonthTotal?: number;
-  currentMonthTotal?: number;
-  firstMonthTotal?: number;
-  previousMonthName?: string;
-  currentMonthName?: string;
-  firstMonthName?: string;
+  previousMonthCash?: number
+  currentMonthCash?: number
+  previousMonthInvestment?: number
+  currentMonthInvestment?: number
+  previousMonthTotal?: number
+  currentMonthTotal?: number
+  firstMonthTotal?: number
+  previousMonthName?: string
+  currentMonthName?: string
+  firstMonthName?: string
 }
 
 interface ChartDataItem {
-  month: string;
-  assets: number;
-  investments: number;
+  month: string
+  assets: number
+  investments: number
 }
 
 interface GrowthDataItem {
-  month: string;
-  growth: number;
+  month: string
+  growth: number
 }
 
 const formatCurrency = (value: number) => {
@@ -84,13 +84,13 @@ const formatCurrency = (value: number) => {
     currency: 'INR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value);
-};
+  }).format(value)
+}
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [hasData, setHasData] = useState(false);
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [hasData, setHasData] = useState(false)
   const [summaryData, setSummaryData] = useState<SummaryData>({
     totalLiquidAssets: 0,
     totalInvestments: 0,
@@ -100,36 +100,36 @@ export default function Dashboard() {
     investmentsGrowthPercent: 0,
     monthlyGrowthPercent: 0,
     totalGrowthPercent: 0,
-  });
-  const [financialData, setFinancialData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
-  const [growthData, setGrowthData] = useState<GrowthDataItem[]>([]);
+  })
+  const [financialData, setFinancialData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [chartData, setChartData] = useState<ChartDataItem[]>([])
+  const [growthData, setGrowthData] = useState<GrowthDataItem[]>([])
 
   // Fetch real data from Supabase
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
-        setIsLoading(false);
-        return;
+        setIsLoading(false)
+        return
       }
 
       try {
-        setIsLoading(true);
+        setIsLoading(true)
         const [statsResponse, allDataResponse] = await Promise.all([
           financialAPI.getStats(),
           financialAPI.getAll(),
-        ]);
+        ])
 
-        const stats = statsResponse.data;
-        const allData = allDataResponse.data;
+        const stats = statsResponse.data
+        const allData = allDataResponse.data
 
-        setFinancialData(allData);
+        setFinancialData(allData)
 
         // Find the latest month/year entry
         const sortedData = [...allData].sort((a: any, b: any) => {
-          const yearDiff = (b.year || 0) - (a.year || 0);
-          if (yearDiff !== 0) return yearDiff;
+          const yearDiff = (b.year || 0) - (a.year || 0)
+          if (yearDiff !== 0) return yearDiff
 
           const monthOrder = [
             'January',
@@ -144,29 +144,29 @@ export default function Dashboard() {
             'October',
             'November',
             'December',
-          ];
-          const aIndex = monthOrder.indexOf(a.month || '');
-          const bIndex = monthOrder.indexOf(b.month || '');
-          return bIndex - aIndex;
-        });
+          ]
+          const aIndex = monthOrder.indexOf(a.month || '')
+          const bIndex = monthOrder.indexOf(b.month || '')
+          return bIndex - aIndex
+        })
 
-        const latestEntry = sortedData[0];
-        const latestMonth = latestEntry?.month;
-        const latestYear = latestEntry?.year;
+        const latestEntry = sortedData[0]
+        const latestMonth = latestEntry?.month
+        const latestYear = latestEntry?.year
 
         // Calculate totals for latest month only
         const latestMonthData = allData.filter(
           (item: any) => item.month === latestMonth && item.year === latestYear,
-        );
+        )
 
         const latestMonthCash = latestMonthData.reduce(
           (sum: number, item: any) => sum + Number(item.cash || 0),
           0,
-        );
+        )
         const latestMonthInvestment = latestMonthData.reduce(
           (sum: number, item: any) => sum + Number(item.investment || 0),
           0,
-        );
+        )
 
         // Sort months chronologically
         const monthOrder = [
@@ -182,109 +182,109 @@ export default function Dashboard() {
           'October',
           'November',
           'December',
-        ];
+        ]
 
         // Group data by month for charts
         const monthlyData: Record<
           string,
           { cash: number; investment: number; count: number }
-        > = {};
+        > = {}
         allData.forEach((item: any) => {
-          const month = item.month || 'Unknown';
+          const month = item.month || 'Unknown'
           if (!monthlyData[month]) {
-            monthlyData[month] = { cash: 0, investment: 0, count: 0 };
+            monthlyData[month] = { cash: 0, investment: 0, count: 0 }
           }
-          monthlyData[month].cash += Number(item.cash || 0);
-          monthlyData[month].investment += Number(item.investment || 0);
-          monthlyData[month].count += 1;
-        });
+          monthlyData[month].cash += Number(item.cash || 0)
+          monthlyData[month].investment += Number(item.investment || 0)
+          monthlyData[month].count += 1
+        })
 
         // Convert to chart data format and sort by month order
         const months = Object.keys(monthlyData).sort((a, b) => {
-          const indexA = monthOrder.indexOf(a);
-          const indexB = monthOrder.indexOf(b);
-          return indexA - indexB;
-        });
+          const indexA = monthOrder.indexOf(a)
+          const indexB = monthOrder.indexOf(b)
+          return indexA - indexB
+        })
 
         const newChartData = months.map(month => ({
           month,
           assets: monthlyData[month].cash,
           investments: monthlyData[month].investment,
-        }));
-        setChartData(newChartData);
+        }))
+        setChartData(newChartData)
 
         // Calculate growth data (comparison with previous month for total)
         const newGrowthData = months.map((month, index) => {
           if (index === 0) {
-            return { month, growth: 0 };
+            return { month, growth: 0 }
           }
           const currentTotal =
-            monthlyData[month].cash + monthlyData[month].investment;
-          const previousMonth = months[index - 1];
+            monthlyData[month].cash + monthlyData[month].investment
+          const previousMonth = months[index - 1]
           const previousTotal =
             monthlyData[previousMonth].cash +
-            monthlyData[previousMonth].investment;
+            monthlyData[previousMonth].investment
           const growth =
             previousTotal > 0
               ? ((currentTotal - previousTotal) / previousTotal) * 100
-              : 0;
-          return { month, growth: Number(growth.toFixed(2)) };
-        });
-        setGrowthData(newGrowthData);
+              : 0
+          return { month, growth: Number(growth.toFixed(2)) }
+        })
+        setGrowthData(newGrowthData)
 
         // Calculate actual percentage changes
         const currentMonthCash =
-          months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0;
+          months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0
         const previousMonthCash =
-          months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0;
+          months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0
         const firstMonthCash =
-          months.length > 0 ? monthlyData[months[0]].cash : 0;
+          months.length > 0 ? monthlyData[months[0]].cash : 0
 
         const currentMonthInvestment =
           months.length > 0
             ? monthlyData[months[months.length - 1]].investment
-            : 0;
+            : 0
         const previousMonthInvestment =
           months.length > 1
             ? monthlyData[months[months.length - 2]].investment
-            : 0;
+            : 0
         const firstMonthInvestment =
-          months.length > 0 ? monthlyData[months[0]].investment : 0;
+          months.length > 0 ? monthlyData[months[0]].investment : 0
 
         const liquidAssetsGrowthPercent =
           previousMonthCash > 0
             ? ((currentMonthCash - previousMonthCash) / previousMonthCash) * 100
-            : 0;
+            : 0
 
         const investmentsGrowthPercent =
           previousMonthInvestment > 0
             ? ((currentMonthInvestment - previousMonthInvestment) /
                 previousMonthInvestment) *
               100
-            : 0;
+            : 0
 
         const monthlyGrowthValue =
           newGrowthData.length > 0
             ? newGrowthData[newGrowthData.length - 1].growth
-            : 0;
+            : 0
         const previousMonthGrowthValue =
           newGrowthData.length > 1
             ? newGrowthData[newGrowthData.length - 2].growth
-            : 0;
+            : 0
         const monthlyGrowthPercent =
           previousMonthGrowthValue !== 0
             ? ((monthlyGrowthValue - previousMonthGrowthValue) /
                 Math.abs(previousMonthGrowthValue)) *
               100
-            : 0;
+            : 0
 
         const totalGrowthAmount =
           currentMonthCash +
           currentMonthInvestment -
-          (firstMonthCash + firstMonthInvestment);
-        const firstMonthTotal = firstMonthCash + firstMonthInvestment;
+          (firstMonthCash + firstMonthInvestment)
+        const firstMonthTotal = firstMonthCash + firstMonthInvestment
         const totalGrowthPercent =
-          firstMonthTotal > 0 ? (totalGrowthAmount / firstMonthTotal) * 100 : 0;
+          firstMonthTotal > 0 ? (totalGrowthAmount / firstMonthTotal) * 100 : 0
 
         // Calculate summary data using latest month totals
         setSummaryData({
@@ -311,30 +311,30 @@ export default function Dashboard() {
           currentMonthName:
             months.length > 0 ? months[months.length - 1] : undefined,
           firstMonthName: months.length > 0 ? months[0] : undefined,
-        });
+        })
 
-        setHasData(allData.length > 0);
+        setHasData(allData.length > 0)
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setHasData(false);
+        console.error('Error fetching dashboard data:', error)
+        setHasData(false)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, [user]);
+    fetchData()
+  }, [user])
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
       </div>
-    );
+    )
   }
 
   if (!hasData) {
-    return <EmptyDashboard />;
+    return <EmptyDashboard />
   }
 
   return (
@@ -438,44 +438,62 @@ export default function Dashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="text-right">{summaryData.currentMonthName || 'Current'}</TableHead>
-                    <TableHead className="text-right">{summaryData.previousMonthName || 'Previous'}</TableHead>
+                    <TableHead className="text-right">
+                      {summaryData.currentMonthName || 'Current'}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {summaryData.previousMonthName || 'Previous'}
+                    </TableHead>
                     <TableHead className="text-right">Diff</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(() => {
-                    const currentMonth = summaryData.currentMonthName;
-                    const previousMonth = summaryData.previousMonthName;
-                    const grouped: Record<string, { current: number; previous: number; category: string }> = {};
-                    
+                    const currentMonth = summaryData.currentMonthName
+                    const previousMonth = summaryData.previousMonthName
+                    const grouped: Record<
+                      string,
+                      { current: number; previous: number; category: string }
+                    > = {}
+
                     financialData
                       .filter((item: any) => Number(item.cash || 0) > 0)
                       .forEach((item: any) => {
-                        const name = item.description || item.category;
+                        const name = item.description || item.category
                         if (!grouped[name]) {
-                          grouped[name] = { current: 0, previous: 0, category: item.category };
+                          grouped[name] = {
+                            current: 0,
+                            previous: 0,
+                            category: item.category,
+                          }
                         }
                         if (item.month === currentMonth) {
-                          grouped[name].current += Number(item.cash || 0);
+                          grouped[name].current += Number(item.cash || 0)
                         } else if (item.month === previousMonth) {
-                          grouped[name].previous += Number(item.cash || 0);
+                          grouped[name].previous += Number(item.cash || 0)
                         }
-                      });
-                    
+                      })
+
                     return Object.entries(grouped).map(([name, data]) => {
-                      const diff = data.current - data.previous;
+                      const diff = data.current - data.previous
                       return (
                         <TableRow key={name}>
                           <TableCell className="font-medium">{name}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(data.current)}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(data.previous)}</TableCell>
-                          <TableCell className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}>
-                            {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                          <TableCell className="text-right">
+                            {formatCurrency(data.current)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(data.previous)}
+                          </TableCell>
+                          <TableCell
+                            className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}
+                          >
+                            {diff >= 0 ? '+' : ''}
+                            {formatCurrency(diff)}
                           </TableCell>
                         </TableRow>
-                      );
-                    });
+                      )
+                    })
                   })()}
                 </TableBody>
               </Table>
@@ -561,44 +579,62 @@ export default function Dashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="text-right">{summaryData.currentMonthName || 'Current'}</TableHead>
-                    <TableHead className="text-right">{summaryData.previousMonthName || 'Previous'}</TableHead>
+                    <TableHead className="text-right">
+                      {summaryData.currentMonthName || 'Current'}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {summaryData.previousMonthName || 'Previous'}
+                    </TableHead>
                     <TableHead className="text-right">Diff</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(() => {
-                    const currentMonth = summaryData.currentMonthName;
-                    const previousMonth = summaryData.previousMonthName;
-                    const grouped: Record<string, { current: number; previous: number; category: string }> = {};
-                    
+                    const currentMonth = summaryData.currentMonthName
+                    const previousMonth = summaryData.previousMonthName
+                    const grouped: Record<
+                      string,
+                      { current: number; previous: number; category: string }
+                    > = {}
+
                     financialData
                       .filter((item: any) => Number(item.investment || 0) > 0)
                       .forEach((item: any) => {
-                        const name = item.description || item.category;
+                        const name = item.description || item.category
                         if (!grouped[name]) {
-                          grouped[name] = { current: 0, previous: 0, category: item.category };
+                          grouped[name] = {
+                            current: 0,
+                            previous: 0,
+                            category: item.category,
+                          }
                         }
                         if (item.month === currentMonth) {
-                          grouped[name].current += Number(item.investment || 0);
+                          grouped[name].current += Number(item.investment || 0)
                         } else if (item.month === previousMonth) {
-                          grouped[name].previous += Number(item.investment || 0);
+                          grouped[name].previous += Number(item.investment || 0)
                         }
-                      });
-                    
+                      })
+
                     return Object.entries(grouped).map(([name, data]) => {
-                      const diff = data.current - data.previous;
+                      const diff = data.current - data.previous
                       return (
                         <TableRow key={name}>
                           <TableCell className="font-medium">{name}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(data.current)}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(data.previous)}</TableCell>
-                          <TableCell className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}>
-                            {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                          <TableCell className="text-right">
+                            {formatCurrency(data.current)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(data.previous)}
+                          </TableCell>
+                          <TableCell
+                            className={`text-right font-medium ${diff >= 0 ? 'text-success' : 'text-destructive'}`}
+                          >
+                            {diff >= 0 ? '+' : ''}
+                            {formatCurrency(diff)}
                           </TableCell>
                         </TableRow>
-                      );
-                    });
+                      )
+                    })
                   })()}
                 </TableBody>
               </Table>
@@ -932,5 +968,5 @@ export default function Dashboard() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }
