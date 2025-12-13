@@ -45,8 +45,9 @@ export default function Statistics() {
   const [performanceData, setPerformanceData] = useState<any[]>([])
   const [titleData, setTitleData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [dateRange, setDateRange] = useState('1month')
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
   const [allData, setAllData] = useState<any[]>([])
+  const [availableMonths, setAvailableMonths] = useState<{value: string, label: string}[]>([])
   const [sortColumn, setSortColumn] = useState<string>('title')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [latestMonth, setLatestMonth] = useState<string>('')
@@ -69,29 +70,52 @@ export default function Statistics() {
         const fetchedData = allDataResponse.data
         setAllData(fetchedData)
 
-        // Get latest month from data
-        let latestMonth = ''
-        if (fetchedData.length > 0) {
-          const sortedData = [...fetchedData].sort(
-            (a, b) =>
-              new Date(b.date_added || b.created_at).getTime() -
-              new Date(a.date_added || a.created_at).getTime(),
-          )
-          const latest = sortedData[0]
-          latestMonth = `${latest.month} ${latest.year}`
-          setLatestMonth(latestMonth)
+        // Extract unique months from data
+        const monthSet = new Map<string, {month: string, year: number, monthNumber: number}>()
+        for (const item of fetchedData) {
+          const key = `${item.month}-${item.year}`
+          if (!monthSet.has(key)) {
+            monthSet.set(key, {
+              month: item.month,
+              year: item.year,
+              monthNumber: item.month_number || 0
+            })
+          }
         }
 
-        // Filter data by date range
-        const filteredData = filterDataByRange(fetchedData, dateRange)
+        // Sort months by year desc, then month_number desc
+        const sortedMonths = Array.from(monthSet.values()).sort((a, b) => {
+          if (a.year !== b.year) return b.year - a.year
+          return b.monthNumber - a.monthNumber
+        })
 
-        // Process category data for pie chart - only latest month
+        const monthOptions = sortedMonths.map(m => ({
+          value: `${m.month}-${m.year}`,
+          label: `${m.month.substring(0, 3)}-${m.year}`
+        }))
+        setAvailableMonths(monthOptions)
+
+        // Set default to latest month if not already set
+        let activeMonth = selectedMonth
+        if (!activeMonth && monthOptions.length > 0) {
+          activeMonth = monthOptions[0].value
+          setSelectedMonth(activeMonth)
+        }
+
+        // Parse selected month
+        const [monthName, yearStr] = activeMonth ? activeMonth.split('-') : ['', '']
+        const displayMonth = `${monthName} ${yearStr}`
+        setLatestMonth(displayMonth)
+
+        // Filter data by selected month
+        const filteredData = fetchedData.filter((item: any) => 
+          `${item.month}-${item.year}` === activeMonth
+        )
+
+        // Process category data for pie chart
         const categoryTotals: Record<string, number> = {}
 
         for (const item of filteredData) {
-          const currentMonth = `${item.month} ${item.year}`
-          if (currentMonth !== latestMonth) continue
-
           const category = item.category
           const amount = Number(item.amount || 0)
 
@@ -111,9 +135,6 @@ export default function Statistics() {
 
         setCategoryData(newCategoryData)
 
-        // Process performance data by category - keep only latest entry per category
-        const categoryPerfMap = []
-
         // Process performance data by category
         const performanceByCategory: Record<
           string,
@@ -121,10 +142,6 @@ export default function Statistics() {
         > = {}
 
         for (let item of filteredData) {
-          const currentMonth = `${item.month} ${item.year}`
-
-          if (currentMonth !== latestMonth) continue
-
           const category = item.category
 
           if (!performanceByCategory[category]) {
@@ -138,19 +155,10 @@ export default function Statistics() {
           if (category == 'Cash in Hand' || category == 'Bank Account') {
             performanceByCategory[category].liquid += Number(item.cash)
           } else {
-            // if (
-            //   category == 'Recurring Deposit' ||
-            //   category == 'Provident Fund'
-            // ) {
-            //   performanceByCategory[category].invested += Number(item.amount)
-            //   performanceByCategory[category].current += Number(item.amount)
-            // } else {
             performanceByCategory[category].invested += Number(item.investment)
             performanceByCategory[category].current += Number(
               item.current_value,
             )
-            // }
-
             performanceByCategory[category].count += 1
           }
         }
@@ -173,16 +181,12 @@ export default function Statistics() {
         setPerformanceData(newPerformanceData)
 
         // Process individual records for title-based table
-        // Group by title and keep only the latest entry for each title
-        const lastesMonthData = []
+        const selectedMonthData = []
 
         for (const item of filteredData) {
-          const currentMonth = `${item.month} ${item.year}`
-
-          if (currentMonth !== latestMonth) continue
           const itemDate = new Date(item.date_added || item.created_at)
 
-          lastesMonthData.push({
+          selectedMonthData.push({
             id: item.id,
             title: item.description,
             category: item.category,
@@ -195,14 +199,14 @@ export default function Statistics() {
           })
         }
         // sort by title
-        lastesMonthData.sort((a, b) => {
+        selectedMonthData.sort((a, b) => {
           const titleCompare = a.title.localeCompare(b.title)
           return titleCompare == 0
             ? a.category.localeCompare(b.category)
             : titleCompare
         })
 
-        setTitleData([...lastesMonthData])
+        setTitleData([...selectedMonthData])
       } catch (error) {
         console.error('Error fetching statistics:', error)
       } finally {
@@ -211,34 +215,7 @@ export default function Statistics() {
     }
 
     fetchData()
-  }, [user, dateRange])
-
-  const filterDataByRange = (data: any[], range: string) => {
-    const now = new Date()
-    const cutoffDate = new Date()
-
-    switch (range) {
-      case '1month':
-        cutoffDate.setMonth(now.getMonth() - 1)
-        break
-      case '3months':
-        cutoffDate.setMonth(now.getMonth() - 3)
-        break
-      case '6months':
-        cutoffDate.setMonth(now.getMonth() - 6)
-        break
-      case '1year':
-        cutoffDate.setFullYear(now.getFullYear() - 1)
-        break
-      default:
-        return data
-    }
-
-    return data.filter((item: any) => {
-      const itemDate = new Date(item.date_added || item.created_at)
-      return itemDate >= cutoffDate
-    })
-  }
+  }, [user, selectedMonth])
 
   const exportToExcel = () => {
     // Prepare title data
@@ -440,16 +417,17 @@ export default function Statistics() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Select value={dateRange} onValueChange={setDateRange}>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-40 h-10 rounded-xl">
               <Calendar className="w-4 h-4 mr-2" />
-              <SelectValue />
+              <SelectValue placeholder="Select month" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1month">Last Month</SelectItem>
-              <SelectItem value="3months">Last 3 Months</SelectItem>
-              <SelectItem value="6months">Last 6 Months</SelectItem>
-              <SelectItem value="1year">Last Year</SelectItem>
+              {availableMonths.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
