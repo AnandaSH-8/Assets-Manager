@@ -61,8 +61,21 @@ Deno.serve(async req => {
   try {
     const url = new URL(req.url);
     const pathSegments = url.pathname.split('/').filter(Boolean);
-    const action = pathSegments[pathSegments.length - 1];
-    const id = pathSegments[pathSegments.length - 2];
+    
+    // Find the index of 'financial-api' in the path
+    const functionIndex = pathSegments.findIndex(seg => seg === 'financial-api');
+    
+    // Get segments after 'financial-api'
+    const relevantSegments = functionIndex >= 0 
+      ? pathSegments.slice(functionIndex + 1) 
+      : pathSegments;
+    
+    // action is the first segment after function name (e.g., 'all', 'stats', or a UUID)
+    const action = relevantSegments[0] || '';
+    
+    // For routes like /financial-api/{id}, id is in action position
+    // For routes like /financial-api/{id}/something, id would be action and something is a sub-action
+    const id = action;
     // Get user from authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -119,22 +132,25 @@ Deno.serve(async req => {
           return await getFinancialStats(supabase, user.id);
         } else if (action === 'titles') {
           return await getUniqueTitles(supabase, user.id);
-        } else if (id && action !== 'all' && action !== 'titles') {
-          return await getFinancial(supabase, id, user.id);
+        } else if (action && action !== 'all' && action !== 'stats' && action !== 'titles') {
+          // action is the UUID
+          return await getFinancial(supabase, action, user.id);
         }
         break;
       case 'POST':
         return await createFinancial(req, supabase, user.id);
       case 'PUT':
-        if (id) {
-          return await updateFinancial(req, supabase, id, user.id);
+        if (action) {
+          // action is the UUID for PUT requests
+          return await updateFinancial(req, supabase, action, user.id);
         }
         break;
       case 'DELETE':
         if (action === 'clear-all') {
           return await clearAllFinancials(supabase, user.id);
-        } else if (id) {
-          return await deleteFinancial(supabase, id, user.id);
+        } else if (action) {
+          // action is the UUID for DELETE requests
+          return await deleteFinancial(supabase, action, user.id);
         }
         break;
     }
