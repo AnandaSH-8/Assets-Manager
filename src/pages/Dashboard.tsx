@@ -184,72 +184,87 @@ export default function Dashboard() {
           'December',
         ]
 
-        // Group data by month for charts
+        // Group data by month-year for charts (key format: "Month-Year")
         const monthlyData: Record<
           string,
-          { cash: number; investment: number; count: number }
+          { cash: number; investment: number; count: number; year: number; monthIndex: number }
         > = {}
         allData.forEach((item: any) => {
           const month = item.month || 'Unknown'
-          if (!monthlyData[month]) {
-            monthlyData[month] = { cash: 0, investment: 0, count: 0 }
+          const year = item.year || new Date().getFullYear()
+          const key = `${month}-${year}`
+          if (!monthlyData[key]) {
+            monthlyData[key] = { 
+              cash: 0, 
+              investment: 0, 
+              count: 0, 
+              year, 
+              monthIndex: monthOrder.indexOf(month) 
+            }
           }
-          monthlyData[month].cash += Number(item.cash || 0)
-          monthlyData[month].investment += Number(item.investment || 0)
-          monthlyData[month].count += 1
+          monthlyData[key].cash += Number(item.cash || 0)
+          monthlyData[key].investment += Number(item.investment || 0)
+          monthlyData[key].count += 1
         })
 
-        // Convert to chart data format and sort by month order
-        const months = Object.keys(monthlyData).sort((a, b) => {
-          const indexA = monthOrder.indexOf(a)
-          const indexB = monthOrder.indexOf(b)
-          return indexA - indexB
+        // Convert to chart data format and sort by year then month
+        const monthYearKeys = Object.keys(monthlyData).sort((a, b) => {
+          const dataA = monthlyData[a]
+          const dataB = monthlyData[b]
+          // First sort by year
+          if (dataA.year !== dataB.year) {
+            return dataA.year - dataB.year
+          }
+          // Then sort by month within the same year
+          return dataA.monthIndex - dataB.monthIndex
         })
 
-        const newChartData = months.map(month => ({
-          month,
-          assets: monthlyData[month].cash,
-          investments: monthlyData[month].investment,
-        }))
+        const newChartData = monthYearKeys.map(key => {
+          const [month, year] = key.split('-')
+          const shortMonth = month.substring(0, 3)
+          return {
+            month: `${shortMonth}-${year}`,
+            assets: monthlyData[key].cash,
+            investments: monthlyData[key].investment,
+          }
+        })
         setChartData(newChartData)
 
         // Calculate growth data (comparison with previous month for total)
-        const newGrowthData = months.map((month, index) => {
+        const newGrowthData = monthYearKeys.map((key, index) => {
+          const [month, year] = key.split('-')
+          const shortMonth = month.substring(0, 3)
+          const displayKey = `${shortMonth}-${year}`
+          
           if (index === 0) {
-            return { month, growth: 0 }
+            return { month: displayKey, growth: 0 }
           }
           const currentTotal =
-            monthlyData[month].cash + monthlyData[month].investment
-          const previousMonth = months[index - 1]
+            monthlyData[key].cash + monthlyData[key].investment
+          const previousKey = monthYearKeys[index - 1]
           const previousTotal =
-            monthlyData[previousMonth].cash +
-            monthlyData[previousMonth].investment
+            monthlyData[previousKey].cash +
+            monthlyData[previousKey].investment
           const growth =
             previousTotal > 0
               ? ((currentTotal - previousTotal) / previousTotal) * 100
               : 0
-          return { month, growth: Number(growth.toFixed(2)) }
+          return { month: displayKey, growth: Number(growth.toFixed(2)) }
         })
         setGrowthData(newGrowthData)
 
-        // Calculate actual percentage changes
-        const currentMonthCash =
-          months.length > 0 ? monthlyData[months[months.length - 1]].cash : 0
-        const previousMonthCash =
-          months.length > 1 ? monthlyData[months[months.length - 2]].cash : 0
-        const firstMonthCash =
-          months.length > 0 ? monthlyData[months[0]].cash : 0
+        // Calculate actual percentage changes using sorted month-year keys
+        const currentMonthKey = monthYearKeys.length > 0 ? monthYearKeys[monthYearKeys.length - 1] : null
+        const previousMonthKey = monthYearKeys.length > 1 ? monthYearKeys[monthYearKeys.length - 2] : null
+        const firstMonthKey = monthYearKeys.length > 0 ? monthYearKeys[0] : null
 
-        const currentMonthInvestment =
-          months.length > 0
-            ? monthlyData[months[months.length - 1]].investment
-            : 0
-        const previousMonthInvestment =
-          months.length > 1
-            ? monthlyData[months[months.length - 2]].investment
-            : 0
-        const firstMonthInvestment =
-          months.length > 0 ? monthlyData[months[0]].investment : 0
+        const currentMonthCash = currentMonthKey ? monthlyData[currentMonthKey].cash : 0
+        const previousMonthCash = previousMonthKey ? monthlyData[previousMonthKey].cash : 0
+        const firstMonthCash = firstMonthKey ? monthlyData[firstMonthKey].cash : 0
+
+        const currentMonthInvestment = currentMonthKey ? monthlyData[currentMonthKey].investment : 0
+        const previousMonthInvestment = previousMonthKey ? monthlyData[previousMonthKey].investment : 0
+        const firstMonthInvestment = firstMonthKey ? monthlyData[firstMonthKey].investment : 0
 
         const liquidAssetsGrowthPercent =
           previousMonthCash > 0
@@ -286,6 +301,13 @@ export default function Dashboard() {
         const totalGrowthPercent =
           firstMonthTotal > 0 ? (totalGrowthAmount / firstMonthTotal) * 100 : 0
 
+        // Format display names for months (e.g., "Jan-2026")
+        const formatMonthDisplay = (key: string | null) => {
+          if (!key) return undefined
+          const [month, year] = key.split('-')
+          return `${month.substring(0, 3)}-${year}`
+        }
+
         // Calculate summary data using latest month totals
         setSummaryData({
           totalLiquidAssets: latestMonthCash,
@@ -306,11 +328,9 @@ export default function Dashboard() {
           previousMonthTotal: previousMonthCash + previousMonthInvestment,
           currentMonthTotal: currentMonthCash + currentMonthInvestment,
           firstMonthTotal,
-          previousMonthName:
-            months.length > 1 ? months[months.length - 2] : undefined,
-          currentMonthName:
-            months.length > 0 ? months[months.length - 1] : undefined,
-          firstMonthName: months.length > 0 ? months[0] : undefined,
+          previousMonthName: formatMonthDisplay(previousMonthKey),
+          currentMonthName: formatMonthDisplay(currentMonthKey),
+          firstMonthName: formatMonthDisplay(firstMonthKey),
         })
 
         setHasData(allData.length > 0)
@@ -449,8 +469,21 @@ export default function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {(() => {
-                    const currentMonth = summaryData.currentMonthName
-                    const previousMonth = summaryData.previousMonthName
+                    // Parse month-year keys back to match data
+                    const parseMonthYear = (display: string | undefined) => {
+                      if (!display) return { month: null, year: null }
+                      const [shortMonth, year] = display.split('-')
+                      const monthMap: Record<string, string> = {
+                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
+                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
+                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
+                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                      }
+                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                    }
+                    
+                    const current = parseMonthYear(summaryData.currentMonthName)
+                    const previous = parseMonthYear(summaryData.previousMonthName)
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -467,9 +500,9 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === currentMonth) {
+                        if (item.month === current.month && item.year === current.year) {
                           grouped[name].current += Number(item.cash || 0)
-                        } else if (item.month === previousMonth) {
+                        } else if (item.month === previous.month && item.year === previous.year) {
                           grouped[name].previous += Number(item.cash || 0)
                         }
                       })
@@ -590,8 +623,21 @@ export default function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {(() => {
-                    const currentMonth = summaryData.currentMonthName
-                    const previousMonth = summaryData.previousMonthName
+                    // Parse month-year keys back to match data
+                    const parseMonthYear = (display: string | undefined) => {
+                      if (!display) return { month: null, year: null }
+                      const [shortMonth, year] = display.split('-')
+                      const monthMap: Record<string, string> = {
+                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
+                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
+                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
+                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                      }
+                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                    }
+                    
+                    const current = parseMonthYear(summaryData.currentMonthName)
+                    const previous = parseMonthYear(summaryData.previousMonthName)
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -608,9 +654,9 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === currentMonth) {
+                        if (item.month === current.month && item.year === current.year) {
                           grouped[name].current += Number(item.investment || 0)
-                        } else if (item.month === previousMonth) {
+                        } else if (item.month === previous.month && item.year === previous.year) {
                           grouped[name].previous += Number(item.investment || 0)
                         }
                       })
