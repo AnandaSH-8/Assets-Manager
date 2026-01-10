@@ -751,7 +751,7 @@ export default function Dashboard() {
                   ({formatCurrency(summaryData.currentMonthTotal || 0)} -{' '}
                   {formatCurrency(summaryData.previousMonthTotal || 0)}) /{' '}
                   {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 ={' '}
-                  {summaryData.monthlyGrowth}%
+                  {summaryData.monthlyGrowthPercent.toFixed(2)}%
                 </p>
                 <p className="text-xs text-muted-foreground">
                   This represents the percentage change in total assets from{' '}
