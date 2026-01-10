@@ -713,7 +713,7 @@ export default function Dashboard() {
                     }
                   >
                     {summaryData.monthlyGrowthPercent >= 0 ? '+' : ''}
-                    {summaryData.monthlyGrowthPercent}%
+                    {summaryData.monthlyGrowthPercent.toFixed(2)}%
                   </span>
                   <span className="text-muted-foreground">from last month</span>
                 </div>
