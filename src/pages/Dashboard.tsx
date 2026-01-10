@@ -187,19 +187,25 @@ export default function Dashboard() {
         // Group data by month-year for charts (key format: "Month-Year")
         const monthlyData: Record<
           string,
-          { cash: number; investment: number; count: number; year: number; monthIndex: number }
+          {
+            cash: number
+            investment: number
+            count: number
+            year: number
+            monthIndex: number
+          }
         > = {}
         allData.forEach((item: any) => {
           const month = item.month || 'Unknown'
           const year = item.year || new Date().getFullYear()
           const key = `${month}-${year}`
           if (!monthlyData[key]) {
-            monthlyData[key] = { 
-              cash: 0, 
-              investment: 0, 
-              count: 0, 
-              year, 
-              monthIndex: monthOrder.indexOf(month) 
+            monthlyData[key] = {
+              cash: 0,
+              investment: 0,
+              count: 0,
+              year,
+              monthIndex: monthOrder.indexOf(month),
             }
           }
           monthlyData[key].cash += Number(item.cash || 0)
@@ -235,7 +241,7 @@ export default function Dashboard() {
           const [month, year] = key.split('-')
           const shortMonth = month.substring(0, 3)
           const displayKey = `${shortMonth}-${year}`
-          
+
           if (index === 0) {
             return { month: displayKey, growth: 0 }
           }
@@ -243,8 +249,7 @@ export default function Dashboard() {
             monthlyData[key].cash + monthlyData[key].investment
           const previousKey = monthYearKeys[index - 1]
           const previousTotal =
-            monthlyData[previousKey].cash +
-            monthlyData[previousKey].investment
+            monthlyData[previousKey].cash + monthlyData[previousKey].investment
           const growth =
             previousTotal > 0
               ? ((currentTotal - previousTotal) / previousTotal) * 100
@@ -254,17 +259,35 @@ export default function Dashboard() {
         setGrowthData(newGrowthData)
 
         // Calculate actual percentage changes using sorted month-year keys
-        const currentMonthKey = monthYearKeys.length > 0 ? monthYearKeys[monthYearKeys.length - 1] : null
-        const previousMonthKey = monthYearKeys.length > 1 ? monthYearKeys[monthYearKeys.length - 2] : null
+        const currentMonthKey =
+          monthYearKeys.length > 0
+            ? monthYearKeys[monthYearKeys.length - 1]
+            : null
+        const previousMonthKey =
+          monthYearKeys.length > 1
+            ? monthYearKeys[monthYearKeys.length - 2]
+            : null
         const firstMonthKey = monthYearKeys.length > 0 ? monthYearKeys[0] : null
 
-        const currentMonthCash = currentMonthKey ? monthlyData[currentMonthKey].cash : 0
-        const previousMonthCash = previousMonthKey ? monthlyData[previousMonthKey].cash : 0
-        const firstMonthCash = firstMonthKey ? monthlyData[firstMonthKey].cash : 0
+        const currentMonthCash = currentMonthKey
+          ? monthlyData[currentMonthKey].cash
+          : 0
+        const previousMonthCash = previousMonthKey
+          ? monthlyData[previousMonthKey].cash
+          : 0
+        const firstMonthCash = firstMonthKey
+          ? monthlyData[firstMonthKey].cash
+          : 0
 
-        const currentMonthInvestment = currentMonthKey ? monthlyData[currentMonthKey].investment : 0
-        const previousMonthInvestment = previousMonthKey ? monthlyData[previousMonthKey].investment : 0
-        const firstMonthInvestment = firstMonthKey ? monthlyData[firstMonthKey].investment : 0
+        const currentMonthInvestment = currentMonthKey
+          ? monthlyData[currentMonthKey].investment
+          : 0
+        const previousMonthInvestment = previousMonthKey
+          ? monthlyData[previousMonthKey].investment
+          : 0
+        const firstMonthInvestment = firstMonthKey
+          ? monthlyData[firstMonthKey].investment
+          : 0
 
         const liquidAssetsGrowthPercent =
           previousMonthCash > 0
@@ -281,10 +304,12 @@ export default function Dashboard() {
         // Monthly growth: current month total vs previous month total
         const currentMonthTotal = currentMonthCash + currentMonthInvestment
         const previousMonthTotal = previousMonthCash + previousMonthInvestment
-        const monthlyGrowthAmount = currentMonthTotal - previousMonthTotal
+        const monthlyGrowthAmount =
+          Math.round((currentMonthTotal - previousMonthTotal) * 100) / 100
         const monthlyGrowthPercent =
           previousMonthTotal > 0
-            ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100
+            ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) *
+              100
             : 0
 
         const totalGrowthAmount =
@@ -383,7 +408,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-muted-foreground">
                       Total Liquid Assets
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-foreground">
                       {formatCurrency(summaryData.totalLiquidAssets)}
                     </p>
                   </div>
@@ -468,16 +493,29 @@ export default function Dashboard() {
                       if (!display) return { month: null, year: null }
                       const [shortMonth, year] = display.split('-')
                       const monthMap: Record<string, string> = {
-                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
-                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
-                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
-                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                        Jan: 'January',
+                        Feb: 'February',
+                        Mar: 'March',
+                        Apr: 'April',
+                        May: 'May',
+                        Jun: 'June',
+                        Jul: 'July',
+                        Aug: 'August',
+                        Sep: 'September',
+                        Oct: 'October',
+                        Nov: 'November',
+                        Dec: 'December',
                       }
-                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                      return {
+                        month: monthMap[shortMonth],
+                        year: parseInt(year),
+                      }
                     }
-                    
+
                     const current = parseMonthYear(summaryData.currentMonthName)
-                    const previous = parseMonthYear(summaryData.previousMonthName)
+                    const previous = parseMonthYear(
+                      summaryData.previousMonthName,
+                    )
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -494,9 +532,15 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === current.month && item.year === current.year) {
+                        if (
+                          item.month === current.month &&
+                          item.year === current.year
+                        ) {
                           grouped[name].current += Number(item.cash || 0)
-                        } else if (item.month === previous.month && item.year === previous.year) {
+                        } else if (
+                          item.month === previous.month &&
+                          item.year === previous.year
+                        ) {
                           grouped[name].previous += Number(item.cash || 0)
                         }
                       })
@@ -537,7 +581,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-muted-foreground">
                       Total Investments
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-foreground">
                       {formatCurrency(summaryData.totalInvestments)}
                     </p>
                   </div>
@@ -622,16 +666,29 @@ export default function Dashboard() {
                       if (!display) return { month: null, year: null }
                       const [shortMonth, year] = display.split('-')
                       const monthMap: Record<string, string> = {
-                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
-                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
-                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
-                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                        Jan: 'January',
+                        Feb: 'February',
+                        Mar: 'March',
+                        Apr: 'April',
+                        May: 'May',
+                        Jun: 'June',
+                        Jul: 'July',
+                        Aug: 'August',
+                        Sep: 'September',
+                        Oct: 'October',
+                        Nov: 'November',
+                        Dec: 'December',
                       }
-                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                      return {
+                        month: monthMap[shortMonth],
+                        year: Number.parseInt(year),
+                      }
                     }
-                    
+
                     const current = parseMonthYear(summaryData.currentMonthName)
-                    const previous = parseMonthYear(summaryData.previousMonthName)
+                    const previous = parseMonthYear(
+                      summaryData.previousMonthName,
+                    )
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -648,9 +705,15 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === current.month && item.year === current.year) {
+                        if (
+                          item.month === current.month &&
+                          item.year === current.year
+                        ) {
                           grouped[name].current += Number(item.investment || 0)
-                        } else if (item.month === previous.month && item.year === previous.year) {
+                        } else if (
+                          item.month === previous.month &&
+                          item.year === previous.year
+                        ) {
                           grouped[name].previous += Number(item.investment || 0)
                         }
                       })
@@ -691,8 +754,10 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-muted-foreground">
                       Monthly Growth
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {summaryData.monthlyGrowth}%
+                    <p className="text-xl font-bold text-foreground">
+                      {summaryData.monthlyGrowth > 0 ? '+' : '-'}
+                      {''}
+                      {formatCurrency(summaryData.monthlyGrowth)}
                     </p>
                   </div>
                   <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
@@ -772,7 +837,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-muted-foreground">
                       Total Growth
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-foreground">
                       {formatCurrency(summaryData.totalGrowth)}
                     </p>
                   </div>
