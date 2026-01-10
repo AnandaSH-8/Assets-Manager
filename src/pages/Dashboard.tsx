@@ -278,19 +278,13 @@ export default function Dashboard() {
               100
             : 0
 
-        const monthlyGrowthValue =
-          newGrowthData.length > 0
-            ? newGrowthData[newGrowthData.length - 1].growth
-            : 0
-        const previousMonthGrowthValue =
-          newGrowthData.length > 1
-            ? newGrowthData[newGrowthData.length - 2].growth
-            : 0
+        // Monthly growth: current month total vs previous month total
+        const currentMonthTotal = currentMonthCash + currentMonthInvestment
+        const previousMonthTotal = previousMonthCash + previousMonthInvestment
+        const monthlyGrowthAmount = currentMonthTotal - previousMonthTotal
         const monthlyGrowthPercent =
-          previousMonthGrowthValue !== 0
-            ? ((monthlyGrowthValue - previousMonthGrowthValue) /
-                Math.abs(previousMonthGrowthValue)) *
-              100
+          previousMonthTotal > 0
+            ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100
             : 0
 
         const totalGrowthAmount =
@@ -312,7 +306,7 @@ export default function Dashboard() {
         setSummaryData({
           totalLiquidAssets: latestMonthCash,
           totalInvestments: latestMonthInvestment,
-          monthlyGrowth: monthlyGrowthValue,
+          monthlyGrowth: monthlyGrowthAmount,
           totalGrowth: totalGrowthAmount,
           liquidAssetsGrowthPercent: Number(
             liquidAssetsGrowthPercent.toFixed(2),
