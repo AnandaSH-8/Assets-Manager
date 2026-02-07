@@ -692,7 +692,7 @@ export default function Dashboard() {
                       Monthly Growth
                     </p>
                     <p className="text-2xl font-bold text-foreground">
-                      {summaryData.monthlyGrowthPercent.toFixed(2)}%
+                      {formatCurrency(summaryData.monthlyGrowth)}
                     </p>
                   </div>
                   <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
