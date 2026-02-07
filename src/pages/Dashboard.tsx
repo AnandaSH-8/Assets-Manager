@@ -405,7 +405,7 @@ export default function Dashboard() {
                     }
                   >
                     {summaryData.liquidAssetsGrowthPercent >= 0 ? '+' : ''}
-                    {summaryData.liquidAssetsGrowthPercent}%
+                    {summaryData.liquidAssetsGrowthPercent.toFixed(2)}%
                   </span>
                   <span className="text-muted-foreground">from last month</span>
                 </div>
@@ -443,7 +443,7 @@ export default function Dashboard() {
                   ({formatCurrency(summaryData.currentMonthCash || 0)} -{' '}
                   {formatCurrency(summaryData.previousMonthCash || 0)}) /{' '}
                   {formatCurrency(summaryData.previousMonthCash || 0)} × 100 ={' '}
-                  {summaryData.liquidAssetsGrowthPercent}%
+                  {summaryData.liquidAssetsGrowthPercent.toFixed(2)}%
                 </p>
               </div>
             </div>
@@ -559,7 +559,7 @@ export default function Dashboard() {
                     }
                   >
                     {summaryData.investmentsGrowthPercent >= 0 ? '+' : ''}
-                    {summaryData.investmentsGrowthPercent}%
+                    {summaryData.investmentsGrowthPercent.toFixed(2)}%
                   </span>
                   <span className="text-muted-foreground">from last month</span>
                 </div>
@@ -597,7 +597,7 @@ export default function Dashboard() {
                   ({formatCurrency(summaryData.currentMonthInvestment || 0)} -{' '}
                   {formatCurrency(summaryData.previousMonthInvestment || 0)}) /{' '}
                   {formatCurrency(summaryData.previousMonthInvestment || 0)} ×
-                  100 = {summaryData.investmentsGrowthPercent}%
+                  100 = {summaryData.investmentsGrowthPercent.toFixed(2)}%
                 </p>
               </div>
             </div>
@@ -692,7 +692,7 @@ export default function Dashboard() {
                       Monthly Growth
                     </p>
                     <p className="text-2xl font-bold text-foreground">
-                      {summaryData.monthlyGrowth}%
+                      {summaryData.monthlyGrowthPercent.toFixed(2)}%
                     </p>
                   </div>
                   <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
@@ -794,7 +794,7 @@ export default function Dashboard() {
                     }
                   >
                     {summaryData.totalGrowthPercent >= 0 ? '+' : ''}
-                    {summaryData.totalGrowthPercent}%
+                    {summaryData.totalGrowthPercent.toFixed(2)}%
                   </span>
                   <span className="text-muted-foreground">total growth</span>
                 </div>
@@ -844,7 +844,7 @@ export default function Dashboard() {
                 <p className="text-sm font-mono mb-3">
                   {formatCurrency(summaryData.totalGrowth)} /{' '}
                   {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 ={' '}
-                  {summaryData.totalGrowthPercent}%
+                  {summaryData.totalGrowthPercent.toFixed(2)}%
                 </p>
                 <p className="text-xs text-muted-foreground">
                   This represents the overall percentage increase from{' '}
