@@ -312,13 +312,13 @@ export default function Dashboard() {
               100
             : 0
 
-        const totalGrowthAmount =
-          currentMonthCash +
-          currentMonthInvestment -
-          (firstMonthCash + firstMonthInvestment)
-        const firstMonthTotal = firstMonthCash + firstMonthInvestment
+        // Total Growth: current month vs previous month (same as monthly growth)
+        const totalGrowthAmount = currentMonthTotal - previousMonthTotal
         const totalGrowthPercent =
-          firstMonthTotal > 0 ? (totalGrowthAmount / firstMonthTotal) * 100 : 0
+          previousMonthTotal > 0 ? (totalGrowthAmount / previousMonthTotal) * 100 : 0
+        
+        // Keep first month data for reference if needed
+        const firstMonthTotal = firstMonthCash + firstMonthInvestment
 
         // Format display names for months (e.g., "Jan-2026")
         const formatMonthDisplay = (key: string | null) => {
@@ -874,10 +874,10 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 rounded-lg bg-accent/30">
                   <p className="text-xs text-muted-foreground mb-1">
-                    {summaryData.firstMonthName || 'First Month'} Total
+                    {summaryData.previousMonthName || 'Previous Month'} Total
                   </p>
                   <p className="text-lg font-bold">
-                    {formatCurrency(summaryData.firstMonthTotal || 0)}
+                    {formatCurrency(summaryData.previousMonthTotal || 0)}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-accent/30">
@@ -898,7 +898,7 @@ export default function Dashboard() {
                 </p>
                 <p className="text-sm font-mono mb-3">
                   {formatCurrency(summaryData.currentMonthTotal || 0)} -{' '}
-                  {formatCurrency(summaryData.firstMonthTotal || 0)} ={' '}
+                  {formatCurrency(summaryData.previousMonthTotal || 0)} ={' '}
                   {formatCurrency(summaryData.totalGrowth)}
                 </p>
               </div>
@@ -907,13 +907,14 @@ export default function Dashboard() {
                   Growth Percentage Calculation
                 </p>
                 <p className="text-sm font-mono mb-3">
-                  {formatCurrency(summaryData.totalGrowth)} /{' '}
-                  {formatCurrency(summaryData.firstMonthTotal || 0)} × 100 ={' '}
-                  {summaryData.totalGrowthPercent}%
+                  ({formatCurrency(summaryData.currentMonthTotal || 0)} -{' '}
+                  {formatCurrency(summaryData.previousMonthTotal || 0)}) /{' '}
+                  {formatCurrency(summaryData.previousMonthTotal || 0)} × 100 ={' '}
+                  {summaryData.totalGrowthPercent.toFixed(2)}%
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  This represents the overall percentage increase from{' '}
-                  {summaryData.firstMonthName} to {summaryData.currentMonthName}
+                  This represents the percentage change from{' '}
+                  {summaryData.previousMonthName} to {summaryData.currentMonthName}
                 </p>
               </div>
             </div>
