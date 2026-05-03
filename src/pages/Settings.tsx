@@ -101,10 +101,18 @@ export default function Settings() {
       return;
     }
 
-    if (newPassword.length < 6) {
+    const passwordChecks = {
+      length: newPassword.length >= 12,
+      lowercase: /[a-z]/.test(newPassword),
+      uppercase: /[A-Z]/.test(newPassword),
+      numbers: /\d/.test(newPassword),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword),
+    };
+    if (!Object.values(passwordChecks).every(Boolean)) {
       toast({
         title: 'Error',
-        description: 'Password must be at least 6 characters',
+        description:
+          'Password must be at least 12 characters and include uppercase, lowercase, number, and special character',
         variant: 'destructive',
       });
       return;
