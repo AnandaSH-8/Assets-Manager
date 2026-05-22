@@ -13,8 +13,8 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('user@yopmail.com');
+  const [password, setPassword] = useState('userAssets@123');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
