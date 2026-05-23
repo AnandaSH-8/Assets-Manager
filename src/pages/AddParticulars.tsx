@@ -53,13 +53,25 @@ export default function AddParticulars() {
 
   const currentMonth = MONTHS[new Date().getMonth()];
   
-  const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    actualCash: '',
-    investedCash: '',
-    currentValue: '',
-    month: currentMonth,
+  const [formData, setFormData] = useState(() => {
+    if (editData) {
+      return {
+        title: editData.title || '',
+        category: editData.category || '',
+        actualCash: editData.cash?.toString() || '0',
+        investedCash: editData.investment?.toString() || '0',
+        currentValue: editData.currentValue?.toString() || '0',
+        month: editData.month || currentMonth,
+      };
+    }
+    return {
+      title: '',
+      category: '',
+      actualCash: '',
+      investedCash: '',
+      currentValue: '',
+      month: currentMonth,
+    };
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +79,7 @@ export default function AddParticulars() {
 
   const [isCustom, setIsCustom] = useState(false);
 
-  // Fetch saved titles and populate form if editing
+  // Fetch saved titles
   useEffect(() => {
     const fetchTitles = async () => {
       try {
@@ -78,19 +90,7 @@ export default function AddParticulars() {
       }
     };
     fetchTitles();
-
-    // Pre-fill form if editing
-    if (editData) {
-      setFormData({
-        title: editData.title || '',
-        category: editData.category || '',
-        actualCash: editData.cash?.toString() || '0',
-        investedCash: editData.investment?.toString() || '0',
-        currentValue: editData.currentValue?.toString() || '0',
-        month: editData.month || '',
-      });
-    }
-  }, [editData]);
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     const newData = { ...formData, [field]: value }
