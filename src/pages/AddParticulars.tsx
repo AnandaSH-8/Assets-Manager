@@ -71,7 +71,7 @@ export default function AddParticulars() {
 
   const [isCustom, setIsCustom] = useState(false);
 
-  // Fetch saved titles and populate form if editing
+  // Fetch saved titles
   useEffect(() => {
     const fetchTitles = async () => {
       try {
