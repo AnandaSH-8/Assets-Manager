@@ -15,6 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsDemoUser } from '@/lib/demo-user';
 
 const categories = [
   'Bank Account',
@@ -48,6 +49,8 @@ export default function AddParticulars() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isDemoUser = useIsDemoUser();
+  const isReadOnly = isDemoUser;
   const editData = location.state?.editData;
   const isEditMode = !!editData;
 
@@ -163,6 +166,17 @@ export default function AddParticulars() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (isReadOnly) {
+      toast({
+        title: 'Read-only demo account',
+        description: 'Sign in with your own account to add or edit entries.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+
 
     if (!validateForm()) {
       toast({
@@ -312,6 +326,16 @@ export default function AddParticulars() {
         >
           <GlassCard className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {isReadOnly && (
+                <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
+                  <p className="font-medium">Demo account — read-only</p>
+                  <p className="text-muted-foreground mt-1">
+                    You are signed in with the shared demo credentials. Fields are disabled.
+                    Create your own account to add or edit financial particulars.
+                  </p>
+                </div>
+              )}
+              <fieldset disabled={isReadOnly} className="space-y-6 contents">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Plus className="h-5 w-5 text-primary" />
@@ -535,13 +559,14 @@ export default function AddParticulars() {
               >
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50"
+                  disabled={isSubmitting || isReadOnly}
+                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : buttonText}
+                  {isReadOnly ? 'Read-only demo account' : isSubmitting ? 'Saving...' : buttonText}
                 </Button>
               </motion.div>
+              </fieldset>
             </form>
           </GlassCard>
         </motion.div>
