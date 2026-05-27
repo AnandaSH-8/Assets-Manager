@@ -61,6 +61,7 @@ import {
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { financialAPI } from '@/services/api'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsDemoUser } from '@/lib/demo-user'
 import { useToast } from '@/hooks/use-toast'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
@@ -89,6 +90,7 @@ const ALL_CATEGORIES = [
 export default function Statistics() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const isDemoUser = useIsDemoUser()
   const { toast } = useToast()
 
   // ─── Core data state ─────────────────────────────────────────────────────
