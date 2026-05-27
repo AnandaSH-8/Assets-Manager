@@ -167,6 +167,17 @@ export default function AddParticulars() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (isReadOnly) {
+      toast({
+        title: 'Read-only demo account',
+        description: 'Sign in with your own account to add or edit entries.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+
+
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
@@ -315,6 +326,16 @@ export default function AddParticulars() {
         >
           <GlassCard className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {isReadOnly && (
+                <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
+                  <p className="font-medium">Demo account — read-only</p>
+                  <p className="text-muted-foreground mt-1">
+                    You are signed in with the shared demo credentials. Fields are disabled.
+                    Create your own account to add or edit financial particulars.
+                  </p>
+                </div>
+              )}
+              <fieldset disabled={isReadOnly} className="space-y-6 contents">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Plus className="h-5 w-5 text-primary" />
