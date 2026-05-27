@@ -53,6 +53,9 @@ export default function AddParticulars() {
 
   const currentMonth = MONTHS[new Date().getMonth()];
   
+  const currentYear = new Date().getFullYear()
+  const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i)
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -60,6 +63,7 @@ export default function AddParticulars() {
     investedCash: '',
     currentValue: '',
     month: currentMonth,
+    year: currentYear.toString(),
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,7 +91,8 @@ export default function AddParticulars() {
         actualCash: editData.cash?.toString() || '0',
         investedCash: editData.investment?.toString() || '0',
         currentValue: editData.currentValue?.toString() || '0',
-        month: editData.month || '',
+        month: editData.month || currentMonth,
+        year: editData.year?.toString() || currentYear.toString(),
       });
     }
   }, [editData]);
@@ -147,6 +152,9 @@ export default function AddParticulars() {
 
     if (!formData.month) {
       newErrors.month = 'Month is required'
+    }
+    if (!formData.year) {
+      newErrors.year = 'Year is required'
     }
 
     setErrors(newErrors)
@@ -219,7 +227,7 @@ export default function AddParticulars() {
           current_value: currentValue,
           month: formData.month,
           month_number: monthNumber,
-          year: new Date().getFullYear(),
+          year: Number(formData.year),
         })
 
         if (!savedTitles.includes(formData.title))
@@ -238,6 +246,7 @@ export default function AddParticulars() {
           investedCash: '',
           currentValue: '',
           month: currentMonth,
+          year: currentYear.toString(),
         })
       }
     } catch (error) {
@@ -464,31 +473,59 @@ export default function AddParticulars() {
                 )}
               </div>
 
-              {/* Month Field */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Month</label>
-                <Select
-                  value={formData.month}
-                  onValueChange={value => handleInputChange('month', value)}
-                >
-                  <SelectTrigger
-                    className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.month ? 'border-destructive' : ''}`}
+              {/* Month & Year Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Month</label>
+                  <Select
+                    value={formData.month}
+                    onValueChange={value => handleInputChange('month', value)}
                   >
-                    <SelectValue placeholder="Select month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MONTHS.map(month => (
-                      <SelectItem key={month} value={month}>
-                        {month}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.month && (
-                  <p className="text-xs text-destructive mt-1 ml-1">
-                    {errors.month}
-                  </p>
-                )}
+                    <SelectTrigger
+                      className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.month ? 'border-destructive' : ''}`}
+                    >
+                      <SelectValue placeholder="Select month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map(month => (
+                        <SelectItem key={month} value={month}>
+                          {month}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.month && (
+                    <p className="text-xs text-destructive mt-1 ml-1">
+                      {errors.month}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Year</label>
+                  <Select
+                    value={formData.year}
+                    onValueChange={value => handleInputChange('year', value)}
+                  >
+                    <SelectTrigger
+                      className={`h-12 rounded-xl shadow-neomorph bg-background ${errors.year ? 'border-destructive' : ''}`}
+                    >
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {YEARS.map(year => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.year && (
+                    <p className="text-xs text-destructive mt-1 ml-1">
+                      {errors.year}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -563,9 +600,11 @@ export default function AddParticulars() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Month:</span>
+                <span className="text-sm text-muted-foreground">Period:</span>
                 <span className="font-medium">
-                  {formData.month || 'Not selected'}
+                  {formData.month && formData.year
+                    ? `${formData.month} ${formData.year}`
+                    : 'Not selected'}
                 </span>
               </div>
             </div>

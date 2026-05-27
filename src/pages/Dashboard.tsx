@@ -78,6 +78,11 @@ interface GrowthDataItem {
   growth: number
 }
 
+interface NetWorthDataItem {
+  month: string
+  netWorth: number
+}
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -105,6 +110,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [chartData, setChartData] = useState<ChartDataItem[]>([])
   const [growthData, setGrowthData] = useState<GrowthDataItem[]>([])
+  const [netWorthData, setNetWorthData] = useState<NetWorthDataItem[]>([])
 
   // Fetch real data from Supabase
   useEffect(() => {
@@ -229,6 +235,17 @@ export default function Dashboard() {
           }
         })
         setChartData(newChartData)
+
+        // Net Worth Over Time — cumulative cash + investments per month
+        const newNetWorthData = monthYearKeys.map(key => {
+          const [month, year] = key.split('-')
+          const shortMonth = month.substring(0, 3)
+          return {
+            month: `${shortMonth}-${year}`,
+            netWorth: monthlyData[key].cash + monthlyData[key].investment,
+          }
+        })
+        setNetWorthData(newNetWorthData)
 
         // Calculate growth data (comparison with previous month for total)
         const newGrowthData = monthYearKeys.map((key, index) => {
@@ -940,17 +957,18 @@ export default function Dashboard() {
           </GlassCard>
         </motion.div>
 
-        {/* Growth Tracking Chart */}
+        {/* Net Worth Over Time Chart */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Growth Tracking</h3>
+            <h3 className="text-lg font-semibold mb-1">Net Worth Over Time</h3>
+            <p className="text-xs text-muted-foreground mb-4">Total portfolio value (cash + investments) per month</p>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={growthData}>
+                <AreaChart data={netWorthData}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
@@ -963,10 +981,10 @@ export default function Dashboard() {
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
-                    tickFormatter={value => `${value}%`}
+                    tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                   />
                   <Tooltip
-                    formatter={value => [`${value}%`, 'Growth']}
+                    formatter={value => [formatCurrency(Number(value)), 'Net Worth']}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                     contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
@@ -975,31 +993,19 @@ export default function Dashboard() {
                     }}
                   />
                   <defs>
-                    <linearGradient
-                      id="growthGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(var(--success))"
-                        stopOpacity={0.3}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(var(--success))"
-                        stopOpacity={0.1}
-                      />
+                    <linearGradient id="netWorthGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
                   <Area
                     type="monotone"
-                    dataKey="growth"
-                    stroke="hsl(var(--success))"
+                    dataKey="netWorth"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={3}
-                    fill="url(#growthGradient)"
+                    fill="url(#netWorthGradient)"
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
