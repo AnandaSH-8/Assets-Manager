@@ -559,13 +559,14 @@ export default function AddParticulars() {
               >
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50"
+                  disabled={isSubmitting || isReadOnly}
+                  className="w-full h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : buttonText}
+                  {isReadOnly ? 'Read-only demo account' : isSubmitting ? 'Saving...' : buttonText}
                 </Button>
               </motion.div>
+              </fieldset>
             </form>
           </GlassCard>
         </motion.div>
