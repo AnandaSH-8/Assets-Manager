@@ -396,6 +396,19 @@ async function updateFinancial(
     if (updates.month) {
       updates.month = sanitizeText(updates.month);
     }
+    // Encrypt monetary fields if provided
+    if (typeof updates.amount === 'number') {
+      updates.amount = await encryptNumber(updates.amount);
+    }
+    if (typeof updates.cash === 'number') {
+      updates.cash = await encryptNumber(updates.cash);
+    }
+    if (typeof updates.investment === 'number') {
+      updates.investment = await encryptNumber(updates.investment);
+    }
+    if (typeof updates.current_value === 'number') {
+      updates.current_value = await encryptNumber(updates.current_value);
+    }
 
     const { data, error } = await supabase
       .from('financial_particulars')
