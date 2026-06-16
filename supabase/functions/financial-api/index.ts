@@ -326,7 +326,7 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
 
     return new Response(
       JSON.stringify({
-        data,
+        data: data ? await decryptRecord(data) : data,
         message: 'Financial particular created successfully',
       }),
       {
