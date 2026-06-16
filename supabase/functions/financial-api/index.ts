@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { encryptNumber, decryptRecord, decryptNumber } from '../_shared/encryption.ts';
 
 // Validation schema for financial data
 const financialSchema = z.object({
@@ -203,9 +204,12 @@ async function getAllFinancials(supabase: any, userId: string) {
       },
     );
   }
+  const decrypted = await Promise.all(
+    (data || []).map((row: any) => decryptRecord(row)),
+  );
   return new Response(
     JSON.stringify({
-      data,
+      data: decrypted,
     }),
     {
       status: 200,
@@ -237,9 +241,10 @@ async function getFinancial(supabase: any, id: string, userId: string) {
       },
     );
   }
+  const decrypted = data ? await decryptRecord(data) : data;
   return new Response(
     JSON.stringify({
-      data,
+      data: decrypted,
     }),
     {
       status: 200,
@@ -293,10 +298,10 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
         user_id: userId,
         category: sanitizedCategory,
         description: sanitizedDescription,
-        amount: validatedData.amount,
-        cash: validatedData.cash || 0,
-        investment: validatedData.investment || 0,
-        current_value: validatedData.current_value || 0,
+        amount: await encryptNumber(validatedData.amount),
+        cash: await encryptNumber(validatedData.cash || 0),
+        investment: await encryptNumber(validatedData.investment || 0),
+        current_value: await encryptNumber(validatedData.current_value || 0),
         month: sanitizedMonth,
         month_number: validatedData.month_number,
         year: validatedData.year || new Date().getFullYear(),
@@ -321,7 +326,7 @@ async function createFinancial(req: Request, supabase: any, userId: string) {
 
     return new Response(
       JSON.stringify({
-        data,
+        data: data ? await decryptRecord(data) : data,
         message: 'Financial particular created successfully',
       }),
       {
@@ -391,6 +396,19 @@ async function updateFinancial(
     if (updates.month) {
       updates.month = sanitizeText(updates.month);
     }
+    // Encrypt monetary fields if provided
+    if (typeof updates.amount === 'number') {
+      updates.amount = await encryptNumber(updates.amount);
+    }
+    if (typeof updates.cash === 'number') {
+      updates.cash = await encryptNumber(updates.cash);
+    }
+    if (typeof updates.investment === 'number') {
+      updates.investment = await encryptNumber(updates.investment);
+    }
+    if (typeof updates.current_value === 'number') {
+      updates.current_value = await encryptNumber(updates.current_value);
+    }
 
     const { data, error } = await supabase
       .from('financial_particulars')
@@ -417,7 +435,7 @@ async function updateFinancial(
 
     return new Response(
       JSON.stringify({
-        data,
+        data: data ? await decryptRecord(data) : data,
         message: 'Financial particular updated successfully',
       }),
       {
@@ -495,30 +513,38 @@ async function getFinancialStats(supabase: any, userId: string) {
       },
     );
   }
-  // Calculate statistics
-  const totalAmount = data.reduce(
-    (sum: number, item: any) => sum + Number(item.amount),
+  // Decrypt monetary fields, then calculate statistics
+  const decryptedRows = await Promise.all(
+    (data || []).map(async (item: any) => ({
+      category: item.category,
+      amount: await decryptNumber(item.amount),
+      cash: await decryptNumber(item.cash),
+      investment: await decryptNumber(item.investment),
+    })),
+  );
+  const totalAmount = decryptedRows.reduce(
+    (sum, item) => sum + item.amount,
     0,
   );
-  const totalCash = data.reduce(
-    (sum: number, item: any) => sum + Number(item.cash || 0),
+  const totalCash = decryptedRows.reduce(
+    (sum, item) => sum + (item.cash || 0),
     0,
   );
-  const totalInvestment = data.reduce(
-    (sum: number, item: any) => sum + Number(item.investment || 0),
+  const totalInvestment = decryptedRows.reduce(
+    (sum, item) => sum + (item.investment || 0),
     0,
   );
-  const categoryStats = data.reduce((acc: any, item: any) => {
-    acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
+  const categoryStats = decryptedRows.reduce((acc: any, item) => {
+    acc[item.category] = (acc[item.category] || 0) + item.amount;
     return acc;
   }, {});
   const stats = {
     total_amount: totalAmount,
     total_cash: totalCash,
     total_investment: totalInvestment,
-    total_entries: data.length,
+    total_entries: decryptedRows.length,
     category_breakdown: categoryStats,
-    average_amount: data.length > 0 ? totalAmount / data.length : 0,
+    average_amount: decryptedRows.length > 0 ? totalAmount / decryptedRows.length : 0,
   };
   return new Response(
     JSON.stringify({

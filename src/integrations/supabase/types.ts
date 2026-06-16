@@ -16,15 +16,15 @@ export type Database = {
     Tables: {
       financial_particulars: {
         Row: {
-          amount: number
-          cash: number
+          amount: string
+          cash: string
           category: string
           created_at: string
-          current_value: number
+          current_value: string
           date_added: string
           description: string | null
           id: string
-          investment: number
+          investment: string
           month: string | null
           month_number: number | null
           updated_at: string
@@ -32,15 +32,15 @@ export type Database = {
           year: number
         }
         Insert: {
-          amount: number
-          cash?: number
+          amount?: string
+          cash?: string
           category: string
           created_at?: string
-          current_value?: number
+          current_value?: string
           date_added?: string
           description?: string | null
           id?: string
-          investment?: number
+          investment?: string
           month?: string | null
           month_number?: number | null
           updated_at?: string
@@ -48,15 +48,15 @@ export type Database = {
           year?: number
         }
         Update: {
-          amount?: number
-          cash?: number
+          amount?: string
+          cash?: string
           category?: string
           created_at?: string
-          current_value?: number
+          current_value?: string
           date_added?: string
           description?: string | null
           id?: string
-          investment?: number
+          investment?: string
           month?: string | null
           month_number?: number | null
           updated_at?: string
