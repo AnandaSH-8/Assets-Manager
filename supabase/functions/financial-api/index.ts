@@ -435,7 +435,7 @@ async function updateFinancial(
 
     return new Response(
       JSON.stringify({
-        data,
+        data: data ? await decryptRecord(data) : data,
         message: 'Financial particular updated successfully',
       }),
       {
