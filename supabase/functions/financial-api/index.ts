@@ -513,21 +513,29 @@ async function getFinancialStats(supabase: any, userId: string) {
       },
     );
   }
-  // Calculate statistics
-  const totalAmount = data.reduce(
-    (sum: number, item: any) => sum + Number(item.amount),
+  // Decrypt monetary fields, then calculate statistics
+  const decryptedRows = await Promise.all(
+    (data || []).map(async (item: any) => ({
+      category: item.category,
+      amount: await decryptNumber(item.amount),
+      cash: await decryptNumber(item.cash),
+      investment: await decryptNumber(item.investment),
+    })),
+  );
+  const totalAmount = decryptedRows.reduce(
+    (sum, item) => sum + item.amount,
     0,
   );
-  const totalCash = data.reduce(
-    (sum: number, item: any) => sum + Number(item.cash || 0),
+  const totalCash = decryptedRows.reduce(
+    (sum, item) => sum + (item.cash || 0),
     0,
   );
-  const totalInvestment = data.reduce(
-    (sum: number, item: any) => sum + Number(item.investment || 0),
+  const totalInvestment = decryptedRows.reduce(
+    (sum, item) => sum + (item.investment || 0),
     0,
   );
-  const categoryStats = data.reduce((acc: any, item: any) => {
-    acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
+  const categoryStats = decryptedRows.reduce((acc: any, item) => {
+    acc[item.category] = (acc[item.category] || 0) + item.amount;
     return acc;
   }, {});
   const stats = {
