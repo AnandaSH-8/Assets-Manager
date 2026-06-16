@@ -204,9 +204,12 @@ async function getAllFinancials(supabase: any, userId: string) {
       },
     );
   }
+  const decrypted = await Promise.all(
+    (data || []).map((row: any) => decryptRecord(row)),
+  );
   return new Response(
     JSON.stringify({
-      data,
+      data: decrypted,
     }),
     {
       status: 200,
@@ -238,9 +241,10 @@ async function getFinancial(supabase: any, id: string, userId: string) {
       },
     );
   }
+  const decrypted = data ? await decryptRecord(data) : data;
   return new Response(
     JSON.stringify({
-      data,
+      data: decrypted,
     }),
     {
       status: 200,
