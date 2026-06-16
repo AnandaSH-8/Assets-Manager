@@ -542,9 +542,9 @@ async function getFinancialStats(supabase: any, userId: string) {
     total_amount: totalAmount,
     total_cash: totalCash,
     total_investment: totalInvestment,
-    total_entries: data.length,
+    total_entries: decryptedRows.length,
     category_breakdown: categoryStats,
-    average_amount: data.length > 0 ? totalAmount / data.length : 0,
+    average_amount: decryptedRows.length > 0 ? totalAmount / decryptedRows.length : 0,
   };
   return new Response(
     JSON.stringify({
