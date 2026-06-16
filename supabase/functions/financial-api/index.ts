@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { encryptNumber, decryptRecord, decryptNumber } from '../_shared/encryption.ts';
 
 // Validation schema for financial data
 const financialSchema = z.object({
