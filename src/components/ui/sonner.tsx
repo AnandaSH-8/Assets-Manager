@@ -19,6 +19,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
             'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
           cancelButton:
             'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+          // Green success toasts (uses emerald tokens; readable in dark & light)
+          success:
+            'group-[.toaster]:!bg-emerald-600 group-[.toaster]:!text-white group-[.toaster]:!border-emerald-700 [&_[data-description]]:!text-emerald-50 [&_[data-icon]]:!text-white [&_[data-close-button]]:!text-white',
         },
       }}
       {...props}
