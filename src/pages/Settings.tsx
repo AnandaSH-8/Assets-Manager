@@ -226,6 +226,28 @@ export default function Settings() {
     }
   };
 
+  const handleEncryptExisting = async () => {
+    setIsEncrypting(true);
+    setEncryptResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('encrypt-existing', {
+        method: 'POST',
+      });
+      if (error) throw error;
+      const summary = `Scanned ${data.scanned}, encrypted ${data.updated}, already-encrypted ${data.skipped_already_encrypted}, failed ${data.failed}${data.demo_user_skipped ? ' (demo user skipped)' : ''}`;
+      setEncryptResult(summary);
+      toast({ title: 'Encryption migration complete', description: summary });
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Encryption failed',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsEncrypting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
