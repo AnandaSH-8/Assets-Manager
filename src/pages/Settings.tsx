@@ -397,7 +397,39 @@ export default function Settings() {
         </GlassCard>
       </motion.div>
 
+      {/* Encryption Migration */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+      >
+        <GlassCard className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Encrypt Existing Data</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            One-shot migration: encrypts any plaintext monetary values
+            (amount, cash, investment, current value) still stored in the
+            database. Already-encrypted rows and the demo account are skipped.
+            Safe to re-run.
+          </p>
+          <Button
+            onClick={handleEncryptExisting}
+            disabled={isEncrypting}
+            className="w-full sm:w-auto"
+          >
+            <ShieldCheck className="w-4 h-4 mr-2" />
+            {isEncrypting ? 'Encrypting...' : 'Encrypt existing rows'}
+          </Button>
+          {encryptResult && (
+            <p className="text-sm text-muted-foreground mt-3">{encryptResult}</p>
+          )}
+        </GlassCard>
+      </motion.div>
+
       {/* Danger Zone */}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
