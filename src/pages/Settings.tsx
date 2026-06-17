@@ -37,6 +37,8 @@ export default function Settings() {
   const { user } = useAuth();
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [encryptResult, setEncryptResult] = useState<string | null>(null);
 
   // Profile state
   const [name, setName] = useState('');
