@@ -16,20 +16,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Require authenticated caller
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return json({ error: 'No authorization header' }, 401);
+    // Admin-only one-shot. Require service-role key as bearer token.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    if (!token || token !== serviceKey) {
+      return json({ error: 'Unauthorized' }, 401);
     }
-    const token = authHeader.replace('Bearer ', '');
-
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: `Bearer ${token}` } } },
-    );
-    const { data: { user }, error: userErr } = await userClient.auth.getUser(token);
-    if (userErr || !user) return json({ error: 'Invalid token' }, 401);
 
     // Service-role client for the migration writes
     const admin = createClient(
