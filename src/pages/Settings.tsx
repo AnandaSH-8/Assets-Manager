@@ -7,6 +7,7 @@ import {
   Mail,
   Lock,
   Save,
+  ShieldCheck,
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
