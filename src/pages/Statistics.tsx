@@ -61,6 +61,7 @@ import {
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { financialAPI } from '@/services/api'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsDemoUser } from '@/lib/demo-user'
 import { useToast } from '@/hooks/use-toast'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
@@ -89,6 +90,7 @@ const ALL_CATEGORIES = [
 export default function Statistics() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const isDemoUser = useIsDemoUser()
   const { toast } = useToast()
 
   // ─── Core data state ─────────────────────────────────────────────────────
@@ -567,8 +569,9 @@ export default function Statistics() {
           {/* Copy to next month */}
           <Button
             variant="outline" className="h-10 rounded-xl"
-            onClick={handleCopyToNextMonth} disabled={isCopying || titleData.length === 0}
-            title="Copy all entries to next month"
+            onClick={handleCopyToNextMonth}
+            disabled={isCopying || titleData.length === 0 || isDemoUser}
+            title={isDemoUser ? 'Disabled for the demo account' : 'Copy all entries to next month'}
           >
             <Copy className="w-4 h-4 mr-2" />
             {isCopying ? 'Copying…' : 'Copy Month'}
@@ -577,8 +580,9 @@ export default function Statistics() {
           {/* Bulk import */}
           <Button
             variant="outline" className="h-10 rounded-xl"
-            onClick={() => fileInputRef.current?.click()}
-            title="Bulk import from Excel/CSV"
+            onClick={() => !isDemoUser && fileInputRef.current?.click()}
+            disabled={isDemoUser}
+            title={isDemoUser ? 'Disabled for the demo account' : 'Bulk import from Excel/CSV'}
           >
             <Upload className="w-4 h-4 mr-2" />
             Import
@@ -844,37 +848,39 @@ export default function Statistics() {
                             </td>
                             {/* Delete button */}
                             <td className="py-3.5 text-right w-[8%]">
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <button
-                                    className="opacity-0 group-hover/row:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                                    title="Delete entry"
-                                    disabled={deletingId === item.id}
-                                    onClick={e => e.stopPropagation()}
-                                  >
-                                    {deletingId === item.id
-                                      ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
-                                      : <Trash2 className="h-4 w-4" />}
-                                  </button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This will permanently remove <strong>{item.title}</strong> ({item.category}) from {item.month} {item.year}. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      onClick={() => handleDelete(item.id)}
+                              {!isDemoUser && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <button
+                                      className="opacity-0 group-hover/row:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                                      title="Delete entry"
+                                      disabled={deletingId === item.id}
+                                      onClick={e => e.stopPropagation()}
                                     >
-                                      Yes, delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                                      {deletingId === item.id
+                                        ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                                        : <Trash2 className="h-4 w-4" />}
+                                    </button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently remove <strong>{item.title}</strong> ({item.category}) from {item.month} {item.year}. This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => handleDelete(item.id)}
+                                      >
+                                        Yes, delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </td>
                           </motion.tr>
                         )

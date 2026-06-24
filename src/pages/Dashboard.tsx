@@ -43,6 +43,7 @@ import EmptyDashboard from '@/components/EmptyDashboard'
 import { useState, useEffect, useMemo } from 'react'
 import { financialAPI } from '@/services/api'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsDemoUser } from '@/lib/demo-user'
 import { useNavigate } from 'react-router-dom'
 
 interface SummaryData {
@@ -94,6 +95,7 @@ const formatCurrency = (value: number) => {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const isDemoUser = useIsDemoUser()
   const navigate = useNavigate()
   const [hasData, setHasData] = useState(false)
   const [summaryData, setSummaryData] = useState<SummaryData>({
@@ -921,8 +923,10 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="flex gap-4">
             <Button
-              onClick={() => navigate('/add-particulars')}
-              className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300"
+              onClick={() => !isDemoUser && navigate('/add-particulars')}
+              disabled={isDemoUser}
+              title={isDemoUser ? 'Disabled for the demo account' : undefined}
+              className="flex-1 h-12 bg-gradient-primary hover:shadow-hover-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add New Asset

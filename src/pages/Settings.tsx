@@ -7,6 +7,7 @@ import {
   Mail,
   Lock,
   Save,
+  ShieldCheck,
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,8 @@ export default function Settings() {
   const { user } = useAuth();
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [encryptResult, setEncryptResult] = useState<string | null>(null);
 
   // Profile state
   const [name, setName] = useState('');
@@ -223,6 +226,28 @@ export default function Settings() {
     }
   };
 
+  const handleEncryptExisting = async () => {
+    setIsEncrypting(true);
+    setEncryptResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('encrypt-existing', {
+        method: 'POST',
+      });
+      if (error) throw error;
+      const summary = `Scanned ${data.scanned}, encrypted ${data.updated}, already-encrypted ${data.skipped_already_encrypted}, failed ${data.failed}${data.demo_user_skipped ? ' (demo user skipped)' : ''}`;
+      setEncryptResult(summary);
+      toast({ title: 'Encryption migration complete', description: summary });
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Encryption failed',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsEncrypting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
@@ -372,7 +397,39 @@ export default function Settings() {
         </GlassCard>
       </motion.div>
 
+      {/* Encryption Migration */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+      >
+        <GlassCard className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Encrypt Existing Data</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            One-shot migration: encrypts any plaintext monetary values
+            (amount, cash, investment, current value) still stored in the
+            database. Already-encrypted rows and the demo account are skipped.
+            Safe to re-run.
+          </p>
+          <Button
+            onClick={handleEncryptExisting}
+            disabled={isEncrypting}
+            className="w-full sm:w-auto"
+          >
+            <ShieldCheck className="w-4 h-4 mr-2" />
+            {isEncrypting ? 'Encrypting...' : 'Encrypt existing rows'}
+          </Button>
+          {encryptResult && (
+            <p className="text-sm text-muted-foreground mt-3">{encryptResult}</p>
+          )}
+        </GlassCard>
+      </motion.div>
+
       {/* Danger Zone */}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
