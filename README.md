@@ -1,149 +1,225 @@
-# AssetsManager 💰
+# AssetPulse 💰
 
-A modern, secure financial portfolio management application built with React and Supabase. Track your investments, manage assets, and monitor your financial growth with beautiful analytics and insights.
+Track your wealth. Measure your growth.
+
+AssetPulse is a modern personal wealth tracking application designed to help users monitor their financial journey through monthly asset snapshots. Record your liquid assets and investments, analyze growth trends, visualize net worth progression, and gain valuable insights into your financial health—all in a secure and intuitive dashboard.
 
 ## ✨ Features
 
-- **🔐 Secure Authentication** - Email/password with strong validation
-- **📊 Dashboard Analytics** - Real-time portfolio overview with interactive charts
-- **💼 Asset Management** - Track liquid assets and investments by category
-- **📈 Growth Tracking** - Monitor monthly and total portfolio growth
-- **📋 Statistics** - Detailed analytics with category breakdowns
-- **🔄 Period Comparison** - Compare performance across different time periods
-- **🌙 Dark/Light Mode** - Beautiful glass morphism design with theme switching
-- **📱 Responsive Design** - Works seamlessly on desktop and mobile
+### 📊 Wealth Dashboard
+
+* Track total net worth across all assets
+* View total liquid assets and investments
+* Monitor month-over-month growth
+* Analyze overall portfolio growth from your starting period
+* Interactive charts and visualizations
+
+### 💼 Asset Management
+
+* Create and manage custom asset names
+* Categorize assets into:
+
+  * Liquid Assets (Bank Accounts, Cash, Wallets, etc.)
+  * Investments (Stocks, Mutual Funds, FD, RD, etc.)
+* Reuse previously created asset names through smart dropdown selection
+* Record monthly asset values with ease
+
+### 📈 Analytics & Insights
+
+* Best Performing Assets
+* Assets Needing Attention
+* Highest Holding Assets
+* Gain/Loss Analysis
+* Category-wise Performance Tracking
+* Asset Allocation Breakdown
+* Historical Net Worth Trends
+
+### 📋 Reporting
+
+* Export monthly financial data to Excel
+* Review historical records and performance
+* Compare portfolio growth over time
+
+### 🔐 Security
+
+* Secure authentication with Supabase Auth
+* Row-Level Security (RLS) for complete data isolation
+* User-specific asset and financial records
+
+### 🎨 User Experience
+
+* Responsive design for desktop and mobile
+* Dark & Light theme support
+* Modern glassmorphism-inspired interface
+* Interactive charts powered by Recharts
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- Supabase account (for backend)
+* Node.js 18+
+* npm
+* Supabase Account
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/assets-manager.git
+# Clone repository
+git clone https://github.com/your-username/assetpulse.git
 
-# Navigate to project directory
-cd assets-manager
+# Navigate into project
+cd assetpulse
 
 # Install dependencies
 npm install
 
-# Start development server
+# Run development server
 npm run dev
 ```
 
-### Environment Setup
+---
 
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Copy `.env.example` to `.env` and fill in your Supabase credentials:
-   ```bash
-   cp .env.example .env
-   ```
-3. Update the `.env` file with your Supabase URL and anon key
-4. Configure your database schema
+## ⚙️ Environment Setup
+
+1. Create a project in Supabase.
+2. Copy environment variables:
+
+```bash
+cp .env.example .env
+```
+
+3. Add your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. Run database migrations and start the application.
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- **React 18** - Modern React with hooks and context
-- **TypeScript** - Type-safe development
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful, accessible UI components
-- **Framer Motion** - Smooth animations and transitions
-- **Recharts** - Interactive data visualization
-- **React Router** - Client-side routing
+* React 18
+* TypeScript
+* Vite
+* Tailwind CSS
+* shadcn/ui
+* Framer Motion
+* Recharts
+* React Router
 
 ### Backend
 
-- **Supabase** - PostgreSQL database with real-time features
-- **Supabase Auth** - User authentication and authorization
-- **Edge Functions** - Serverless API endpoints
-- **Row Level Security** - Database-level security
+* Supabase
+* PostgreSQL
+* Supabase Auth
+* Edge Functions
+* Row Level Security (RLS)
 
 ### Development Tools
 
-- **ESLint** - Code linting and quality
-- **Prettier** - Code formatting
-- **TypeScript** - Static type checking
+* ESLint
+* Prettier
+* TypeScript
+
+---
+
+## 📊 How AssetPulse Works
+
+1. Create your assets once (Bank Accounts, Cash, Stocks, Mutual Funds, FD, RD, etc.)
+2. Each month, enter the latest values for your assets.
+3. AssetPulse calculates:
+
+   * Total Net Worth
+   * Investment Value
+   * Liquid Assets
+   * Monthly Growth %
+   * Overall Growth %
+4. Explore analytics and performance insights.
+5. Track your financial progress over time.
+
+---
 
 ## 📁 Project Structure
 
-```
+```text
 src/
-├── components/          # Reusable UI components
-│   ├── ui/             # shadcn/ui components
-│   ├── AppSidebar.tsx  # Navigation sidebar
-│   ├── Footer.tsx      # Application footer
-│   └── ThemeProvider.tsx # Theme management
-├── pages/              # Main application pages
-│   ├── Dashboard.tsx   # Portfolio overview
-│   ├── AddParticulars.tsx # Add new assets
-│   ├── Statistics.tsx  # Analytics and insights
-│   ├── Comparison.tsx  # Period comparisons
-│   ├── Settings.tsx    # User settings
-│   └── Auth.tsx        # Authentication
-├── hooks/              # Custom React hooks
-├── services/           # API service layer
-├── integrations/       # Third-party integrations
-└── lib/               # Utility functions
+├── components/
+├── pages/
+│   ├── Dashboard.tsx
+│   ├── AddAssets.tsx
+│   ├── Analytics.tsx
+│   ├── Settings.tsx
+│   └── Auth.tsx
+├── hooks/
+├── services/
+├── integrations/
+└── lib/
 
 supabase/
-├── functions/          # Edge Functions (API)
-├── migrations/         # Database schema
-└── config.toml        # Supabase configuration
+├── functions/
+├── migrations/
+└── config.toml
 ```
 
-## 🎨 Design System
-
-- **Glass Morphism** - Modern translucent card designs
-- **Gradient Themes** - Beautiful green-based color palette
-- **Responsive Layout** - Mobile-first design approach
-- **Smooth Animations** - Framer Motion powered interactions
-- **Accessibility** - WCAG compliant components
+---
 
 ## 🔒 Security Features
 
-- **Row Level Security (RLS)** - Database-level data isolation
-- **JWT Authentication** - Secure token-based auth
-- **Input Validation** - Client and server-side validation
-- **HTTPS Only** - Secure data transmission
+* Supabase Authentication
+* JWT-based Sessions
+* Row-Level Security (RLS)
+* User Data Isolation
+* Input Validation
+* Secure HTTPS Communication
+
+---
 
 ## 🔧 Available Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
+npm run dev
+npm run build
+npm run preview
+npm run lint
+npm run format
+npm run format:check
 ```
+
+---
 
 ## 🚀 Deployment
 
-The application can be deployed on various platforms:
+AssetPulse can be deployed on:
 
-- **Vercel** - Recommended for React apps
-- **Netlify** - Great for static sites
-- **Supabase Hosting** - Integrated with backend
+* Vercel (Recommended)
+* Netlify
+* Supabase Hosting
 
-## 🤝 Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🎯 Future Enhancements
+
+* Weekly Asset Tracking
+* Financial Goals & Milestones
+* CAGR & Advanced Growth Metrics
+* Asset Allocation History
+* Wealth Forecasting
+* Import/Export Improvements
+* Enhanced Reporting & Insights
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
+
 
 ## 👨‍💻 Author
 

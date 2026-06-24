@@ -130,7 +130,7 @@ export function AppSidebar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-lg font-bold text-white">Assets Manager</h2>
+              <h2 className="text-lg font-bold text-white">AssetPulse</h2>
             </motion.div>
           )}
         </motion.div>
@@ -248,5 +248,5 @@ export function AppSidebar() {
         </motion.div>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

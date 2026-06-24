@@ -59,7 +59,7 @@ const AppContent = () => {
                       <div className="flex items-center">
                         <SidebarTrigger className="mr-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" />
                         <h1 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-                          Assets Manager
+                          AssetPulse
                         </h1>
                       </div>
                     </header>
@@ -89,12 +89,12 @@ const AppContent = () => {
         </Routes>
       </BrowserRouter>
     </SidebarProvider>
-  );
+  )
 };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="assets-manager-theme">
+    <ThemeProvider defaultTheme="light" storageKey="asset-pulse-theme">
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
@@ -104,6 +104,6 @@ const App = () => (
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
+)
 
 export default App;

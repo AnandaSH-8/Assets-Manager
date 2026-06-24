@@ -377,10 +377,10 @@ export default function Dashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Welcome to Assets Manager
+          Welcome to AssetPulse
         </h1>
         <p className="text-muted-foreground text-lg">
-          Track, manage, and grow your financial portfolio with ease
+          Track, analyze, and grow your wealth with confidence.
         </p>
       </motion.div>
 
@@ -485,16 +485,29 @@ export default function Dashboard() {
                       if (!display) return { month: null, year: null }
                       const [shortMonth, year] = display.split('-')
                       const monthMap: Record<string, string> = {
-                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
-                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
-                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
-                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                        Jan: 'January',
+                        Feb: 'February',
+                        Mar: 'March',
+                        Apr: 'April',
+                        May: 'May',
+                        Jun: 'June',
+                        Jul: 'July',
+                        Aug: 'August',
+                        Sep: 'September',
+                        Oct: 'October',
+                        Nov: 'November',
+                        Dec: 'December',
                       }
-                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                      return {
+                        month: monthMap[shortMonth],
+                        year: parseInt(year),
+                      }
                     }
-                    
+
                     const current = parseMonthYear(summaryData.currentMonthName)
-                    const previous = parseMonthYear(summaryData.previousMonthName)
+                    const previous = parseMonthYear(
+                      summaryData.previousMonthName,
+                    )
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -511,9 +524,15 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === current.month && item.year === current.year) {
+                        if (
+                          item.month === current.month &&
+                          item.year === current.year
+                        ) {
                           grouped[name].current += Number(item.cash || 0)
-                        } else if (item.month === previous.month && item.year === previous.year) {
+                        } else if (
+                          item.month === previous.month &&
+                          item.year === previous.year
+                        ) {
                           grouped[name].previous += Number(item.cash || 0)
                         }
                       })
@@ -639,16 +658,29 @@ export default function Dashboard() {
                       if (!display) return { month: null, year: null }
                       const [shortMonth, year] = display.split('-')
                       const monthMap: Record<string, string> = {
-                        'Jan': 'January', 'Feb': 'February', 'Mar': 'March',
-                        'Apr': 'April', 'May': 'May', 'Jun': 'June',
-                        'Jul': 'July', 'Aug': 'August', 'Sep': 'September',
-                        'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+                        Jan: 'January',
+                        Feb: 'February',
+                        Mar: 'March',
+                        Apr: 'April',
+                        May: 'May',
+                        Jun: 'June',
+                        Jul: 'July',
+                        Aug: 'August',
+                        Sep: 'September',
+                        Oct: 'October',
+                        Nov: 'November',
+                        Dec: 'December',
                       }
-                      return { month: monthMap[shortMonth], year: parseInt(year) }
+                      return {
+                        month: monthMap[shortMonth],
+                        year: parseInt(year),
+                      }
                     }
-                    
+
                     const current = parseMonthYear(summaryData.currentMonthName)
-                    const previous = parseMonthYear(summaryData.previousMonthName)
+                    const previous = parseMonthYear(
+                      summaryData.previousMonthName,
+                    )
                     const grouped: Record<
                       string,
                       { current: number; previous: number; category: string }
@@ -665,9 +697,15 @@ export default function Dashboard() {
                             category: item.category,
                           }
                         }
-                        if (item.month === current.month && item.year === current.year) {
+                        if (
+                          item.month === current.month &&
+                          item.year === current.year
+                        ) {
                           grouped[name].current += Number(item.investment || 0)
-                        } else if (item.month === previous.month && item.year === previous.year) {
+                        } else if (
+                          item.month === previous.month &&
+                          item.year === previous.year
+                        ) {
                           grouped[name].previous += Number(item.investment || 0)
                         }
                       })
@@ -965,7 +1003,9 @@ export default function Dashboard() {
         >
           <GlassCard className="p-6">
             <h3 className="text-lg font-semibold mb-1">Net Worth Over Time</h3>
-            <p className="text-xs text-muted-foreground mb-4">Total portfolio value (cash + investments) per month</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Total portfolio value (cash + investments) per month
+            </p>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={netWorthData}>
@@ -984,7 +1024,10 @@ export default function Dashboard() {
                     tickFormatter={value => `₹${(value / 100000).toFixed(0)}L`}
                   />
                   <Tooltip
-                    formatter={value => [formatCurrency(Number(value)), 'Net Worth']}
+                    formatter={value => [
+                      formatCurrency(Number(value)),
+                      'Net Worth',
+                    ]}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                     contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
@@ -993,9 +1036,23 @@ export default function Dashboard() {
                     }}
                   />
                   <defs>
-                    <linearGradient id="netWorthGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
+                    <linearGradient
+                      id="netWorthGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.3}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.05}
+                      />
                     </linearGradient>
                   </defs>
                   <Area

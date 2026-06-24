@@ -59,10 +59,10 @@ export default function Footer() {
               </div>
               <div>
                 <h3 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  AssetsManager
+                  AssetPulse
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Track. Manage. Grow.
+                  Track. Analyze. Grow.
                 </p>
               </div>
             </motion.div>
@@ -110,13 +110,12 @@ export default function Footer() {
                 </span>
               </p>
               <p className="text-xs text-muted-foreground/70 mt-1">
-                © {new Date().getFullYear()} AssetsManager. All rights
-                reserved.
+                © {new Date().getFullYear()} AssetPulse All rights reserved.
               </p>
             </motion.div>
           </div>
         </GlassCard>
       </div>
     </footer>
-  );
+  )
 }
