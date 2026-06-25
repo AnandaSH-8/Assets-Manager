@@ -15,7 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { financialAPI } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsDemoUser } from '@/lib/demo-user';
+import { useDemoReadOnly } from '@/lib/demo-user';
 
 const categories = [
   'Bank Account',
