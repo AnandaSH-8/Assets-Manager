@@ -472,7 +472,39 @@ export default function Settings() {
         </GlassCard>
       </motion.div>
 
+      {/* Creator Controls (only visible to the creator account) */}
+      {adminSettings?.is_creator && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.38 }}
+        >
+          <GlassCard className="p-6 border-primary/40">
+            <div className="flex items-center gap-3 mb-4">
+              <KeyRound className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-semibold">Creator Controls</h2>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50">
+              <div className="pr-4">
+                <h3 className="font-semibold mb-1">Allow demo account to edit data</h3>
+                <p className="text-sm text-muted-foreground">
+                  When ON, the shared demo account ({DEMO_EMAIL_DISPLAY}) can add, edit,
+                  and delete entries. Turn OFF to restore the public read-only demo.
+                </p>
+              </div>
+              <Switch
+                checked={!!adminSettings?.demo_editable}
+                disabled={isTogglingDemo}
+                onCheckedChange={handleToggleDemoEditable}
+              />
+            </div>
+          </GlassCard>
+        </motion.div>
+      )}
+
       {/* Danger Zone */}
+
+
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
