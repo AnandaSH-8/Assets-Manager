@@ -49,8 +49,7 @@ export default function AddParticulars() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isDemoUser = useIsDemoUser();
-  const isReadOnly = isDemoUser;
+  const isReadOnly = useDemoReadOnly();
   const editData = location.state?.editData;
   const isEditMode = !!editData;
 
