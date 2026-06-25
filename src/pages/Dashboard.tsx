@@ -43,7 +43,7 @@ import EmptyDashboard from '@/components/EmptyDashboard'
 import { useState, useEffect, useMemo } from 'react'
 import { financialAPI } from '@/services/api'
 import { useAuth } from '@/hooks/useAuth'
-import { useIsDemoUser } from '@/lib/demo-user'
+import { useDemoReadOnly } from '@/lib/demo-user'
 import { useNavigate } from 'react-router-dom'
 
 interface SummaryData {
@@ -95,7 +95,7 @@ const formatCurrency = (value: number) => {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const isDemoUser = useIsDemoUser()
+  const isDemoUser = useDemoReadOnly()
   const navigate = useNavigate()
   const [hasData, setHasData] = useState(false)
   const [summaryData, setSummaryData] = useState<SummaryData>({

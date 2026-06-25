@@ -8,7 +8,9 @@ import {
   Lock,
   Save,
   ShieldCheck,
+  KeyRound,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +41,48 @@ export default function Settings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [encryptResult, setEncryptResult] = useState<string | null>(null);
+
+  // Creator-only: toggle demo account edit mode
+  const [adminSettings, setAdminSettings] = useState<{ demo_editable: boolean; is_creator: boolean } | null>(null);
+  const [isTogglingDemo, setIsTogglingDemo] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-settings', { method: 'GET' });
+        if (error || !data) return;
+        setAdminSettings({ demo_editable: !!data.demo_editable, is_creator: !!data.is_creator });
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  const handleToggleDemoEditable = async (next: boolean) => {
+    setIsTogglingDemo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-settings', {
+        method: 'POST',
+        body: { demo_editable: next },
+      });
+      if (error) throw error;
+      setAdminSettings((prev) => prev ? { ...prev, demo_editable: !!data.demo_editable } : prev);
+      const { refreshAdminSettings } = await import('@/lib/demo-user');
+      await refreshAdminSettings();
+      toast({
+        title: 'Updated',
+        description: `Demo account editing ${data.demo_editable ? 'enabled' : 'disabled'}.`,
+      });
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Failed to update setting',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsTogglingDemo(false);
+    }
+  };
 
   // Profile state
   const [name, setName] = useState('');
@@ -428,7 +472,39 @@ export default function Settings() {
         </GlassCard>
       </motion.div>
 
+      {/* Creator Controls (only visible to the creator account) */}
+      {adminSettings?.is_creator && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.38 }}
+        >
+          <GlassCard className="p-6 border-primary/40">
+            <div className="flex items-center gap-3 mb-4">
+              <KeyRound className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-semibold">Creator Controls</h2>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50">
+              <div className="pr-4">
+                <h3 className="font-semibold mb-1">Allow demo account to edit data</h3>
+                <p className="text-sm text-muted-foreground">
+                  When ON, the shared demo account (user@yopmail.com) can add, edit,
+                  and delete entries. Turn OFF to restore the public read-only demo.
+                </p>
+              </div>
+              <Switch
+                checked={!!adminSettings?.demo_editable}
+                disabled={isTogglingDemo}
+                onCheckedChange={handleToggleDemoEditable}
+              />
+            </div>
+          </GlassCard>
+        </motion.div>
+      )}
+
       {/* Danger Zone */}
+
+
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
