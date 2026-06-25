@@ -42,6 +42,48 @@ export default function Settings() {
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [encryptResult, setEncryptResult] = useState<string | null>(null);
 
+  // Creator-only: toggle demo account edit mode
+  const [adminSettings, setAdminSettings] = useState<{ demo_editable: boolean; is_creator: boolean } | null>(null);
+  const [isTogglingDemo, setIsTogglingDemo] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-settings', { method: 'GET' });
+        if (error || !data) return;
+        setAdminSettings({ demo_editable: !!data.demo_editable, is_creator: !!data.is_creator });
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  const handleToggleDemoEditable = async (next: boolean) => {
+    setIsTogglingDemo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-settings', {
+        method: 'POST',
+        body: { demo_editable: next },
+      });
+      if (error) throw error;
+      setAdminSettings((prev) => prev ? { ...prev, demo_editable: !!data.demo_editable } : prev);
+      const { refreshAdminSettings } = await import('@/lib/demo-user');
+      await refreshAdminSettings();
+      toast({
+        title: 'Updated',
+        description: `Demo account editing ${data.demo_editable ? 'enabled' : 'disabled'}.`,
+      });
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Failed to update setting',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsTogglingDemo(false);
+    }
+  };
+
   // Profile state
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
